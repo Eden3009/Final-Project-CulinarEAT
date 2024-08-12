@@ -1,0 +1,87 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden; /* Prevent scrolling */
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .registration-container {
+    width: 100%; 
+    max-width: 800px; /* Narrow the container */
+    min-width: 600px; /* Maintain a reasonable minimum width */
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .logo-container {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 0;
+  }
+  
+  .logo {
+    width: 50px;
+  }
+  
+  .registration-container h2 {
+    text-align: center;
+    margin-top: 10px; /* Add small space at the top */
+    margin-bottom: 10px;
+  }
+  
+  .registration-form .form-group {
+    margin-bottom: 10px; /* Reduce space between form fields */
+    height: 60px; /* Slightly reduce the height of each field */
+    position: relative;
+  }
+  
+  .registration-form .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .registration-form .form-group input,
+  .registration-form .form-group select {
+    width: 100%;
+    padding: 8px; /* Reduce padding for a more compact input field */
+    box-sizing: border-box;
+  }
+  
+  .registration-form .submit-button {
+    width: 100%;
+    padding: 10px; /* Reduce padding to make the button fit */
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px; /* Reduce space above the button */
+  }
+  
+  .registration-form .submit-button:hover {
+    background-color: #45a049;
+  }
+  
+  .error {
+    color: red;
+    font-size: 0.875em;
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    width: 100%;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+  
