@@ -1,13 +1,21 @@
 import React from 'react';
-import './App.css';
-import RegistrationPage from './RegistrationPage';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import HomePage from './HomePage';  // Import the HomePage component
+import RegistrationPage from './RegistrationPage';  // Assuming you have this
+import Navbar from './Navbar';  // Import the Navbar component
 
 function App() {
   return (
-    <div className="App">
-      <RegistrationPage />
-    </div>
+    <Router>
+      <div>
+        <Navbar />  {/* Navbar will always be visible at the top */}
+        <Routes>
+          <Route path="/" element={<HomePage />} />  {/* Home Page route */}
+          <Route path="/registrationpage" element={<RegistrationPage />} />  {/* Registration Page route */}
+        </Routes>
+      </div>
+    </Router>
   );
 }
-//fcvghdfcgvbhnjdfgv
+
 export default App;

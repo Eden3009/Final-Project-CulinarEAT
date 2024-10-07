@@ -1,0 +1,54 @@
+/* Navbar Styles */
+.navbar {
+    position: fixed;  /* Stays at the top of the page */
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    border-bottom: 1px solid #ddd;
+    z-index: 10;  /* Makes sure the navbar stays on top of other elements */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar-logo h1 {
+    margin: 0;
+    font-size: 2rem;
+    color: #6f6e54;  /* Match with your color scheme */
+  }
+  
+  .navbar-links {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .navbar-links li {
+    margin-right: 20px;
+  }
+  
+  .navbar-links li a {
+    text-decoration: none;
+    font-size: 1.1rem;
+    color: #333;
+    transition: color 0.3s ease;
+  }
+  
+  .navbar-links li a:hover {
+    color: #6f6e54;  /* Highlight on hover */
+  }
+  
+  .navbar-contact {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #888;
+  }
+  
+  .navbar-contact p {
+    margin: 0;
+  }
+  

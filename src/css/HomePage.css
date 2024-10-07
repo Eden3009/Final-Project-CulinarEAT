@@ -1,0 +1,79 @@
+/* Ensure the body and html allow scrolling */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+}
+
+/* Home page setup */
+.home-page {
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    flex-direction: column; /* Stacking hero and grid sections */
+}
+
+/* Flex container to ensure sections grow correctly */
+.page-content {
+    flex-grow: 1; /* Ensures content grows and scrolls naturally */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hero Section */
+.hero-section {
+    height: 70vh; /* Takes 70% of the viewport height */
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%; /* Ensure full width */
+}
+
+.hero-overlay {
+    background-color: rgba(0, 0, 0, 0.6); /* Overlay to enhance readability */
+    padding: 40px;
+    border-radius: 8px;
+}
+
+.hero-overlay h1 {
+    color: white;
+    font-size: 4rem; /* Adjust text size */
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-align: center;
+    margin: 0;
+}
+
+/* Grid Section */
+.grid-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);  /* 3 items per row */
+    gap: 20px;  /* Space between grid items */
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-grow: 1; /* Allows grid to grow and fill remaining space */
+    overflow-y: auto; /* Allows the grid to scroll if it overflows */
+}
+
+.grid-item {
+    text-align: center;
+}
+
+.grid-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.grid-item h2 {
+    margin-top: 10px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+}
