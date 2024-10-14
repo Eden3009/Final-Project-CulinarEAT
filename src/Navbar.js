@@ -1,23 +1,39 @@
 import React from 'react';
-import './css/Navbar.css';  // Navbar-specific styles
+import { Link } from 'react-router-dom';
+import './css/Navbar.css';  // Add your Navbar styles here
 
-function Navbar() {
+function Navbar({ isLoggedIn }) {
   return (
     <nav className="navbar">
       <div className="navbar-logo">
-        <h1>RESTAURANT</h1>
+        <Link to="/">Culinareat</Link>  {/* Home Page */}
       </div>
+      
+      {/* Search Bar in the header for both guest and registered users */}
+      <div className="search-bar">
+        <input type="text" placeholder="Search recipes..." />
+        <button type="submit">Search</button>
+      </div>
+
       <ul className="navbar-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="/about">About</a></li>
-        <li><a href="/menu">Menu</a></li>
-        <li><a href="/templates">Templates</a></li>
-        <li><a href="/contact">Contact</a></li>
+        {/* Guest users */}
+        {!isLoggedIn ? (
+          <>
+            <li><Link to="/register">Register</Link></li>
+            <li><Link to="/login">Login</Link></li>
+          </>
+        ) : (
+          /* Registered users */
+          <>
+            <li><Link to="/profile">Profile</Link></li>
+            <li><Link to="/add-recipe">Add Recipe</Link></li>
+            <li><Link to="/shopping-list">Shopping List</Link></li>
+            <li><Link to="/favorites">Favorites</Link></li>
+            <li><Link to="/chatbot">Chatbot</Link></li>
+            <li><Link to="/logout" onClick={() => window.location.reload()}>Logout</Link></li>
+          </>
+        )}
       </ul>
-      <div className="navbar-contact">
-        <p>Email: reservations@myrestaurant.com</p>
-        <p>Phone: 0114 267 9090</p>
-      </div>
     </nav>
   );
 }
