@@ -11,3 +11,8 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Apply Dancing Script for specific sections or elements */
+.overlay-text {
+  font-family: 'Dancing Script', cursive;  /* Use Dancing Script for elegant text */
+}

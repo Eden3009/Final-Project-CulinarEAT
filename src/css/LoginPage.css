@@ -1,0 +1,133 @@
+/* General page setup */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Raleway', sans-serif;
+    background-color: #f9f9f9;
+    width: 100%;
+}
+
+/* Flexbox layout for split screen with reversed order */
+.login-page {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    flex-direction: row-reverse;  /* Switch the position of the form and image */
+}
+
+/* Right side image container with overlay text */
+.right-image-container {
+    flex: 1;
+    position: relative;
+    background-image: url('../images/img4.png');  /* Corrected path */
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* Elegant overlay text with effects */
+.right-image-container .overlay-text {
+    position: absolute;
+    color: white;
+    font-size: 2rem;
+    text-align: center;
+    padding: 30px;
+    background-color: rgba(0, 0, 0, 0.5);  /* Semi-transparent background */
+    border-radius: 10px;
+    font-family: 'Dancing Script', cursive;  /* Elegant font like Dancing Script */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.7); /* Elegant shadow for depth */
+    letter-spacing: 1px;
+    line-height: 1.5;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);  /* Subtle text shadow for glow */
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 0.9;  /* Slightly transparent for elegance */
+    max-width: 90%;
+}
+
+/* Hover effect to add a subtle animation */
+.right-image-container:hover .overlay-text {
+    transform: scale(1.05);  /* Slight zoom effect on hover */
+    opacity: 1;  /* Increase opacity */
+}
+
+/* Keyframe for smooth text appearance */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 0.9;
+        transform: translateY(0);
+    }
+}
+
+/* Apply the fade-in animation to the overlay text */
+.right-image-container .overlay-text {
+    animation: fadeIn 1s ease-out;
+}
+
+/* Left side login form */
+.left-form-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    padding: 50px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-container {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.form-container h2 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    text-align: left;
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #777;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.submit-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4397c1;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+}
+
+.submit-button:hover {
+    background-color: #357a94;
+}

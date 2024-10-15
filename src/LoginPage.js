@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './RegistrationPage.css';
+import './css/LoginPage.css';  // Ensure this points to your LoginPage.css
 import logo from './logo.png';  // Ensure this points to your logo image
 
 function LoginPage({ setIsLoggedIn }) {
@@ -42,51 +42,49 @@ function LoginPage({ setIsLoggedIn }) {
     };
 
     return (
-        <div>
-            {/* Top Bar */}
-            <div className="top-bar">
-                <div className="logo-container">
-                    <img src={logo} alt="Culinareat Logo" className="logo" />
-                </div>
-                <div className="right-icons">
-                    <a href="/search">🔍</a>
-                    <a href="/favorites">❤️</a>
-                    <a href="/home">🏠</a>
+        <div className="login-page">
+            {/* Left side login form */}
+            <div className="left-form-container">
+                <div className="form-container">
+                    <h2>Login to CulinarEAT</h2>
+                    <form onSubmit={handleSubmit} className="login-form">
+                        <div className="form-group">
+                            <label htmlFor="UserName">Username:</label>
+                            <input
+                                type="text"
+                                id="UserName"
+                                name="UserName"
+                                value={formData.UserName}
+                                onChange={handleChange}
+                                required
+                            />
+                            {errors.UserName && <span className="error">{errors.UserName}</span>}
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="Password">Password:</label>
+                            <input
+                                type="password"
+                                id="Password"
+                                name="Password"
+                                value={formData.Password}
+                                onChange={handleChange}
+                                required
+                            />
+                            {errors.Password && <span className="error">{errors.Password}</span>}
+                        </div>
+
+                        <button type="submit" className="submit-button">Login</button>
+                    </form>
                 </div>
             </div>
 
-            {/* Login Form */}
-            <div className="registration-container">
-                <h2>Login to CulinarEAT</h2>
-                <form onSubmit={handleSubmit} className="registration-form">
-                    <div className="form-group">
-                        <label htmlFor="UserName">Username:</label>
-                        <input
-                            type="text"
-                            id="UserName"
-                            name="UserName"
-                            value={formData.UserName}
-                            onChange={handleChange}
-                            required
-                        />
-                        {errors.UserName && <span className="error">{errors.UserName}</span>}
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="Password">Password:</label>
-                        <input
-                            type="password"
-                            id="Password"
-                            name="Password"
-                            value={formData.Password}
-                            onChange={handleChange}
-                            required
-                        />
-                        {errors.Password && <span className="error">{errors.Password}</span>}
-                    </div>
-
-                    <button type="submit" className="submit-button">Login</button>
-                </form>
+            {/* Right side image */}
+            <div className="right-image-container">
+                <div className="overlay-text">
+                    Glad to see you back! <br />
+                    Login to continue your culinary journey.
+                </div>
             </div>
         </div>
     );

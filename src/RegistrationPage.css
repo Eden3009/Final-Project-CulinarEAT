@@ -1,156 +1,133 @@
+/* General page setup */
 html, body {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden; /* Prevent scrolling */
-    font-family: Raleway;
+    font-family: 'Raleway', sans-serif;
     background-color: #f9f9f9;
+    width: 100%;
+}
+
+/* Flexbox layout for split screen with reversed order */
+.registration-page {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    flex-direction: row-reverse;  /* Switch the position of the form and image */
+}
+
+/* Right side image container with overlay text */
+.right-image-container {
+    flex: 1;
+    position: relative;
+    background-image: url('./images/img4.png');  /* Replace with the correct image */
+    background-size: cover;
+    background-position: center;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
 }
 
-.top-bar {
-    width: 100%;
-    background-color: #333;
-    padding: 10px 20px;
+/* Elegant overlay text with effects */
+.right-image-container .overlay-text {
     position: absolute;
-    top: 0;
-    left: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.logo-container {
-    display: flex;
-    align-items: center;
-}
-
-.logo {
-    width: 50px;
-    height: auto;
-}
-
-.right-icons {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    margin-right: 22px; /* Move the entire icon group further to the left */
-}
-
-.right-icons a {
-    margin-left: 10px; /* Adjusted margin to ensure all icons are visible */
-    font-size: 24px;
     color: white;
-    text-decoration: none;
+    font-size: 2rem;
+    text-align: center;
+    padding: 30px;
+    background-color: rgba(0, 0, 0, 0.5);  /* Semi-transparent background */
+    border-radius: 10px;
+    font-family: 'Dancing Script', cursive;  /* Elegant font like Dancing Script */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.7); /* Elegant shadow for depth */
+    letter-spacing: 1px;
+    line-height: 1.5;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);  /* Subtle text shadow for glow */
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 0.9;  /* Slightly transparent for elegance */
+    max-width: 90%;
 }
 
-.nav-bar {
+/* Hover effect to add a subtle animation */
+.right-image-container:hover .overlay-text {
+    transform: scale(1.05);  /* Slight zoom effect on hover */
+    opacity: 1;  /* Increase opacity */
+}
+
+/* Keyframe for smooth text appearance */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 0.9;
+        transform: translateY(0);
+    }
+}
+
+/* Apply the fade-in animation to the overlay text */
+.right-image-container .overlay-text {
+    animation: fadeIn 1s ease-out;
+}
+
+/* Left side registration form */
+.left-form-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    padding: 50px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-container {
     width: 100%;
-    background-color: #444;
-    padding: 5px 0; /* Thinner lower bar */
+    max-width: 400px;
     text-align: center;
-    position: absolute;
-    top: 50px; /* Adjust this based on the height of the top bar */
-    left: 0;
-    margin-top: -1px; /* Remove space between top bar and nav bar */
 }
 
-.nav-bar ul {
-    display: flex;
-    justify-content: space-around;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.nav-bar ul li a {
-    color: white;
-    text-decoration: none;
-    padding: 5px 10px; /* Reduced padding to make the bar thinner */
-    font-size: 0.9em; /* Reduced font size to match the thinner bar */
-    display: block;
-}
-
-.nav-bar ul li a:hover {
-    background-color: #555; /* Change background color on hover */
-    color: #ffd700; /* Change text color on hover */
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.registration-container {
-    width: 100%; 
-    max-width: 1000px; 
-    min-width: 800px; 
-    padding: 20px;
-    background-color: #f9f9f9; /* Blend with the page background */
-    border-radius: 8px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    height: auto;
-    margin-top: 110px; /* Adjust to move the form down under the bars */
-}
-
-.registration-container h2 {
-    text-align: center;
-    margin-top: -70px; /* Further adjusted margin to move the headline higher */
-    margin-bottom: 50px; /* Add more space below the headline */
-    font-family: Raleway;
-    font-size: 35px;
-}
-
-.registration-form {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
+.form-container h2 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 20px;
 }
 
 .form-group {
-    width: 48%; /* Adjust to create two columns */
-    margin-bottom: 15px; 
-    height: auto; 
     position: relative;
+    margin-bottom: 20px;
 }
 
 .form-group label {
+    text-align: left;
     display: block;
     margin-bottom: 5px;
+    font-size: 14px;
+    color: #777;
 }
 
 .form-group input,
 .form-group select {
     width: 100%;
-    padding: 8px;
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
     box-sizing: border-box;
 }
 
 .submit-button {
-    width: 25%;
-    padding: 10px; 
+    width: 100%;
+    padding: 12px;
     background-color: #4397c1;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    margin-top: 10px; 
-    margin-left: auto; /* Center the button */
-    margin-right: auto; /* Center the button */
+    font-size: 16px;
+    margin-top: 20px;
 }
 
 .submit-button:hover {
-    background-color: #457fa0;
-}
-
-.error {
-    color: red;
-    font-size: 0.875em;
-    margin-top: 5px;
-    position: absolute;
-    bottom: -20px;
-    left: 0;
-    width: 100%;
-    box-sizing: border-box;
+    background-color: #357a94;
 }

@@ -1,39 +1,48 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './css/Navbar.css';  // Add your Navbar styles here
+import './css/Navbar.css';
+import logo from './logo.png';  // Import your logo image
 
 function Navbar({ isLoggedIn }) {
   return (
     <nav className="navbar">
+      {/* Left section: Logo */}
       <div className="navbar-logo">
-        <Link to="/">Culinareat</Link>  {/* Home Page */}
-      </div>
-      
-      {/* Search Bar in the header for both guest and registered users */}
-      <div className="search-bar">
-        <input type="text" placeholder="Search recipes..." />
-        <button type="submit">Search</button>
+        <Link to="/">
+          <img src={logo} alt="Culinareat Logo" className="logo" />
+        </Link>
       </div>
 
+      {/* Center section: Links */}
       <ul className="navbar-links">
-        {/* Guest users */}
-        {!isLoggedIn ? (
-          <>
-            <li><Link to="/register">Register</Link></li>
-            <li><Link to="/login">Login</Link></li>
-          </>
-        ) : (
-          /* Registered users */
+        {isLoggedIn ? (
           <>
             <li><Link to="/profile">Profile</Link></li>
             <li><Link to="/add-recipe">Add Recipe</Link></li>
             <li><Link to="/shopping-list">Shopping List</Link></li>
             <li><Link to="/favorites">Favorites</Link></li>
             <li><Link to="/chatbot">Chatbot</Link></li>
-            <li><Link to="/logout" onClick={() => window.location.reload()}>Logout</Link></li>
+          </>
+        ) : (
+          <>
+            <li><Link to="/register">Register</Link></li>
+            <li><Link to="/login">Login</Link></li>
           </>
         )}
       </ul>
+
+      {/* Right section: Search bar and Logout button */}
+      <div className="right-section">
+        <div className="search-bar">
+          <input type="text" placeholder="Search recipes..." />
+          <button type="submit">Search</button>
+        </div>
+        {isLoggedIn && (
+          <button className="logout-button" onClick={() => window.location.reload()}>
+            Logout
+          </button>
+        )}
+      </div>
     </nav>
   );
 }

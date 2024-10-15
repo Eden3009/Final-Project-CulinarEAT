@@ -1,54 +1,89 @@
-/* Navbar Styles */
+/* Ensure the navbar is fully visible at the top */
+body {
+  margin: 0;
+  padding-top: 150px;  /* Add space at the top of the page */
+}
+
+/* Basic Navbar Styling */
 .navbar {
-    position: fixed;  /* Stays at the top of the page */
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: white;
-    border-bottom: 1px solid #ddd;
-    z-index: 10;  /* Makes sure the navbar stays on top of other elements */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .navbar-logo h1 {
-    margin: 0;
-    font-size: 2rem;
-    color: #6f6e54;  /* Match with your color scheme */
-  }
-  
-  .navbar-links {
-    list-style: none;
-    display: flex;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .navbar-links li {
-    margin-right: 20px;
-  }
-  
-  .navbar-links li a {
-    text-decoration: none;
-    font-size: 1.1rem;
-    color: #333;
-    transition: color 0.3s ease;
-  }
-  
-  .navbar-links li a:hover {
-    color: #6f6e54;  /* Highlight on hover */
-  }
-  
-  .navbar-contact {
-    text-align: right;
-    font-size: 0.9rem;
-    color: #888;
-  }
-  
-  .navbar-contact p {
-    margin: 0;
-  }
-  
+  background-color: #f8f8f8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid #ddd;
+  position: relative;  /* Ensure the navbar is positioned relative to the page */
+  top: 0;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+/* Logo on the left */
+.navbar-logo {
+  flex: 1;
+}
+
+.navbar-logo img {
+  width: 150px;
+}
+
+/* Center links */
+.navbar-links {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex: 2;
+  margin: 0;
+}
+
+.navbar-links li {
+  display: inline;
+}
+
+.navbar-links a {
+  text-decoration: none;
+  color: #333;
+  font-size: 1rem;
+  padding: 5px 10px;
+}
+
+.navbar-links a:hover {
+  text-decoration: underline;
+}
+
+/* Right section for Search Bar and Logout button */
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+}
+
+.search-bar input {
+  padding: 5px;
+  font-size: 1rem;
+}
+
+.search-bar button {
+  padding: 5px 10px;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.logout-button {
+  background-color: #f44336;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background-color: #d32f2f;
+}
