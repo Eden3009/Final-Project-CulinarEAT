@@ -19,7 +19,7 @@ function App() {
   return (
     <Router>
       <div>
-        <Navbar isLoggedIn={isLoggedIn} />  {/* Pass login state to Navbar */}
+        <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />  {/* Pass login state to Navbar */}
         <Routes>
           {/* Common routes (both guest and registered users) */}
           <Route path="/" element={<HomePage />} />

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import './css/Navbar.css';
 import logo from './logo.png';  // Import your logo image
 
-function Navbar({ isLoggedIn }) {
+function Navbar({ isLoggedIn, setIsLoggedIn }) {  // Accept setIsLoggedIn to manage logout
   return (
     <nav className="navbar">
       {/* Left section: Logo */}
@@ -14,7 +14,7 @@ function Navbar({ isLoggedIn }) {
       </div>
 
       {/* Center section: Links */}
-      <ul className="navbar-links">
+      <ul className={isLoggedIn ? "navbar-links navbar-links-logged" : "navbar-links navbar-links-not-logged"}>
         {isLoggedIn ? (
           <>
             <li><Link to="/profile">Profile</Link></li>
@@ -38,7 +38,7 @@ function Navbar({ isLoggedIn }) {
           <button type="submit">Search</button>
         </div>
         {isLoggedIn && (
-          <button className="logout-button" onClick={() => window.location.reload()}>
+          <button className="logout-button" onClick={() => setIsLoggedIn(false)}>
             Logout
           </button>
         )}

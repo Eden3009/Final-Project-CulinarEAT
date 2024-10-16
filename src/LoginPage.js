@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';  // Import useNavigate for redirection
 import './css/LoginPage.css';  // Ensure this points to your LoginPage.css
 import logo from './logo.png';  // Ensure this points to your logo image
 
@@ -9,6 +10,7 @@ function LoginPage({ setIsLoggedIn }) {
     });
 
     const [errors, setErrors] = useState({});
+    const navigate = useNavigate();  // Initialize navigate for redirection
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -36,6 +38,7 @@ function LoginPage({ setIsLoggedIn }) {
             // Simulate login action (in a real app, you would check the credentials here)
             console.log('Form data submitted:', formData);
             setIsLoggedIn(true);  // Update the app state to log the user in
+            navigate('/');  // Redirect to the homepage after login
         } else {
             setErrors(inputErrors);
         }
@@ -58,7 +61,12 @@ function LoginPage({ setIsLoggedIn }) {
                                 onChange={handleChange}
                                 required
                             />
-                            {errors.UserName && <span className="error">{errors.UserName}</span>}
+                            {errors.UserName && (
+                                <div className="error">
+                                    <i className="fas fa-exclamation-circle icon"></i>
+                                    {errors.UserName}
+                                </div>
+                            )}
                         </div>
 
                         <div className="form-group">
@@ -71,7 +79,12 @@ function LoginPage({ setIsLoggedIn }) {
                                 onChange={handleChange}
                                 required
                             />
-                            {errors.Password && <span className="error">{errors.Password}</span>}
+                            {errors.Password && (
+                                <div className="error">
+                                    <i className="fas fa-exclamation-circle icon"></i>
+                                    {errors.Password}
+                                </div>
+                            )}
                         </div>
 
                         <button type="submit" className="submit-button">Login</button>

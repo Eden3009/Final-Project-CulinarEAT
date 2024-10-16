@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './RegistrationPage.css';
+import './RegistrationPage.css';  // Ensure this points to your RegistrationPage.css
 import logo from './logo.png';  // Ensure this points to your logo image
 
 function RegistrationPage() {
@@ -82,7 +82,7 @@ function RegistrationPage() {
             {/* Left Form */}
             <div className="left-form-container">
                 <div className="form-container">
-                    <h2>Registration to CulinarEAT</h2>
+                    <h2>Personalize your experience</h2>
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label htmlFor="FName">First Name:</label>
@@ -94,7 +94,12 @@ function RegistrationPage() {
                                 onChange={handleChange}
                                 required
                             />
-                            {errors.FName && <span className="error">{errors.FName}</span>}
+                            {errors.FName && (
+                                <div className="error">
+                                    <i className="fas fa-exclamation-circle icon"></i>
+                                    {errors.FName}
+                                </div>
+                            )}
                         </div>
 
                         <div className="form-group">
@@ -107,7 +112,12 @@ function RegistrationPage() {
                                 onChange={handleChange}
                                 required
                             />
-                            {errors.LName && <span className="error">{errors.LName}</span>}
+                            {errors.LName && (
+                                <div className="error">
+                                    <i className="fas fa-exclamation-circle icon"></i>
+                                    {errors.LName}
+                                </div>
+                            )}
                         </div>
 
                         <div className="form-group">
@@ -120,7 +130,12 @@ function RegistrationPage() {
                                 onChange={handleChange}
                                 required
                             />
-                            {errors.Email && <span className="error">{errors.Email}</span>}
+                            {errors.Email && (
+                                <div className="error">
+                                    <i className="fas fa-exclamation-circle icon"></i>
+                                    {errors.Email}
+                                </div>
+                            )}
                         </div>
 
                         <div className="form-group">
@@ -173,7 +188,8 @@ function RegistrationPage() {
             {/* Right Image with Overlay Text */}
             <div className="right-image-container">
                 <div className="overlay-text">
-                    Glad to meet you! You're just a few clicks away from the most immersive online culinary experience.
+                    Glad to meet you! <br /> 
+                    You're just a few clicks away from the most immersive online culinary experience.
                 </div>
             </div>
         </div>
