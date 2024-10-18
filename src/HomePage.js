@@ -59,6 +59,10 @@ function HomePage() {
             <img src={bakeryImage} alt="Bakery" />
             <h2>Bakery</h2>
           </div>
+          <div className="grid-item">
+            <img src={menuImage} alt="Menu" />
+            <h2>Menu</h2>
+          </div>
         </div>
       </div>
     </div>
