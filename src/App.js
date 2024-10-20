@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './HomePage';
 import SearchResultsPage from './SearchResultsPage';
@@ -7,14 +7,26 @@ import ShoppingListPage from './ShoppingListPage';
 import FavoritesPage from './FavoritesPage';
 import ProfilePage from './ProfilePage';
 import LoginPage from './LoginPage';
-import RegistrationPage from './RegistrationPage';  // Importing your existing Registration Page
+import RegistrationPage from './RegistrationPage';
 import ChatbotPage from './ChatbotPage';
 import RecipeDetailPage from './RecipeDetailPage';
-import Navbar from './Navbar';  // Navbar component
+import Navbar from './Navbar';
 
+// Updated App component to include backend integration
 function App() {
   // State to track if the user is logged in
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // State to track users fetched from the backend
+  const [users, setUsers] = useState([]);
+
+  // Fetch users from backend on mount
+  useEffect(() => {
+    fetch('http://localhost:5001/User')
+      .then(response => response.json())
+      .then(data => setUsers(data))
+      .catch(error => console.error('Error fetching users:', error));
+  }, []);
 
   return (
     <Router>
@@ -22,7 +34,7 @@ function App() {
         <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />  {/* Pass login state to Navbar */}
         <Routes>
           {/* Common routes (both guest and registered users) */}
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<HomePage users={users} />} />  {/* Passing users to HomePage */}
           <Route path="/recipe-detail" element={<RecipeDetailPage />} />
           <Route path="/search" element={<SearchResultsPage />} />
 
