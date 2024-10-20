@@ -14,8 +14,8 @@ function RegistrationPage() {
     });
 
     const [errors, setErrors] = useState({});
-    const [successMessage, setSuccessMessage] = useState('');  // Success message state
-    const [apiErrorMessage, setApiErrorMessage] = useState('');  // API error message state
+    const [successMessage, setSuccessMessage] = useState('');
+    const [apiErrorMessage, setApiErrorMessage] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -73,18 +73,15 @@ function RegistrationPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const inputErrors = validate();
-    
+
         if (Object.keys(inputErrors).length === 0) {
             try {
-                // Send formData to the backend using Axios
                 const response = await axios.post('http://localhost:5001/register', formData, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     withCredentials: true,
                 });
                 setSuccessMessage('Registration successful!');
-                setApiErrorMessage('');  // Clear any API error message
+                setApiErrorMessage('');
                 console.log(response.data);
             } catch (error) {
                 if (error.response) {
@@ -97,7 +94,7 @@ function RegistrationPage() {
                             setApiErrorMessage('An error occurred. Please try again.');
                         }
                     } else if (error.response.status === 500) {
-                        setErrors({ Email: 'Email already exists. Please use a different email.' });
+                        setApiErrorMessage('A server error occurred. Please try again.');
                     }
                 } else {
                     setApiErrorMessage('An error occurred. Please try again.');
@@ -108,7 +105,6 @@ function RegistrationPage() {
             setErrors(inputErrors);
         }
     };
-    
 
     return (
         <div className="registration-page">
@@ -137,6 +133,7 @@ function RegistrationPage() {
                         <div className="form-group">
                             <label htmlFor="UserName">Username:</label>
                             <input type="text" id="UserName" name="UserName" value={formData.UserName} onChange={handleChange} required />
+                            {errors.UserName && <div className="error">{errors.UserName}</div>}
                         </div>
 
                         <div className="form-group">
