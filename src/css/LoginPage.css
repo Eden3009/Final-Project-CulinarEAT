@@ -131,3 +131,58 @@ html, body {
 .submit-button:hover {
     background-color: #357a94;
 }
+/* Error message styles */
+.error {
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 5px 10px;
+    border-radius: 8px;
+    position: absolute;
+    top: 50px;
+    left: 0;
+    width: calc(100% - 20px);
+    text-align: left;
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+    font-size: 0.75em;
+    z-index: 10;
+}
+
+/* Softer and more transparent error banner */
+.error-banner {
+    color: #fff;
+    background-color: rgba(217, 83, 79, 0.7);  /* Softer, more transparent red */
+    padding: 12px;
+    border-radius: 12px;
+    margin-top: 20px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 25.3%; /* Reduce the width slightly */
+    position: absolute; /* Ensure it stays in place */
+    left: 60%; /* Move 5% from the left edge */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Softer shadow */
+    animation: bounce-in 0.6s ease-in-out;  /* Slower and more visible bounce */
+}
+
+/* Enhanced bounce-in animation */
+@keyframes bounce-in {
+    0% {
+        transform: scale(0.6);  /* Start smaller */
+        opacity: 0;
+    }
+    40% {
+        transform: scale(1.2);  /* Exaggerated bounce */
+        opacity: 1;
+    }
+    60% {
+        transform: scale(0.9);  /* Slight compression */
+    }
+    100% {
+        transform: scale(1);  /* Settle at original size */
+        opacity: 1;
+    }
+}

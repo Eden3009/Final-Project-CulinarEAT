@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';  // Import useNavigate for redirection
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './css/LoginPage.css';  // Ensure this points to your LoginPage.css
-import logo from './logo.png';  // Ensure this points to your logo image
 
 function LoginPage({ setIsLoggedIn }) {
     const [formData, setFormData] = useState({
@@ -10,7 +10,8 @@ function LoginPage({ setIsLoggedIn }) {
     });
 
     const [errors, setErrors] = useState({});
-    const navigate = useNavigate();  // Initialize navigate for redirection
+    const [apiErrorMessage, setApiErrorMessage] = useState('');  // API error message state
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -31,14 +32,32 @@ function LoginPage({ setIsLoggedIn }) {
         return inputErrors;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const inputErrors = validate();
+
         if (Object.keys(inputErrors).length === 0) {
-            // Simulate login action (in a real app, you would check the credentials here)
-            console.log('Form data submitted:', formData);
-            setIsLoggedIn(true);  // Update the app state to log the user in
-            navigate('/');  // Redirect to the homepage after login
+            try {
+                // Send login request to the backend
+                const response = await axios.post('http://localhost:5001/login', formData, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                setIsLoggedIn(true);  // Set login state
+                setApiErrorMessage('');  // Clear any previous error
+                navigate('/');  // Redirect to home page after successful login
+
+            } catch (error) {
+                // Handle invalid login
+                if (error.response && error.response.status === 401) {
+                    setApiErrorMessage('Invalid username or password.');
+                } else {
+                    setApiErrorMessage('The user name or password are not correct.');
+                    console.error('Login error:', error);
+                }
+            }
         } else {
             setErrors(inputErrors);
         }
@@ -46,7 +65,6 @@ function LoginPage({ setIsLoggedIn }) {
 
     return (
         <div className="login-page">
-            {/* Left side login form */}
             <div className="left-form-container">
                 <div className="form-container">
                     <h2>Login to CulinarEAT</h2>
@@ -89,10 +107,17 @@ function LoginPage({ setIsLoggedIn }) {
 
                         <button type="submit" className="submit-button">Login</button>
                     </form>
+
+                    {/* Display API error message with a bounce-in animation */}
+                    {apiErrorMessage && (
+                        <div className="error-banner bounce-in">
+                            <i className="fas fa-exclamation-circle icon"></i>
+                            {apiErrorMessage}
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Right side image */}
             <div className="right-image-container">
                 <div className="overlay-text">
                     Glad to see you back! <br />

@@ -65,6 +65,35 @@ app.post('/register', (req, res) => {
     });
 });
 
+app.post('/login', (req, res) => {
+    const { UserName, Password } = req.body;
+
+    // Query to find the user by username
+    const sql = 'SELECT * FROM User WHERE UserName = ?';
+
+    db.query(sql, [UserName], (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        if (results.length === 0) {
+            return res.status(401).json({ message: 'Invalid username' });
+        }
+
+        const user = results[0];
+
+        // Check if the password matches (ideally you'd hash and compare hashed passwords)
+        if (user.Password !== Password) {
+            return res.status(401).json({ message: 'Invalid password' });
+        }
+
+        // Authentication successful
+        res.status(200).json({ message: 'Login successful', user: { UserName: user.UserName, Role: user.Role } });
+    });
+});
+
+
+
 // Handle preflight requests for all routes
 app.options('*', cors());  // Make sure preflight requests are allowed
 
