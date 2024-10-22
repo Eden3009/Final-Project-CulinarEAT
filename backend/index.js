@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');  // Import cookie-parser
 
 const app = express();
 const port = 5001;
@@ -17,8 +18,8 @@ app.use(cors({
     credentials: true  // Ensure credentials are allowed if needed
 }));
 
-
 app.use(express.json());  // Parse JSON bodies
+app.use(cookieParser());  // Initialize cookie-parser to handle cookies
 
 // MySQL Connection
 const db = mysql.createConnection({
@@ -65,6 +66,7 @@ app.post('/register', (req, res) => {
     });
 });
 
+// API Route to Login a User
 app.post('/login', (req, res) => {
     const { UserName, Password } = req.body;
 
@@ -87,17 +89,51 @@ app.post('/login', (req, res) => {
             return res.status(401).json({ message: 'Invalid password' });
         }
 
-        // Authentication successful
+        // Authentication successful, set session cookie (HttpOnly for security)
+        res.cookie('session_token', user.UserName, {  // Use a token in real cases
+            httpOnly: true,  // Makes the cookie inaccessible to client-side JavaScript
+            secure: false,   // Set to true if you're using HTTPS
+            maxAge: 24 * 60 * 60 * 1000  // 1 day expiration
+        });
+
         res.status(200).json({ message: 'Login successful', user: { UserName: user.UserName, Role: user.Role } });
     });
 });
 
+// Route to check session (if user is logged in based on the session token)
+app.get('/session', (req, res) => {
+    const sessionToken = req.cookies.session_token;
+    
+    if (!sessionToken) {
+        return res.status(401).json({ message: 'Not logged in' });
+    }
 
+    // Verify if the user exists in the database by session token (UserName in this case)
+    const sql = 'SELECT * FROM User WHERE UserName = ?';
+
+    db.query(sql, [sessionToken], (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        if (results.length === 0) {
+            return res.status(401).json({ message: 'Session invalid' });
+        }
+
+        res.status(200).json({ message: 'Session valid', user: { UserName: results[0].UserName, Role: results[0].Role } });
+    });
+});
+
+// API Route to Logout a User
+app.post('/logout', (req, res) => {
+    res.clearCookie('session_token');  // Clear the session cookie
+    res.status(200).json({ message: 'Logout successful' });
+});
 
 // Handle preflight requests for all routes
 app.options('*', cors());  // Make sure preflight requests are allowed
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    console.log('Server running on port ${port}');
 });

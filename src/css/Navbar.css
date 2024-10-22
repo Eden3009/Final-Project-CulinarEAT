@@ -1,26 +1,17 @@
-/* Ensure the navbar is fully visible at the top */
-body {
-  margin: 0;
-  padding-top: 150px;
-}
-
-/* Import the Poppins font */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
 /* Basic Navbar Styling */
 .navbar {
   background-color: #333333; /* Rich Charcoal */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 15px 20px;
   border-bottom: 2px solid #D4AF37;  /* Warm Gold bottom border */
-  position: fixed;  /* Ensure the navbar stays at the top */
+  position: fixed;
   top: 0;
   width: 100%;
   box-sizing: border-box;
   z-index: 1000;
-  font-family: 'Poppins', sans-serif;  /* Apply the Poppins font */
+  font-family: 'Poppins', sans-serif;
 }
 
 /* Logo on the left */
@@ -29,92 +20,149 @@ body {
 }
 
 .navbar-logo img {
-  width: 150px;
+  width: 120px;
 }
 
-/* Center links for logged-in users */
-.navbar-links-logged {
-  list-style: none;
+/* Top section for logged-in user (My Profile, Open Chatbot, My Preferences, Logout) */
+.centered {
   display: flex;
-  justify-content: center;  /* Center the links */
-  gap: 20px;  /* Spacing between the buttons */
-  margin: 0;
-  padding: 0;
-  flex-grow: 1;
-}
-
-/* Center links for not-logged-in users */
-.navbar-links-not-logged {
-  list-style: none;
-  display: flex;
-  justify-content: flex-end;  /* Align register/login to the right */
+  justify-content: flex-end; /* Revert back to aligned on the right */
   gap: 20px;
-  margin: 0;
-  padding-right: 50px; /* Added padding-right to space away from the search bar */
-}
-
-.navbar-links li {
-  display: inline;
-}
-
-.navbar-links a {
-  text-decoration: none;
-  color: #F9F5F0;  /* Elegant Ivory text */
-  font-size: 1rem;
-  padding: 5px 10px;
-}
-
-.navbar-links a:hover {
-  text-decoration: underline;
-  color: #D4AF37;  /* Warm Gold hover effect */
-}
-
-/* Right section for Search Bar and Logout button */
-.right-section {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.search-bar {
-  display: flex;
+  flex: 1;
   align-items: center;
 }
 
-.search-bar input {
-  padding: 5px;
-  font-size: 1rem;
-  border-radius: 5px;
-  border: 1px solid #D4AF37;  /* Warm Gold border for input */
-  background-color: #F9F5F0;  /* Elegant Ivory background */
-  color: #333333;  /* Rich Charcoal text */
-}
-
-.search-bar button {
-  padding: 5px 10px;
-  margin-left: 5px;
-  cursor: pointer;
-  background-color: #D4AF37;  /* Warm Gold */
-  color: #333333;  /* Rich Charcoal text */
+/* Navbar actions (buttons) */
+.navbar-button {
+  background-color: #D4AF37; /* Warm Gold */
+  color: white;
   border: none;
+  padding: 8px 12px;
   border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Poppins', sans-serif;
 }
 
-.search-bar button:hover {
-  background-color: #F9F5F0;  /* Ivory hover effect */
-  color: #D4AF37;  /* Gold text on hover */
+.navbar-button i {
+  font-size: 16px;
+}
+
+.navbar-button:hover {
+  background-color: #B58929; /* Darker gold on hover */
 }
 
 /* Logout button */
 .logout-button {
   background-color: #E97451;  /* Burnt Sienna */
   color: #F9F5F0;  /* Ivory */
-  padding: 5px 10px;
+  padding: 8px 12px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .logout-button:hover {
-  background-color: #D32F2F;  /* Darker Burnt Sienna for hover effect */
+  background-color: #D32F2F;
+}
+
+/* Bottom Navbar for links and search bar */
+.bottom-navbar {
+  background-color: #333333;  /* Charcoal background */
+  padding: 10px;
+  display: flex;
+  margin-top: 12px;
+  justify-content: flex-start; /* Shift this entire section to the left */
+  align-items: center;
+  width: 95%; /* Adjust to control how far to the left it moves */
+  margin-right: 58%; /* Fine-tune the shift */
+  position: fixed;
+  top: 60px;
+  z-index: 999;
+  font-family: 'Poppins', sans-serif;
+
+}
+
+/* Navigation links */
+.navbar-links {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+
+}
+
+.navbar-links a {
+  text-decoration: none;
+  color: #F9F5F0; /* Ivory */
+  font-size: 1rem;
+  padding: 5px 10px;
+  font-family: 'Poppins', sans-serif;
+
+}
+
+.navbar-links a:hover {
+  text-decoration: underline;
+  color: #D4AF37;  /* Gold on hover */
+  font-family: 'Poppins', sans-serif;
+
+}
+
+/* Search Bar Styling */
+.search-bar {
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* Pushes the search bar to the far right */
+  font-family: 'Poppins', sans-serif;
+
+}
+
+.search-bar input {
+  padding: 5px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #D4AF37;
+  background-color: #F9F5F0;
+  color: #333333;
+}
+
+.search-bar button {
+  padding: 5px 10px;
+  margin-left: 5px;
+  background-color: #D4AF37;
+  color: #333333;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+
+}
+
+.search-bar button:hover {
+  background-color: #F9F5F0;
+  color: #D4AF37;
+}
+
+/* Center links for not-logged-in users */
+.navbar-links-not-logged {
+  list-style: none;
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  margin: 0;
+}
+
+/* Adjusting the right section for non-logged-in users */
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }

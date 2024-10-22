@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './css/LoginPage.css';  // Ensure this points to your LoginPage.css
+import './css/LoginPage.css';  // Make sure the path to your CSS file is correct
 
 function LoginPage({ setIsLoggedIn }) {
     const [formData, setFormData] = useState({
@@ -11,7 +11,7 @@ function LoginPage({ setIsLoggedIn }) {
 
     const [errors, setErrors] = useState({});
     const [apiErrorMessage, setApiErrorMessage] = useState('');  // API error message state
-    const navigate = useNavigate();
+    const navigate = useNavigate();  // For page redirection
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -43,18 +43,24 @@ function LoginPage({ setIsLoggedIn }) {
                     headers: {
                         'Content-Type': 'application/json',
                     },
+                    withCredentials: true,  // Important to send cookies with the request
                 });
 
+                // If login is successful, update the state and localStorage
                 setIsLoggedIn(true);  // Set login state
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userName', formData.UserName);  // Store username if needed
                 setApiErrorMessage('');  // Clear any previous error
-                navigate('/');  // Redirect to home page after successful login
+
+                // Redirect to homepage after successful login
+                navigate('/');  
 
             } catch (error) {
-                // Handle invalid login
+                // Handle invalid login (status 401: Unauthorized)
                 if (error.response && error.response.status === 401) {
                     setApiErrorMessage('Invalid username or password.');
                 } else {
-                    setApiErrorMessage('The user name or password are not correct.');
+                    setApiErrorMessage('An error occurred during login. Please try again.');
                     console.error('Login error:', error);
                 }
             }
@@ -65,6 +71,7 @@ function LoginPage({ setIsLoggedIn }) {
 
     return (
         <div className="login-page">
+            {/* Left side login form */}
             <div className="left-form-container">
                 <div className="form-container">
                     <h2>Login to CulinarEAT</h2>
@@ -108,7 +115,7 @@ function LoginPage({ setIsLoggedIn }) {
                         <button type="submit" className="submit-button">Login</button>
                     </form>
 
-                    {/* Display API error message with a bounce-in animation */}
+                    {/* Display API error message */}
                     {apiErrorMessage && (
                         <div className="error-banner bounce-in">
                             <i className="fas fa-exclamation-circle icon"></i>
@@ -118,6 +125,7 @@ function LoginPage({ setIsLoggedIn }) {
                 </div>
             </div>
 
+            {/* Right side background image with text */}
             <div className="right-image-container">
                 <div className="overlay-text">
                     Glad to see you back! <br />
