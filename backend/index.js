@@ -23,7 +23,7 @@ app.use(cookieParser());  // Initialize cookie-parser to handle cookies
 
 // MySQL Connection
 const db = mysql.createConnection({
-    host: 'localhost',
+    host: '127.0.0.1',
     user: 'root', // Default XAMPP MySQL user
     password: '', // Default no password for XAMPP
     database: 'culinareat_db', // Your database name
@@ -129,6 +129,19 @@ app.post('/logout', (req, res) => {
     res.clearCookie('session_token');  // Clear the session cookie
     res.status(200).json({ message: 'Logout successful' });
 });
+
+// API Route to get all measures
+app.get('/measures', (req, res) => {
+    const sql = 'SELECT * FROM Measure';
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error fetching measures:', err);
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+        res.status(200).json(results);
+    });
+});
+
 
 // Handle preflight requests for all routes
 app.options('*', cors());  // Make sure preflight requests are allowed

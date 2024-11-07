@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './css/AddRecipePage.css';
 
@@ -10,6 +10,14 @@ function AddRecipePage() {
     const [photo, setPhoto] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [measures, setMeasures] = useState([]); // State to store measures
+
+    // Fetch measures from the server when the component mounts
+    useEffect(() => {
+        axios.get('http://localhost:5001/measures')
+            .then(response => setMeasures(response.data))
+            .catch(error => console.error('Error fetching measures:', error));
+    }, []);
 
     const handleAddIngredient = () => {
         setIngredients([...ingredients, { quantity: '', measure: '', ingredient: '' }]);
@@ -109,14 +117,19 @@ function AddRecipePage() {
                             onChange={(e) => handleIngredientChange(index, e)} 
                             required 
                         />
-                        <input 
-                            type="text" 
-                            name="measure" 
-                            placeholder="Measure Type" 
-                            value={ingredient.measure} 
-                            onChange={(e) => handleIngredientChange(index, e)} 
-                            required 
-                        />
+                        <select
+                            name="measure"
+                            value={ingredient.measure}
+                            onChange={(e) => handleIngredientChange(index, e)}
+                            required
+                        >
+                            <option value="">Select Measure</option>
+                            {measures.map(measure => (
+                                <option key={measure.MeasureID} value={measure.MeasureID}>
+                                    {measure.MeasureName}
+                                </option>
+                            ))}
+                        </select>
                         <input 
                             type="text" 
                             name="ingredient" 
