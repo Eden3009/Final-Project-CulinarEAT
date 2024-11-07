@@ -1,17 +1,16 @@
 /* Basic Navbar Styling */
 .navbar {
-  background-color: #333333; /* Rich Charcoal */
+  background-color: #D6C0B3; /* Background color */
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  border-bottom: 2px solid #D4AF37;  /* Warm Gold bottom border */
-  position: fixed;
-  top: 0;
-  width: 100%;
   box-sizing: border-box;
-  z-index: 1000;
+  width: 100%;
   font-family: 'Poppins', sans-serif;
+  position: relative; /* Set to relative to make it scroll with the page */
+  border-bottom: 2px solid #D4AF37; /* Orange bottom border line */
+  margin-bottom: 0.5cm; /* Reduced gap to achieve consistent spacing */
 }
 
 /* Logo on the left */
@@ -23,10 +22,10 @@
   width: 120px;
 }
 
-/* Top section for logged-in user (My Profile, Open Chatbot, My Preferences, Logout) */
+/* Centered section for logged-in user (My Profile, Open Chatbot, My Preferences, Logout) */
 .centered {
   display: flex;
-  justify-content: flex-end; /* Revert back to aligned on the right */
+  justify-content: flex-end; /* Align on the right */
   gap: 20px;
   flex: 1;
   align-items: center;
@@ -55,10 +54,23 @@
   background-color: #B58929; /* Darker gold on hover */
 }
 
+/* Add Recipe button styled like Register/Login links */
+.navbar-link {
+  text-decoration: none;
+  color: #F9F5F0; /* Ivory */
+  font-size: 1rem;
+  padding: 5px 10px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.navbar-link:hover {
+  color: #D4AF37; /* Gold on hover */
+}
+
 /* Logout button */
 .logout-button {
-  background-color: #E97451;  /* Burnt Sienna */
-  color: #F9F5F0;  /* Ivory */
+  background-color: #E97451; /* Burnt Sienna */
+  color: #F9F5F0; /* Ivory */
   padding: 8px 12px;
   border: none;
   border-radius: 5px;
@@ -74,19 +86,15 @@
 
 /* Bottom Navbar for links and search bar */
 .bottom-navbar {
-  background-color: #333333;  /* Charcoal background */
+  background-color: #D6C0B3; /* Background color */
   padding: 10px;
   display: flex;
-  margin-top: 12px;
-  justify-content: flex-start; /* Shift this entire section to the left */
+  justify-content: flex-start;
   align-items: center;
-  width: 95%; /* Adjust to control how far to the left it moves */
-  margin-right: 58%; /* Fine-tune the shift */
-  position: fixed;
-  top: 60px;
-  z-index: 999;
+  width: 100%; /* Full width */
   font-family: 'Poppins', sans-serif;
-
+  position: relative; /* Set to relative to make it scroll with the page */
+  margin-top: 0.5cm; /* Spacing between top and bottom sections */
 }
 
 /* Navigation links */
@@ -97,7 +105,6 @@
   margin: 0;
   padding: 0;
   font-family: 'Poppins', sans-serif;
-
 }
 
 .navbar-links a {
@@ -105,15 +112,11 @@
   color: #F9F5F0; /* Ivory */
   font-size: 1rem;
   padding: 5px 10px;
-  font-family: 'Poppins', sans-serif;
-
 }
 
 .navbar-links a:hover {
   text-decoration: underline;
-  color: #D4AF37;  /* Gold on hover */
-  font-family: 'Poppins', sans-serif;
-
+  color: #D4AF37; /* Gold on hover */
 }
 
 /* Search Bar Styling */
@@ -121,8 +124,6 @@
   display: flex;
   align-items: center;
   margin-left: auto; /* Pushes the search bar to the far right */
-  font-family: 'Poppins', sans-serif;
-
 }
 
 .search-bar input {
@@ -142,8 +143,6 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-
 }
 
 .search-bar button:hover {

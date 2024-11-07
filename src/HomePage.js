@@ -1,6 +1,5 @@
 import React from 'react';
-import './css/HomePage.css';  // Your CSS file
-import heroImage from './images/backGround.png';  // Hero background image
+import './css/HomePage.css';
 import menuImage from './images/img1.png';  // Example image for Menu
 import happyHourImage from './images/img2.png';  // Example image for Happy Hour
 import locationImage from './images/img1.png';  // Example image for Location
@@ -16,12 +15,33 @@ function HomePage() {
       {/* Flexbox wrapper to control both sections */}
       <div className="page-content">
         {/* Hero Section */}
-        <div
-          className="hero-section"
-          style={{ backgroundImage: `url(${heroImage})` }}
-        >
+        <div className="hero-section">
           <div className="hero-overlay">
             <h1>Culinareat</h1>
+          </div>
+        </div>
+
+        {/* Circles Section */}
+        <div className="circles-section">
+          <div className="circle-item">
+            <img src={menuImage} alt="About Us" />
+            <span className="circle-label">About Us</span>
+          </div>
+          <div className="circle-item">
+            <img src={happyHourImage} alt="Cooking Tips" />
+            <span className="circle-label">Cooking Tips</span>
+          </div>
+          <div className="circle-item">
+            <img src={locationImage} alt="Baking Tips" />
+            <span className="circle-label">Baking Tips</span>
+          </div>
+          <div className="circle-item">
+            <img src={dessertImage} alt="Conversions" />
+            <span className="circle-label">Conversions</span>
+          </div>
+          <div className="circle-item">
+            <img src={drinksImage} alt="" />
+            <span className="circle-label"></span> {/* Empty label for future use */}
           </div>
         </div>
 

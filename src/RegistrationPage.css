@@ -4,8 +4,8 @@ html, body {
     padding: 0;
     height: 100%;
     font-family: 'Raleway', sans-serif;
-    background-color: #4D4D4D;  /* Match header background color */
-    color: #F9F5F0;  /* Match header text color */
+    background-color: #D6C0B3;  /* Match header background color */
+    color: black;  /* Match header text color */
     width: 100%;
 }
 
@@ -29,150 +29,129 @@ html, body {
     align-items: center;
 }
 
-/* Elegant overlay text with effects */
+/* Text on the image */
 .right-image-container .overlay-text {
     position: absolute;
-    color: white;
+    color: rgb(181, 165, 165);
     font-size: 2rem;
     text-align: center;
     padding: 30px;
-    background-color: rgba(0, 0, 0, 0.5);  /* Semi-transparent background */
+    background-color: rgba(0, 0, 0, 0.5);
     border-radius: 10px;
-    font-family: 'Dancing Script', cursive;  /* Elegant font like Dancing Script */
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.7); /* Elegant shadow for depth */
+    font-family: 'Dancing Script', cursive;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.7);
     letter-spacing: 1px;
     line-height: 1.5;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);  /* Subtle text shadow for glow */
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
     transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    opacity: 0.9;  /* Slightly transparent for elegance */
+    opacity: 0.9;
     max-width: 90%;
 }
 
-/* Hover effect to add a subtle animation */
+/* Hover effect for subtle animation */
 .right-image-container:hover .overlay-text {
-    transform: scale(1.05);  /* Slight zoom effect on hover */
-    opacity: 1;  /* Increase opacity */
+    transform: scale(1.05);
+    opacity: 1;
 }
 
-/* Keyframe for smooth text appearance */
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    100% {
-        opacity: 0.9;
-        transform: translateY(0);
-    }
-}
-
-/* Apply the fade-in animation to the overlay text */
-.right-image-container .overlay-text {
-    animation: fadeIn 1s ease-out;
-}
-
-/* Left side registration form */
-.left-form-container {
+/* Left side registration form container */
+.Right-form-container {
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #4D4D4D;  /* Match header background color */
     padding: 50px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Form container styling */
 .form-container {
     width: 100%;
     max-width: 400px;
     text-align: center;
+    padding: 30px;
+    background-color: transparent;  /* Make the form background fully transparent */
+    box-shadow: none;  /* Remove any shadow */
 }
 
+/* Heading styling */
 .form-container h2 {
     font-size: 25px;
-    color: #F9F5F0;  /* Match header text color */
-    font-family: 'Poppins', sans-serif;
+    color: #d77a65;
+    font-family: 'EB Garamond', serif;
+    font-weight: bold;
     margin-bottom: 20px;
 }
 
+/* Form group styling */
 .form-group {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .form-group label {
-    text-align: left;
     display: block;
     margin-bottom: 5px;
-    font-size: 14px;
+    font-size: 16px;
     font-family: 'Poppins', sans-serif;
-    color: #F9F5F0;  /* Match header text color */
+    color: #6f6666;
+    font-weight: bold;
 }
 
+/* Input and select styling */
 .form-group input,
 .form-group select {
     width: 100%;
-    padding: 12px;
+    padding: 10px;
     border-radius: 5px;
     border: 1px solid #ccc;
     font-size: 16px;
     box-sizing: border-box;
+    background-color: #ffffff;  /* Set input fields to solid white */
+    color: #333;
 }
 
+/* Submit button styling */
 .submit-button {
     width: 100%;
     padding: 12px;
-    background-color: #D4AF37;  /* Match header accent color */
+    background-color: #c5705d;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
     margin-top: 20px;
+    font-weight: bold;
 }
 
 .submit-button:hover {
-    background-color: #357a94;
+    background-color: #ab886d;
 }
-/* Style the error messages as translucent bubbles with an icon */
+
+/* Style for error messages */
 .error {
-    color: #fff;  /* White text color */
-    background-color: rgba(0, 0, 0, 0.7);  /* Translucent black background */
-    padding: 5px 10px;  /* Reduced padding for a smaller bubble */
+    color: #050505;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 5px 10px;
     border-radius: 8px;
     position: absolute;
-    top: 50px;  /* Move the bubble further down to avoid overlapping input */
+    top: 50px;
     left: 0;
-    width: calc(100% - 20px);  /* Ensure the error message fits within the input */
-    text-align: left;  /* Align text to the left */
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);  /* Lighter shadow */
-    z-index: 10;
-    font-size: 0.750em;  /* Small but readable font size */
+    width: calc(100% - 20px);
+    text-align: left;
+    font-size: 0.75em;
     font-family: 'Poppins', sans-serif;
     line-height: 1.2;
-    display: flex;  /* Flexbox for aligning icon and text */
+    display: flex;
     align-items: center;
-    margin-top: 5px;  /* Small space between input and error */
+    margin-top: 5px;
 }
 
-/* Icon styling inside the error message */
-.error .icon {
-    margin-right: 8px;  /* Spacing between icon and text */
-    font-size: 1.2em;  /* Adjust size to match the text */
-    display: inline-block;  /* Ensure the icon appears properly */
-}
-
-/* Position the form group relative to its container to ensure proper error message placement */
-.form-group {
-    position: relative;
-    margin-bottom: 25px;  /* Reduced margin to bring fields closer together */
-}
-
-/* Slight animation for the error message */
+/* Animation for error messages */
 @keyframes fadeIn {
     0% {
         opacity: 0;
-        transform: translateY(10px);  /* Animate from below */
+        transform: translateY(10px);
     }
     100% {
         opacity: 1;
@@ -180,7 +159,6 @@ html, body {
     }
 }
 
-/* Apply the fade-in animation to the error message */
 .error {
     animation: fadeIn 0.3s ease-in-out;
 }

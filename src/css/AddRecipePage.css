@@ -1,0 +1,153 @@
+/* General page setup */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Raleway', sans-serif;
+    background-color: #D6C0B3;
+    color: black;
+    width: 100%;
+}
+
+/* Main container for the Add Recipe page */
+.add-recipe-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items */
+    padding: 40px;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* Form container styling */
+form {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Form group styling */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 16px;
+    color: #6f6666; /* Consistent color for all labels */
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
+}
+
+/* Uniform input styling for all fields */
+.form-group input[type="text"],
+.form-group input[type="file"],
+textarea,
+.ingredient-group input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+/* Ingredient and instruction group styling */
+.ingredient-group,
+.instruction-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+/* Button group for Add and Delete buttons */
+.button-group {
+    display: flex;
+    justify-content: flex-start; /* Align buttons to the left */
+    gap: 10px; /* Space between buttons */
+    margin-top: 10px;
+}
+
+/* Add button styling (green) */
+.add-button {
+    background-color: #5b9e5d; /* Green color */
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+}
+
+.add-button:hover {
+    background-color: #3d493e;
+}
+
+/* Delete button styling */
+.delete-button {
+    background-color: #de3a3ac8;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+}
+
+.delete-button:hover {
+    background-color: #7b5852;
+}
+
+/* Submit button */
+.submit-button {
+    width: 200px; /* Make the submit button narrower */
+    padding: 12px;
+    background-color: #c5705d;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+    font-family: 'Poppins', sans-serif;
+    text-align: center; /* Center text */
+}
+
+.submit-button:hover {
+    background-color: #ab886d;
+}
+
+/* Success and error messages */
+.success,
+.error {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 100%;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Headline styling */
+h2 {
+    text-align: center; /* Center the headline */
+    margin-bottom: 20px; /* Space below the headline */
+}
+
+/* Small headings styling */
+h3 {
+    font-family: 'Poppins', sans-serif;
+    color: #6f6666; /* Consistent color */
+    font-size: 16px; /* Uniform size for all h3 headings */
+    font-weight: bold;
+    margin-top: 20px; /* Space above small headings */
+}

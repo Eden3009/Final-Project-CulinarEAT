@@ -108,9 +108,9 @@ function RegistrationPage() {
 
     return (
         <div className="registration-page">
-            <div className="left-form-container">
+            <div className="Right-form-container">
                 <div className="form-container">
-                    <h2>Personalize your experience</h2>
+                    <h2>Welcome to Your Culinary Adventure!</h2>
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label htmlFor="FName">First Name:</label>
@@ -163,7 +163,7 @@ function RegistrationPage() {
 
             <div className="right-image-container">
                 <div className="overlay-text">
-                    Glad to meet you! <br />
+                    Glad to meet you! <br/>
                     You're just a few clicks away from the most immersive online culinary experience.
                 </div>
             </div>
