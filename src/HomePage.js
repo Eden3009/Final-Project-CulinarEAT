@@ -1,6 +1,6 @@
 import React from 'react';
 import './css/HomePage.css';
-import menuImage from './images/img1.png';  // Example image for Menu
+import menuImage from './images/logo1.png';  // Example image for Menu
 import happyHourImage from './images/img2.png';  // Example image for Happy Hour
 import locationImage from './images/img1.png';  // Example image for Location
 import dessertImage from './images/img3.png';  // Example image for Desserts
@@ -8,6 +8,7 @@ import drinksImage from './images/img1.png';  // Example image for Drinks
 import snacksImage from './images/img2.png';  // Example image for Snacks
 import seafoodImage from './images/img1.png';  // Example image for Seafood
 import bakeryImage from './images/img2.png';  // Example image for Bakery
+import Footer from './Footer';
 
 function HomePage() {
   return (
@@ -17,7 +18,7 @@ function HomePage() {
         {/* Hero Section */}
         <div className="hero-section">
           <div className="hero-overlay">
-            <h1>Culinareat</h1>
+            <h1>CulinarEAT</h1>
           </div>
         </div>
 
@@ -41,7 +42,7 @@ function HomePage() {
           </div>
           <div className="circle-item">
             <img src={drinksImage} alt="" />
-            <span className="circle-label"></span> {/* Empty label for future use */}
+            <span className="circle-label"></span>
           </div>
         </div>
 
@@ -85,6 +86,8 @@ function HomePage() {
           </div>
         </div>
       </div>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

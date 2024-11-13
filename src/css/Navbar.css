@@ -15,17 +15,18 @@
 
 /* Logo on the left */
 .navbar-logo {
-  flex: 1;
+  flex: 0 0 auto; /* Ensures logo takes up only the space it needs */
+  margin-right: auto; /* Pushes the logo to the far left */
 }
 
 .navbar-logo img {
   width: 120px;
 }
 
-/* Centered section for logged-in user (My Profile, Open Chatbot, My Preferences, Logout) */
+/* Centered section for links and actions */
 .centered {
   display: flex;
-  justify-content: flex-end; /* Align on the right */
+  justify-content: flex-end; /* Aligns elements to the right */
   gap: 20px;
   flex: 1;
   align-items: center;

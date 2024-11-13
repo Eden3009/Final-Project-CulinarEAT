@@ -9,17 +9,15 @@ html, body {
     width: 100%;
 }
 
-/* Main container for the Add Recipe page */
 .add-recipe-page {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center items */
+    align-items: center;
     padding: 40px;
     min-height: 100vh;
     box-sizing: border-box;
 }
 
-/* Form container styling */
 form {
     width: 100%;
     max-width: 800px;
@@ -27,88 +25,107 @@ form {
     box-sizing: border-box;
 }
 
-/* Form group styling */
 .form-group {
     margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     font-size: 16px;
-    color: #6f6666; /* Consistent color for all labels */
+    color: #6f6666;
     font-family: 'Poppins', sans-serif;
     font-weight: bold;
 }
 
-/* Uniform input styling for all fields */
-.form-group input[type="text"],
-.form-group input[type="file"],
-textarea,
-.ingredient-group input[type="text"] {
+/* Make the description textarea full-width */
+.full-width-textarea {
     width: 100%;
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #ccc;
     font-size: 16px;
     box-sizing: border-box;
-    margin-bottom: 10px;
 }
 
-/* Ingredient and instruction group styling */
-.ingredient-group,
-.instruction-group {
+/* Additional margin for photo upload section */
+.form-group-photo {
+    margin-top: 20px;
+}
+
+/* Ingredient section styling */
+.ingredient-group {
     display: flex;
-    align-items: center;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 30px;
+    position: relative;
+    align-items: center;
 }
 
-/* Button group for Add and Delete buttons */
-.button-group {
-    display: flex;
-    justify-content: flex-start; /* Align buttons to the left */
-    gap: 10px; /* Space between buttons */
+.ingredient-group input[type="text"],
+.ingredient-group select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    box-sizing: border-box;
+    width: 150px;
+}
+
+/* Error message styling positioned below the input field */
+.error-text {
+    color: #333333;
+    font-size: 14px;
+    font-weight: 500;
+    position: absolute;
+    top: 100%; /* Positions error message directly below the input */
+    left: 0;
+    margin-top: 3px;
+    white-space: nowrap; /* Prevents the error message from wrapping */
+}
+
+/* Button group for Add and Delete buttons in Ingredients section */
+.button-group-inline {
+    display: inline-flex;
+    gap: 10px;
     margin-top: 10px;
 }
 
-/* Add button styling (green) */
-.add-button {
-    background-color: #5b9e5d; /* Green color */
-    color: #FFFFFF;
-    border: none;
+.instructions-button-group {
+    display: inline-flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.add-button, .delete-button {
     border-radius: 5px;
-    padding: 10px 15px;
+    padding: 8px 12px;
     font-size: 14px;
-    cursor: pointer;
     font-family: 'Poppins', sans-serif;
+    cursor: pointer;
     text-align: center;
+}
+
+.add-button {
+    background-color: #5b9e5d;
+    color: #FFFFFF;
 }
 
 .add-button:hover {
     background-color: #3d493e;
 }
 
-/* Delete button styling */
 .delete-button {
     background-color: #de3a3ac8;
     color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 15px;
-    font-size: 14px;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    text-align: center;
 }
 
 .delete-button:hover {
     background-color: #7b5852;
 }
 
-/* Submit button */
 .submit-button {
-    width: 200px; /* Make the submit button narrower */
+    width: 200px;
     padding: 12px;
     background-color: #c5705d;
     color: #FFFFFF;
@@ -118,17 +135,16 @@ textarea,
     font-size: 16px;
     margin-top: 20px;
     font-family: 'Poppins', sans-serif;
-    text-align: center; /* Center text */
+    text-align: center;
 }
 
 .submit-button:hover {
     background-color: #ab886d;
 }
 
-/* Success and error messages */
 .success,
 .error {
-    margin-top: 15px;
+    margin-top: 10px;
     padding: 10px;
     border-radius: 5px;
     font-size: 14px;
@@ -137,17 +153,20 @@ textarea,
     font-family: 'Poppins', sans-serif;
 }
 
-/* Headline styling */
 h2 {
-    text-align: center; /* Center the headline */
-    margin-bottom: 20px; /* Space below the headline */
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'EB Garamond', serif;
+    color: #d77a65;
+    font-size: 28px;
+    font-weight: bold;
 }
 
-/* Small headings styling */
 h3 {
     font-family: 'Poppins', sans-serif;
-    color: #6f6666; /* Consistent color */
-    font-size: 16px; /* Uniform size for all h3 headings */
+    color: #6f6666;
+    font-size: 16px;
     font-weight: bold;
-    margin-top: 20px; /* Space above small headings */
+    margin-top: 20px;
+    margin-bottom: 10px;
 }

@@ -10,6 +10,7 @@ import RegistrationPage from './RegistrationPage';
 import ChatbotPage from './ChatbotPage';
 import RecipeDetailPage from './RecipeDetailPage';
 import Navbar from './Navbar';
+import Footer from './Footer';  // Import Footer
 import axios from 'axios';
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
           <Route path="/chatbot" element={isLoggedIn ? <ChatbotPage /> : <LoginPage setIsLoggedIn={setIsLoggedIn} />} />
           <Route path="/recipe-detail" element={<RecipeDetailPage />} />
         </Routes>
+        <Footer /> {/* Add Footer here to appear on all pages */}
       </div>
     </Router>
   );
