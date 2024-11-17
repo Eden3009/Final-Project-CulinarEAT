@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 
 
-
 const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -330,6 +329,10 @@ const AddRecipePage = () => {
   const [file, setFile] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [incompleteFields, setIncompleteFields] = useState({});
+  const [productAmount, setProductAmount] = useState("");
+  const [skillLevel, setSkillLevel] = useState("");
+  const [preparationTime, setPreparationTime] = useState("");
+
 
 
   const isFormValid = () => {
@@ -540,6 +543,52 @@ const AddRecipePage = () => {
 
           <ErrorText isVisible={!!errors.description}>{errors.description}</ErrorText>
         </FormGroup>
+{/* Amount of Product */}
+<FormGroup>
+  <Label htmlFor="productAmount">Amount of Product</Label>
+  <Input
+    type="text"
+    id="productAmount"
+    placeholder="E.g., 1 English Cake, 8 Pancakes"
+    value={productAmount} // Create a state for productAmount if not already present
+    onChange={(e) => setProductAmount(e.target.value)} // Create a handler if not already present
+    aria-label="Final product amount"
+  />
+</FormGroup>
+{/* Skill Level and Preparation Time*/}
+<FormGroup style={{ display: "flex", gap: "20px", flexDirection: "row", alignItems: "center" }}>
+  {/* Skill Level */}
+  <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    <Label htmlFor="skillLevel" style={{ marginBottom: "5px" }}>Skill Level</Label>
+    <Select
+      id="skillLevel"
+      value={skillLevel}
+      onChange={(e) => setSkillLevel(e.target.value)}
+      aria-label="Select skill level"
+      style={{ width: "100%", padding: "10px", fontSize: "16px" }} // set styles
+    >
+      <option value="">Select Level</option>
+      <option value="Easy">Easy</option>
+      <option value="Medium">Medium</option>
+      <option value="Hard">Hard</option>
+    </Select>
+  </div>
+
+  {/* Preparation Time */}
+  <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    <Label htmlFor="preparationTime" style={{ marginBottom: "5px" }}>Preparation Time</Label>
+    <Input
+      type="text"
+      id="preparationTime"
+      placeholder="E.g., 20 minutes"
+      value={preparationTime}
+      onChange={(e) => setPreparationTime(e.target.value)}
+      aria-label="Preparation time"
+      style={{ width: "100%", padding: "10px", fontSize: "16px" }} // Ensure consistent styles
+    />
+  </div>
+</FormGroup>
+
 
         {/* Ingredients */}
         <FormGroup>

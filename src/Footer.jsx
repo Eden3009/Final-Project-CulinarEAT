@@ -42,6 +42,7 @@ const Footer = () => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            marginTop: '20px', // Adjusted to align with other sections
           }}
         >
           <h1

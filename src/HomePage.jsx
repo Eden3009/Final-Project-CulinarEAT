@@ -13,9 +13,13 @@ import holidaysImage from './images/holidays.jpg'; // Holidays
 import quickMealsImage from './images/10min.jpg'; // Meals in 10 Minutes
 import dessertsImage from './images/chocolatecubes.jpg'; // Desserts
 import drinksImage from './images/beverage.jpg'; // Drinks
-import chickenImage from './images/img1.png'; // Chicken
-import beefImage from './images/img1.png'; // Beef
-
+import chickenImage from './images/chicken.jpg'; // Chicken
+import beefImage from './images/beef.jpg'; // Beef
+import aboutUsImage from './images/logo5.jpg'; // About Us
+import cookingTipsImage from './images/cooking1.png'; // Cooking Tips
+import bakingTipsImage from './images/baking2.png'; // Baking Tips
+import conversionsImage from './images/conversions.png'; // Conversions
+import specialOffersImage from './images/new.png'; // New this week
 
 const styles = {
   homePage: {
@@ -44,6 +48,7 @@ const styles = {
     justifyContent: 'center',
     gap: '20px',
     marginTop: '0.5cm',
+    marginBottom: '1cm', // Added spacing between circles and grid
   },
   circleItem: {
     display: 'flex',
@@ -54,9 +59,18 @@ const styles = {
     width: '75px',
     height: '75px',
     borderRadius: '50%',
-    objectFit: 'cover',
     padding: '3px',
     background: 'linear-gradient(45deg, #8D6E63, #D4AF37, #d9b8a6)',
+    objectFit: 'cover',
+  },
+  circleImageSpecial: {
+    width: '75px',
+    height: '75px',
+    borderRadius: '50%',
+    padding: '3px',
+    background: 'linear-gradient(45deg, #8D6E63, #D4AF37, #d9b8a6)',
+    objectFit: 'contain',
+    backgroundColor: '#fff', // White background inside
   },
   circleLabel: {
     marginTop: '8px',
@@ -66,7 +80,7 @@ const styles = {
   },
   gridSection: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)', // Updated number of cols
+    gridTemplateColumns: 'repeat(4, 1fr)', // Updated for 4 columns
     gap: '1.5cm', // Gap between cubes
     padding: '20px',
   },
@@ -108,9 +122,21 @@ function HomePage() {
 
       {/* Circles Section */}
       <div style={styles.circlesSection}>
-        {[].map((circle, index) => (
+        {[
+          { img: aboutUsImage, label: 'About Us', special: true },
+          { img: cookingTipsImage, label: 'Cooking Tips' },
+          { img: bakingTipsImage, label: 'Baking Tips' },
+          { img: conversionsImage, label: 'Conversions', special: true },
+          { img: specialOffersImage, label: 'New this week' },
+        ].map((circle, index) => (
           <div style={styles.circleItem} key={index}>
-            <img src={circle.img} alt={circle.label} style={styles.circleImage} />
+            <img
+              src={circle.img}
+              alt={circle.label}
+              style={
+                circle.special ? styles.circleImageSpecial : styles.circleImage
+              }
+            />
             <span style={styles.circleLabel}>{circle.label}</span>
           </div>
         ))}
@@ -133,8 +159,8 @@ function HomePage() {
           { img: quickMealsImage, label: 'Meals in 10 Minutes' },
           { img: chickenImage, label: 'Chicken' },
           { img: beefImage, label: 'Beef' },
-          { img: asianImage, label: 'Asian' }, 
-          { img: holidaysImage, label: 'Holidays' }, 
+          { img: asianImage, label: 'Asian' },
+          { img: holidaysImage, label: 'Holidays' },
         ].map((grid, index) => (
           <div style={styles.gridItem} key={index}>
             <img src={grid.img} alt={grid.label} style={styles.gridImage} />
