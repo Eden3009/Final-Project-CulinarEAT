@@ -1,7 +1,8 @@
+/*delete this code*/
 /* Basic Navbar Styling */
-.navbar {
+/*.navbar {
   background-color: #D6C0B3; /* Background color */
-  display: flex;
+ /* display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
@@ -9,33 +10,33 @@
   width: 100%;
   font-family: 'Poppins', sans-serif;
   position: relative; /* Set to relative to make it scroll with the page */
-  border-bottom: 2px solid #D4AF37; /* Orange bottom border line */
-  margin-bottom: 0.5cm; /* Reduced gap to achieve consistent spacing */
-}
+  /*border-bottom: 2px solid #D4AF37; /* Orange bottom border line */
+  /*margin-bottom: 0.5cm; /* Reduced gap to achieve consistent spacing */
+/*}
 
 /* Logo on the left */
-.navbar-logo {
+/*.navbar-logo {
   flex: 0 0 auto; /* Ensures logo takes up only the space it needs */
-  margin-right: auto; /* Pushes the logo to the far left */
-}
+  /*margin-right: auto; /* Pushes the logo to the far left */
+/*}
 
 .navbar-logo img {
   width: 120px;
 }
 
 /* Centered section for links and actions */
-.centered {
+/*.centered {
   display: flex;
   justify-content: flex-end; /* Aligns elements to the right */
-  gap: 20px;
+  /*gap: 20px;
   flex: 1;
   align-items: center;
 }
 
 /* Navbar actions (buttons) */
-.navbar-button {
+/*.navbar-button {
   background-color: #D4AF37; /* Warm Gold */
-  color: white;
+/*  color: white;
   border: none;
   padding: 8px 12px;
   border-radius: 5px;
@@ -53,26 +54,26 @@
 
 .navbar-button:hover {
   background-color: #B58929; /* Darker gold on hover */
-}
+/*}
 
 /* Add Recipe button styled like Register/Login links */
-.navbar-link {
+/*.navbar-link {
   text-decoration: none;
   color: #F9F5F0; /* Ivory */
-  font-size: 1rem;
+  /*font-size: 1rem;
   padding: 5px 10px;
   font-family: 'Poppins', sans-serif;
 }
 
 .navbar-link:hover {
   color: #D4AF37; /* Gold on hover */
-}
+/*}
 
 /* Logout button */
-.logout-button {
+/*.logout-button {
   background-color: #E97451; /* Burnt Sienna */
-  color: #F9F5F0; /* Ivory */
-  padding: 8px 12px;
+  /*color: #F9F5F0; /* Ivory */
+  /*padding: 8px 12px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -86,20 +87,20 @@
 }
 
 /* Bottom Navbar for links and search bar */
-.bottom-navbar {
+/*.bottom-navbar {
   background-color: #D6C0B3; /* Background color */
-  padding: 10px;
+  /*padding: 10px;
   display: flex;
   justify-content: flex-start;
   align-items: center;
   width: 100%; /* Full width */
-  font-family: 'Poppins', sans-serif;
+  /*font-family: 'Poppins', sans-serif;
   position: relative; /* Set to relative to make it scroll with the page */
-  margin-top: 0.5cm; /* Spacing between top and bottom sections */
-}
+  /*margin-top: 0.5cm; /* Spacing between top and bottom sections */
+/*}
 
 /* Navigation links */
-.navbar-links {
+/*.navbar-links {
   display: flex;
   list-style: none;
   gap: 20px;
@@ -111,21 +112,21 @@
 .navbar-links a {
   text-decoration: none;
   color: #F9F5F0; /* Ivory */
-  font-size: 1rem;
+  /*font-size: 1rem;
   padding: 5px 10px;
 }
 
 .navbar-links a:hover {
   text-decoration: underline;
   color: #D4AF37; /* Gold on hover */
-}
+/*}
 
 /* Search Bar Styling */
-.search-bar {
+/*.search-bar {
   display: flex;
   align-items: center;
   margin-left: auto; /* Pushes the search bar to the far right */
-}
+/*}
 
 .search-bar input {
   padding: 5px;
@@ -152,7 +153,7 @@
 }
 
 /* Center links for not-logged-in users */
-.navbar-links-not-logged {
+/*.navbar-links-not-logged {
   list-style: none;
   display: flex;
   justify-content: flex-end;
@@ -161,7 +162,7 @@
 }
 
 /* Adjusting the right section for non-logged-in users */
-.right-section {
+/*.right-section {
   display: flex;
   align-items: center;
   gap: 20px;

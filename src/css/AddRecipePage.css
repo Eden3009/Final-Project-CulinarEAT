@@ -1,5 +1,7 @@
+/*Delete this code-we dont need it anymore*/
+
 /* General page setup */
-html, body {
+/*html, body {
     margin: 0;
     padding: 0;
     height: 100%;
@@ -39,7 +41,7 @@ form {
 }
 
 /* Make the description textarea full-width */
-.full-width-textarea {
+/*.full-width-textarea {
     width: 100%;
     padding: 10px;
     border-radius: 5px;
@@ -49,12 +51,12 @@ form {
 }
 
 /* Additional margin for photo upload section */
-.form-group-photo {
+/*.form-group-photo {
     margin-top: 20px;
 }
 
 /* Ingredient section styling */
-.ingredient-group {
+/*.ingredient-group {
     display: flex;
     gap: 10px;
     margin-bottom: 30px;
@@ -73,19 +75,19 @@ form {
 }
 
 /* Error message styling positioned below the input field */
-.error-text {
+/*.error-text {
     color: #333333;
     font-size: 14px;
     font-weight: 500;
     position: absolute;
     top: 100%; /* Positions error message directly below the input */
     left: 0;
-    margin-top: 3px;
+   /* margin-top: 3px;
     white-space: nowrap; /* Prevents the error message from wrapping */
-}
+/*}
 
 /* Button group for Add and Delete buttons in Ingredients section */
-.button-group-inline {
+/*.button-group-inline {
     display: inline-flex;
     gap: 10px;
     margin-top: 10px;

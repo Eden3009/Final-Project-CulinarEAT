@@ -319,9 +319,6 @@ const CategoryOption = styled.div`
 `;
 
 
-
-
-
 const AddRecipePage = () => {
   const [recipeName, setRecipeName] = useState("");
   const [description, setDescription] = useState("");
@@ -354,7 +351,6 @@ const AddRecipePage = () => {
     setFile(selectedFile);
   }
 };
-
 
   const tags = [
     { label: "Kosher", icon: "🍞" },

@@ -1,5 +1,6 @@
+/*Delete this code*/
 /* General page setup */
-html, body {
+/*html, body {
     margin: 0;
     padding: 0;
     height: 100%;
@@ -9,19 +10,19 @@ html, body {
 }
 
 /* Flexbox layout for split screen with reversed order */
-.login-page {
+/*.login-page {
     display: flex;
     height: 100vh;
     width: 100vw;
     flex-direction: row-reverse;  /* Switch the position of the form and image */
-}
+/*}
 
 /* Right side image container with overlay text */
-.right-image-container {
+/*.right-image-container {
     flex: 1;
     position: relative;
     background-image: url('../images/img4.png');  /* Corrected path */
-    background-size: cover;
+    /*background-size: cover;
     background-position: center;
     display: flex;
     justify-content: center;
@@ -30,32 +31,32 @@ html, body {
 
 
 /* Elegant overlay text with effects */
-.right-image-container .overlay-text {
+/*.right-image-container .overlay-text {
     position: absolute;
     color: white;
     font-size: 2rem;
     text-align: center;
     padding: 30px;
     background-color: rgba(0, 0, 0, 0.5);  /* Semi-transparent background */
-    border-radius: 10px;
+    /*border-radius: 10px;
     font-family: 'Dancing Script', cursive;  /* Elegant font like Dancing Script */
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.7); /* Elegant shadow for depth */
-    letter-spacing: 1px;
+   /* box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.7); /* Elegant shadow for depth */
+   /* letter-spacing: 1px;
     line-height: 1.5;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);  /* Subtle text shadow for glow */
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+   /* transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
     opacity: 0.9;  /* Slightly transparent for elegance */
-    max-width: 90%;
+    /*max-width: 90%;
 }
 
 /* Hover effect to add a subtle animation */
-.right-image-container:hover .overlay-text {
+/*.right-image-container:hover .overlay-text {
     transform: scale(1.05);  /* Slight zoom effect on hover */
-    opacity: 1;  /* Increase opacity */
-}
+   /* opacity: 1;  /* Increase opacity */
+/*}
 
 /* Keyframe for smooth text appearance */
-@keyframes fadeIn {
+/*@keyframes fadeIn {
     0% {
         opacity: 0;
         transform: translateY(20px);
@@ -67,12 +68,12 @@ html, body {
 }
 
 /* Apply the fade-in animation to the overlay text */
-.right-image-container .overlay-text {
+/*.right-image-container .overlay-text {
     animation: fadeIn 1s ease-out;
 }
 
 /* Left side login form */
-.left-form-container {
+/*.left-form-container {
     flex: 1;
     display: flex;
     justify-content: center;
@@ -132,7 +133,7 @@ html, body {
     background-color: #357a94;
 }
 /* Error message styles */
-.error {
+/*.error {
     color: #fff;
     background-color: rgba(0, 0, 0, 0.7);
     padding: 5px 10px;
@@ -150,10 +151,10 @@ html, body {
 }
 
 /* Softer and more transparent error banner */
-.error-banner {
+/*.error-banner {
     color: #fff;
     background-color: rgba(217, 83, 79, 0.7);  /* Softer, more transparent red */
-    padding: 12px;
+   /* padding: 12px;
     border-radius: 12px;
     margin-top: 20px;
     font-size: 16px;
@@ -162,27 +163,27 @@ html, body {
     justify-content: center;
     text-align: center;
     width: 25.3%; /* Reduce the width slightly */
-    position: absolute; /* Ensure it stays in place */
-    left: 60%; /* Move 5% from the left edge */
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Softer shadow */
-    animation: bounce-in 0.6s ease-in-out;  /* Slower and more visible bounce */
-}
+   /* position: absolute; /* Ensure it stays in place */
+  /*  left: 60%; /* Move 5% from the left edge */
+  /*  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Softer shadow */
+   /* animation: bounce-in 0.6s ease-in-out;  /* Slower and more visible bounce */
+/*}
 
 /* Enhanced bounce-in animation */
-@keyframes bounce-in {
+/*@keyframes bounce-in {
     0% {
         transform: scale(0.6);  /* Start smaller */
-        opacity: 0;
+       /* opacity: 0;
     }
     40% {
         transform: scale(1.2);  /* Exaggerated bounce */
-        opacity: 1;
+       /* opacity: 1;
     }
     60% {
         transform: scale(0.9);  /* Slight compression */
-    }
+    /*}
     100% {
         transform: scale(1);  /* Settle at original size */
-        opacity: 1;
+       /* opacity: 1;
     }
 }

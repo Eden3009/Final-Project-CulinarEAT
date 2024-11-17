@@ -1,5 +1,6 @@
+/*Delete this code*/
 /* Hero Section */
-.hero-section {
+/*.hero-section {
   height: 30vh;
   display: flex;
   justify-content: center;
@@ -12,7 +13,7 @@
 }
 
 /* Headline Styling */
-.hero-overlay {
+/*.hero-overlay {
   color: #ffffff;
   font-size: 3rem;
   text-align: center;
@@ -25,7 +26,7 @@
 }
 
 /* Circles Section */
-.circles-section {
+/*.circles-section {
   display: flex;
   justify-content: center;
   gap: 20px;
@@ -34,7 +35,7 @@
 }
 
 /* Circle Item Styling */
-.circle-item {
+/*.circle-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -43,17 +44,17 @@
 
 .circle-item img {
   width: 75px; /* Circle size */
-  height: 75px;
+  /*height: 75px;
   border-radius: 50%;
   object-fit: cover; /* Ensures the image covers the circle without being stretched */
-  padding: 3px;
+  /*padding: 3px;
   background: linear-gradient(45deg, #8D6E63, #D4AF37, #d9b8a6);
   border: 4px solid transparent;
   background-clip: padding-box;
 }
 
 /* Remove hover scale for circles */
-.circle-item:hover {
+/*.circle-item:hover {
   transform: none;
 }
 
@@ -65,7 +66,7 @@
 }
 
 /* Grid Section */
-.grid-section {
+/*.grid-section {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.5cm;
@@ -100,7 +101,7 @@
 }
 
 /* Grid item heading */
-.grid-item h2 {
+/*.grid-item h2 {
   margin-top: 10px;
   font-size: 1rem;
   font-weight: bold;
@@ -109,6 +110,6 @@
 }
 
 /* Enhanced Text Effect on Hover */
-.grid-item:hover h2 {
+/*.grid-item:hover h2 {
   color: #D4AF37;
 }

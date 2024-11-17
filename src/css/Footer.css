@@ -1,12 +1,13 @@
+/*Delete this code-we dont need it anymore*/
 /* Basic Styling */
-body {
+/*body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
     background-color: #D6C0B3;
 }
 
 /* Navbar Styling */
-.navbar {
+/*.navbar {
     background-color: #D6C0B3;
     padding: 15px 20px;
     border-bottom: 1px solid #D4AF37;
@@ -14,7 +15,7 @@ body {
 }
 
 /* Hero Section Styling */
-.hero-section {
+/*.hero-section {
     height: 200px;
     display: flex;
     align-items: center;
@@ -24,7 +25,7 @@ body {
 }
 
 /* Footer Main Styling */
-.footer {
+/*.footer {
     background-color: #D6C0B3;
     color: #333;
     padding: 20px 20px 0 20px;
@@ -34,7 +35,7 @@ body {
 }
 
 /* Orange Line Above Footer */
-.footer-line {
+/*.footer-line {
     width: 100%;
     height: 1px;
     background-color: #D4AF37;
@@ -42,7 +43,7 @@ body {
 }
 
 /* Footer Content Layout */
-.footer-content {
+/*.footer-content {
     display: flex;
     justify-content: space-evenly;
     align-items: flex-start;
@@ -53,7 +54,7 @@ body {
 }
 
 /* Footer Logo/Text Styling */
-.footer-logo-section {
+/*.footer-logo-section {
     text-align: center;
     width: 200px;
     display: flex;
@@ -85,7 +86,7 @@ body {
 }
 
 /* Footer Links */
-.footer-links {
+/*.footer-links {
     width: 200px;
     text-align: left;
 }
@@ -117,7 +118,7 @@ body {
 }
 
 /* Social Media Links */
-.footer-social {
+/*.footer-social {
     width: 200px;
     text-align: left;
 }
@@ -156,7 +157,7 @@ body {
 }
 
 /* Footer Bottom Section */
-.footer-bottom {
+/*.footer-bottom {
     font-size: 0.9rem;
     color: #666;
     margin-top: 10px;
@@ -164,7 +165,7 @@ body {
 }
 
 /* Grid Section Styling */
-.grid-section {
+/*.grid-section {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
@@ -176,7 +177,7 @@ body {
 }
 
 /* Grid Item Styling */
-.grid-item {
+/*.grid-item {
     text-align: center;
     padding: 10px;
     position: relative;
@@ -185,7 +186,7 @@ body {
     transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
     border-radius: 10px;
     z-index: 1; /* Keep background lower than text */
-}
+/*}
 
 .grid-item:hover {
     transform: scale(1.05);
@@ -200,10 +201,10 @@ body {
 }
 
 /* Grid Item Text Styling */
-.grid-item h2 {
+/*.grid-item h2 {
     position: relative;
     z-index: 2; /* Ensure text is above other elements */
-    margin-top: 10px;
+   /* margin-top: 10px;
     font-size: 1rem;
     font-weight: bold;
     color: #333;

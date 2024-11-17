@@ -1,28 +1,29 @@
+/*delete*/
 /* General page setup */
-html, body {
+/*html, body {
     margin: 0;
     padding: 0;
     height: 100%;
     font-family: 'Raleway', sans-serif;
     background-color: #D6C0B3;  /* Match header background color */
-    color: black;  /* Match header text color */
-    width: 100%;
+    /*color: black;  /* Match header text color */
+    /*width: 100%;
 }
 
 /* Flexbox layout for split screen with reversed order */
-.registration-page {
+/*.registration-page {
     display: flex;
     height: 100vh;
     width: 100vw;
     flex-direction: row-reverse;  /* Switch the position of the form and image */
-}
+/*}
 
 /* Right side image container with overlay text */
-.right-image-container {
+/*.right-image-container {
     flex: 1;
     position: relative;
     background-image: url('./images/img4.png');  /* Replace with the correct image */
-    background-size: cover;
+  /*  background-size: cover;
     background-position: center;
     display: flex;
     justify-content: center;
@@ -30,7 +31,7 @@ html, body {
 }
 
 /* Text on the image */
-.right-image-container .overlay-text {
+/*.right-image-container .overlay-text {
     position: absolute;
     color: rgb(181, 165, 165);
     font-size: 2rem;
@@ -49,13 +50,13 @@ html, body {
 }
 
 /* Hover effect for subtle animation */
-.right-image-container:hover .overlay-text {
+/*.right-image-container:hover .overlay-text {
     transform: scale(1.05);
     opacity: 1;
 }
 
 /* Left side registration form container */
-.Right-form-container {
+/*.Right-form-container {
     flex: 1;
     display: flex;
     justify-content: center;
@@ -64,17 +65,17 @@ html, body {
 }
 
 /* Form container styling */
-.form-container {
+/*.form-container {
     width: 100%;
     max-width: 400px;
     text-align: center;
     padding: 30px;
     background-color: transparent;  /* Make the form background fully transparent */
-    box-shadow: none;  /* Remove any shadow */
-}
+  /*  box-shadow: none;  /* Remove any shadow */
+/*}
 
 /* Heading styling */
-.form-container h2 {
+/*.form-container h2 {
     font-size: 25px;
     color: #d77a65;
     font-family: 'EB Garamond', serif;
@@ -83,7 +84,7 @@ html, body {
 }
 
 /* Form group styling */
-.form-group {
+/*.form-group {
     position: relative;
     margin-bottom: 15px;
 }
@@ -98,7 +99,7 @@ html, body {
 }
 
 /* Input and select styling */
-.form-group input,
+/*.form-group input,
 .form-group select {
     width: 100%;
     padding: 10px;
@@ -107,11 +108,11 @@ html, body {
     font-size: 16px;
     box-sizing: border-box;
     background-color: #ffffff;  /* Set input fields to solid white */
-    color: #333;
+  /*  color: #333;
 }
 
 /* Submit button styling */
-.submit-button {
+/*.submit-button {
     width: 100%;
     padding: 12px;
     background-color: #c5705d;
@@ -129,7 +130,7 @@ html, body {
 }
 
 /* Style for error messages */
-.error {
+/*.error {
     color: #050505;
     background-color: rgba(0, 0, 0, 0.7);
     padding: 5px 10px;
@@ -148,7 +149,7 @@ html, body {
 }
 
 /* Animation for error messages */
-@keyframes fadeIn {
+/*@keyframes fadeIn {
     0% {
         opacity: 0;
         transform: translateY(10px);
