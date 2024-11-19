@@ -321,7 +321,16 @@ const CategoryOption = styled.div`
 const AddRecipePage = () => {
   const [recipeName, setRecipeName] = useState("");
   const [description, setDescription] = useState("");
-  const [ingredients, setIngredients] = useState([{ quantity: "", measure: "", name: "", substitute: "", showSubstitute: false }]);
+  const [ingredients, setIngredients] = useState([
+    {
+      quantity: "",
+      measure: "",
+      name: "",
+      substitutes: [{ quantity: "", measure: "", name: "" }],
+      showSubstitute: false,
+    },
+  ]);
+  
   const [instructions, setInstructions] = useState([""]);
   const [errors, setErrors] = useState({});
   const [showAddStepError, setShowAddStepError] = useState(false);
@@ -331,8 +340,23 @@ const AddRecipePage = () => {
   const [incompleteFields, setIncompleteFields] = useState({});
   const [productAmount, setProductAmount] = useState("");
   const [skillLevel, setSkillLevel] = useState("");
-  const [preparationTime, setPreparationTime] = useState("");
+  const [preparationTime, setPreparationTime] = useState({ value: "", unit: "" });
 
+
+const validatePreparationTime = ({ value, unit }) => {
+  if (!value || !unit) {
+    return "Both time and unit must be provided.";
+  }
+
+  const numericValue = parseInt(value, 10);
+  if (unit === "minutes" && (numericValue < 5 || numericValue > 59)) {
+    return "Minutes must be between 5 and 59.";
+  }
+  if (unit === "hours" && (numericValue < 1 || numericValue > 48)) {
+    return "Hours must be between 1 and 48.";
+  }
+  return ""; 
+};
 
 
   const isFormValid = () => {
@@ -555,7 +579,7 @@ const AddRecipePage = () => {
     aria-label="Final product amount"
   />
 </FormGroup>
-{/* Skill Level and Preparation Time*/}
+{/* Skill Level and Preparation Time */}
 <FormGroup style={{ display: "flex", gap: "20px", flexDirection: "row", alignItems: "center" }}>
   {/* Skill Level */}
   <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
@@ -565,7 +589,7 @@ const AddRecipePage = () => {
       value={skillLevel}
       onChange={(e) => setSkillLevel(e.target.value)}
       aria-label="Select skill level"
-      style={{ width: "100%", padding: "10px", fontSize: "16px" }} // set styles
+      style={{ width: "100%", padding: "10px", fontSize: "16px" }}
     >
       <option value="">Select Level</option>
       <option value="Easy">Easy</option>
@@ -573,19 +597,82 @@ const AddRecipePage = () => {
       <option value="Hard">Hard</option>
     </Select>
   </div>
+</FormGroup>
 
-  {/* Preparation Time */}
-  <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-    <Label htmlFor="preparationTime" style={{ marginBottom: "5px" }}>Preparation Time</Label>
-    <Input
-      type="text"
-      id="preparationTime"
-      placeholder="E.g., 20 minutes"
-      value={preparationTime}
-      onChange={(e) => setPreparationTime(e.target.value)}
-      aria-label="Preparation time"
-      style={{ width: "100%", padding: "10px", fontSize: "16px" }} // Ensure consistent styles
-    />
+{/* Preparation Time */}
+<FormGroup style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}>
+  {/* Time Input and Dropdown on the Same Row */}
+  <div style={{ display: "flex", gap: "20px", alignItems: "flex-start", width: "100%" }}>
+    {/* Time Input */}
+    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <Label htmlFor="timeValue" style={{ marginBottom: "5px" }}>Preparation Time</Label>
+      <Input
+        type="text"
+        id="timeValue"
+        placeholder="Enter time"
+        value={preparationTime.value || ""}
+        onChange={(e) => {
+          const value = e.target.value;
+
+          // Validation for numeric values
+          const numericValue = parseInt(value, 10);
+
+          // If the input is cleared, reset the error and value
+          if (value === "") {
+            const newPreparationTime = { ...preparationTime, value: "" };
+            setPreparationTime(newPreparationTime);
+            setErrors((prevErrors) => ({
+              ...prevErrors,
+              preparationTime: "",
+            }));
+          } else if (!/^\d*$/.test(value)) {
+            // If non-numeric characters are entered
+            setErrors((prevErrors) => ({
+              ...prevErrors,
+              preparationTime: "Only numeric values are allowed.",
+            }));
+          } else {
+            const newPreparationTime = { ...preparationTime, value: numericValue };
+            setPreparationTime(newPreparationTime);
+
+            // Range validation based on the unit
+            setErrors((prevErrors) => ({
+              ...prevErrors,
+              preparationTime: validatePreparationTime(newPreparationTime),
+            }));
+          }
+        }}
+        isError={!!errors.preparationTime}
+        aria-label="Preparation time value"
+      />
+      <ErrorText isVisible={!!errors.preparationTime}>{errors.preparationTime}</ErrorText>
+    </div>
+
+    {/* Time Unit Dropdown */}
+    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <Label htmlFor="timeUnit" style={{ marginBottom: "5px" }}>Unit</Label>
+      <Select
+        id="timeUnit"
+        value={preparationTime.unit || ""}
+        onChange={(e) => {
+          const newUnit = e.target.value;
+          const newPreparationTime = { ...preparationTime, unit: newUnit };
+          setPreparationTime(newPreparationTime);
+
+          // Validation
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            preparationTime: validatePreparationTime(newPreparationTime),
+          }));
+        }}
+        aria-label="Select time unit"
+        style={{ width: "100%", padding: "10px", fontSize: "16px" }} // Wider dropdown
+      >
+        <option value="">Select Unit</option>
+        <option value="minutes">Minutes</option>
+        <option value="hours">Hours</option>
+      </Select>
+    </div>
   </div>
 </FormGroup>
 
@@ -638,9 +725,14 @@ const AddRecipePage = () => {
                 <DeleteButton
                   type="button"
                   onClick={() => {
-                    const newIngredients = ingredients.filter((_, i) => i !== index);
+                    const newIngredients = [...ingredients];
+                    newIngredients[index].showSubstitute = !newIngredients[index].showSubstitute;
+                    if (!newIngredients[index].substitutes || newIngredients[index].substitutes.length === 0) {
+                      newIngredients[index].substitutes = [{ quantity: "", measure: "", name: "" }];
+                    }
                     setIngredients(newIngredients);
                   }}
+                  
                 >
                   Delete
                 </DeleteButton>
@@ -655,18 +747,80 @@ const AddRecipePage = () => {
               >
                 {ingredient.showSubstitute ? "- Substitute" : "+ Substitute"}
               </SubstituteButton>
-              {ingredient.showSubstitute && (
-                <Input
-                  type="text"
-                  placeholder="Substitute Ingredient"
-                  value={ingredient.substitute}
-                  onChange={(e) => {
-                    const newIngredients = [...ingredients];
-                    newIngredients[index].substitute = e.target.value;
-                    setIngredients(newIngredients);
-                  }}
-                />
-              )}
+              {ingredient.showSubstitute &&
+  ingredient.substitutes.map((substitute, subIndex) => (
+    <Row key={subIndex}>
+      <SmallInputContainer>
+        <SmallInput
+          type="text"
+          placeholder="Quantity"
+          value={substitute.quantity}
+          onChange={(e) => {
+            const newIngredients = [...ingredients];
+            newIngredients[index].substitutes[subIndex].quantity = e.target.value;
+            setIngredients(newIngredients);
+          }}
+          aria-label={`Quantity for substitute ${subIndex + 1}`}
+        />
+      </SmallInputContainer>
+
+      <Select
+        value={substitute.measure}
+        onChange={(e) => {
+          const newIngredients = [...ingredients];
+          newIngredients[index].substitutes[subIndex].measure = e.target.value;
+          setIngredients(newIngredients);
+        }}
+        aria-label={`Measure for substitute ${subIndex + 1}`}
+      >
+        <option value="">Select Measure</option>
+        <option value="g">g</option>
+        <option value="kg">kg</option>
+        <option value="ml">ml</option>
+        <option value="cup">Cup</option>
+        <option value="tbsp">Tbsp</option>
+        <option value="tsp">Tsp</option>
+      </Select>
+
+      <SmallInputContainer>
+        <SmallInput
+          type="text"
+          placeholder="Substitute Ingredient"
+          value={substitute.name}
+          onChange={(e) => {
+            const newIngredients = [...ingredients];
+            newIngredients[index].substitutes[subIndex].name = e.target.value;
+            setIngredients(newIngredients);
+          }}
+          aria-label={`Substitute ingredient name for substitute ${subIndex + 1}`}
+        />
+      </SmallInputContainer>
+
+      <DeleteButton
+        type="button"
+        onClick={() => {
+          const newIngredients = [...ingredients];
+          newIngredients[index].substitutes = newIngredients[index].substitutes.filter(
+            (_, i) => i !== subIndex
+          );
+          setIngredients(newIngredients);
+        }}
+      >
+        Delete
+      </DeleteButton>
+    </Row>
+  ))}
+<AddButton
+  type="button"
+  onClick={() => {
+    const newIngredients = [...ingredients];
+    newIngredients[index].substitutes.push({ quantity: "", measure: "", name: "" });
+    setIngredients(newIngredients);
+  }}
+>
+  + Add Another Substitute
+</AddButton>
+
             </IngredientGroup>
           ))}
           <AddButton
