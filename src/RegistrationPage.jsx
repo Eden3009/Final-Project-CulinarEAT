@@ -28,11 +28,11 @@ const styles = {
     position: 'relative',
   },
   header: {
-    fontSize: '28px',
+    fontSize: '24px',
     color: '#d77a65',
     fontWeight: 'bold',
     marginBottom: '20px',
-    fontFamily: "'Dancing Script', cursive",
+    fontFamily: 'Georgia' ,
   },
   group: {
     marginBottom: '20px',

@@ -1,25 +1,27 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import breakfastImage from './images/breakfast.jpg'; // Breakfast
-import lunchImage from './images/img1.png'; // Lunch
+import lunchImage from './images/lunch.png'; // Lunch
 import dinnerImage from './images/dinner.jpg'; // Dinner
 import pastaImage from './images/pastapic.jpg'; // Pasta
 import riceImage from './images/rice.jpg'; // Rice
 import seafoodImage from './images/seafood.jpg'; // Fish & Sea Food
 import soupsImage from './images/soups.jpg'; // Soups
-import asianImage from './images/asian.jpg'; // Asian 
+import asianImage from './images/asian.jpg'; // Asian
 import vegetarianImage from './images/vegetarian.jpg'; // Vegetarian
 import veganImage from './images/vegtable.jpg'; // Vegan
-import holidaysImage from './images/holidays.jpg'; // Holidays 
+import holidaysImage from './images/holidays.jpg'; // Holidays
 import quickMealsImage from './images/10min.jpg'; // Meals in 10 Minutes
 import dessertsImage from './images/chocolatecubes.jpg'; // Desserts
 import drinksImage from './images/beverage.jpg'; // Drinks
 import chickenImage from './images/chicken.jpg'; // Chicken
 import beefImage from './images/beef.jpg'; // Beef
-import aboutUsImage from './images/logo5.jpg'; // About Us
-import cookingTipsImage from './images/cooking1.png'; // Cooking Tips
-import bakingTipsImage from './images/baking2.png'; // Baking Tips
-import conversionsImage from './images/conversions.png'; // Conversions
-import specialOffersImage from './images/new.png'; // New this week
+import aboutUsImage from './images/logo1.jpeg'; // About Us
+import cookingTipsImage from './images/cooking.png'; // Cooking Tips
+import bakingTipsImage from './images/baking4.png'; // Baking Tips
+import conversionsImage from './images/conversions4.png'; // Conversions
+import specialOffersImage from './images/new2.jpeg'; // New this week
 
 const styles = {
   homePage: {
@@ -39,78 +41,129 @@ const styles = {
   },
   heroOverlay: {
     color: '#8B4513', // Deep brown
-    fontSize: '3rem',
+    fontSize: '35px',
     textAlign: 'center',
-    fontFamily: "'Dancing Script', cursive",
+    fontFamily: 'Georgia',
   },
   circlesSection: {
     display: 'flex',
     justifyContent: 'center',
     gap: '20px',
-    marginTop: '0.5cm',
-    marginBottom: '1cm', // Added spacing between circles and grid
+    marginTop: '20px',
+    marginBottom: '40px',
   },
   circleItem: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    cursor: 'pointer',
   },
   circleImage: {
     width: '75px',
     height: '75px',
     borderRadius: '50%',
-    padding: '3px',
-    background: 'linear-gradient(45deg, #8D6E63, #D4AF37, #d9b8a6)',
-    objectFit: 'cover',
-  },
-  circleImageSpecial: {
-    width: '75px',
-    height: '75px',
-    borderRadius: '50%',
-    padding: '3px',
-    background: 'linear-gradient(45deg, #8D6E63, #D4AF37, #d9b8a6)',
-    objectFit: 'contain',
-    backgroundColor: '#fff', // White background inside
+    border: '3px solid #D4AF37', // Golden frame
+    backgroundColor: '#fff',
+    objectFit: 'contain', // Ensure the entire image fits inside
+    padding: '5px', // Add padding to avoid cropped images
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
   },
   circleLabel: {
-    marginTop: '8px',
+    marginTop: '10px',
     fontSize: '0.9rem',
     color: '#333',
     textAlign: 'center',
   },
   gridSection: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)', // Updated for 4 columns
-    gap: '1.5cm', // Gap between cubes
+    gridTemplateColumns: 'repeat(4, 1fr)', // 4 items per row
+    gap: '35px', // Increase the gap between items
     padding: '20px',
   },
   gridItem: {
     textAlign: 'center',
-    width: '150px',
-    height: '180px', // Keeps grid size consistent
+    width: '180px', // Increase width
+    height: '200px', // Increase height
     position: 'relative',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'flex-start', // Aligns content to the top
+    justifyContent: 'center',
+    overflow: 'hidden',
+    borderRadius: '10px',
+    backgroundColor: '#ffffff',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    transition: 'transform 0.4s ease, box-shadow 0.4s ease',
+    cursor: 'pointer',
+  },
+  gridItemHover: {
+    transform: 'scale(1.05)',
+    boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(190, 196, 192, 0.1)', // Light orange tint
+    transition: 'opacity 0.4s ease',
+    opacity: 0,
+  },
+  overlayVisible: {
+    opacity: 1,
   },
   gridImage: {
     width: '100%',
-    height: '130px', // Adjusted height to leave room for the label
-    borderRadius: '10px',
+    height: '130px',
     objectFit: 'cover',
-    marginBottom: '5px', // Adds consistent spacing between the image and label
+    borderRadius: '10px',
+    transition: 'transform 0.4s ease',
   },
   gridLabel: {
     fontSize: '1rem',
     fontWeight: 'bold',
     color: '#333',
-    textAlign: 'center',
-    lineHeight: '1.2', // Ensures proper spacing for multiline labels
+    marginTop: '10px',
   },
 };
 
 function HomePage() {
+  const [hoverIndex, setHoverIndex] = useState(null);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
+
+  const categories = [
+    { img: breakfastImage, label: 'Breakfast', path: '/breakfast' },
+    { img: lunchImage, label: 'Lunch', path: '/lunch' },
+    { img: dinnerImage, label: 'Dinner', path: '/dinner' },
+    { img: pastaImage, label: 'Pasta', path: '/pasta' },
+    { img: seafoodImage, label: 'Fish & Sea Food', path: '/seafood' },
+    { img: soupsImage, label: 'Soups', path: '/soups' },
+    { img: riceImage, label: 'Rice', path: '/rice' },
+    { img: dessertsImage, label: 'Desserts', path: '/desserts' },
+    { img: vegetarianImage, label: 'Vegetarian', path: '/vegetarian' },
+    { img: veganImage, label: 'Vegan', path: '/vegan' },
+    { img: drinksImage, label: 'Drinks', path: '/drinks' },
+    { img: quickMealsImage, label: 'Meals in 10 Minutes', path: '/quick-meals' },
+    { img: chickenImage, label: 'Chicken', path: '/chicken' },
+    { img: beefImage, label: 'Beef', path: '/beef' },
+    { img: asianImage, label: 'Asian', path: '/asian' },
+    { img: holidaysImage, label: 'Holidays', path: '/holidays' },
+  ];
+
+  const tips = [
+    { img: aboutUsImage, label: 'About Us' },
+    { img: cookingTipsImage, label: 'Cooking Tips' },
+    { img: bakingTipsImage, label: 'Baking Tips' },
+    { img: conversionsImage, label: 'Conversions' },
+    { img: specialOffersImage, label: 'New This Week' },
+  ];
+
   return (
     <div style={styles.homePage}>
       {/* Hero Section */}
@@ -122,50 +175,44 @@ function HomePage() {
 
       {/* Circles Section */}
       <div style={styles.circlesSection}>
-        {[
-          { img: aboutUsImage, label: 'About Us', special: true },
-          { img: cookingTipsImage, label: 'Cooking Tips' },
-          { img: bakingTipsImage, label: 'Baking Tips' },
-          { img: conversionsImage, label: 'Conversions', special: true },
-          { img: specialOffersImage, label: 'New this week' },
-        ].map((circle, index) => (
-          <div style={styles.circleItem} key={index}>
-            <img
-              src={circle.img}
-              alt={circle.label}
-              style={
-                circle.special ? styles.circleImageSpecial : styles.circleImage
-              }
-            />
-            <span style={styles.circleLabel}>{circle.label}</span>
+        {tips.map((tip, index) => (
+          <div
+            style={{
+              ...styles.circleItem,
+              ...(hoverIndex === `circle-${index}` ? { transform: 'scale(1.1)' } : {}),
+            }}
+            key={`circle-${index}`}
+            onMouseEnter={() => setHoverIndex(`circle-${index}`)}
+            onMouseLeave={() => setHoverIndex(null)}
+          >
+            <img src={tip.img} alt={tip.label} style={styles.circleImage} />
+            <span style={styles.circleLabel}>{tip.label}</span>
           </div>
         ))}
       </div>
 
       {/* Grid Section */}
       <div style={styles.gridSection}>
-        {[
-          { img: breakfastImage, label: 'Breakfast' },
-          { img: lunchImage, label: 'Lunch' },
-          { img: dinnerImage, label: 'Dinner' },
-          { img: pastaImage, label: 'Pasta' },
-          { img: seafoodImage, label: 'Fish & Sea Food' },
-          { img: soupsImage, label: 'Soups' },
-          { img: riceImage, label: 'Rice' },
-          { img: dessertsImage, label: 'Desserts' },
-          { img: vegetarianImage, label: 'Vegetarian' },
-          { img: veganImage, label: 'Vegan' },
-          { img: drinksImage, label: 'Drinks' },
-          { img: quickMealsImage, label: 'Meals in 10 Minutes' },
-          { img: chickenImage, label: 'Chicken' },
-          { img: beefImage, label: 'Beef' },
-          { img: asianImage, label: 'Asian' },
-          { img: holidaysImage, label: 'Holidays' },
-        ].map((grid, index) => (
-          <div style={styles.gridItem} key={index}>
-            <img src={grid.img} alt={grid.label} style={styles.gridImage} />
-            <span style={styles.gridLabel}>{grid.label}</span>
-          </div>
+        {categories.map((grid, index) => (
+          <Link to={grid.path} key={index} style={{ textDecoration: 'none' }}>
+            <div
+              style={{
+                ...styles.gridItem,
+                ...(hoverIndex === index ? styles.gridItemHover : {}),
+              }}
+              onMouseEnter={() => setHoverIndex(index)}
+              onMouseLeave={() => setHoverIndex(null)}
+            >
+              <div
+                style={{
+                  ...styles.overlay,
+                  ...(hoverIndex === index ? styles.overlayVisible : {}),
+                }}
+              ></div>
+              <img src={grid.img} alt={grid.label} style={styles.gridImage} />
+              <span style={styles.gridLabel}>{grid.label}</span>
+            </div>
+          </Link>
         ))}
       </div>
     </div>

@@ -11,6 +11,22 @@ import ChatbotPage from './ChatbotPage';
 import RecipeDetailPage from './RecipeDetailPage';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import BreakfastPage from './BreakfastPage';
+import LunchPage from './LunchPage';
+import DinnerPage from './DinnerPage';
+import PastaPage from './PastaPage';
+import RicePage from './RicePage';
+import SeafoodPage from './SeafoodPage';
+import SoupsPage from './SoupsPage';
+import DessertsPage from './DessertsPage';
+import VegetarianPage from './VegetarianPage';
+import VeganPage from './VeganPage';
+import DrinksPage from './DrinksPage';
+import QuickMealsPage from './QuickMealsPage';
+import ChickenPage from './ChickenPage';
+import BeefPage from './BeefPage';
+import AsianPage from './AsianPage';
+import HolidaysPage from './HolidaysPage';
 import axios from 'axios';
 
 const appStyles = {
@@ -76,10 +92,28 @@ function App() {
   return (
     <Router>
       <div style={appStyles.app}>
+        {/* Navbar */}
         <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+
+        {/* Routes */}
         <Routes>
           <Route path="/" element={<HomePage />} />
-          {/* Temporarily disable login check for AddRecipePage */}
+          <Route path="/breakfast" element={<BreakfastPage />} />
+          <Route path="/lunch" element={<LunchPage />} />
+          <Route path="/dinner" element={<DinnerPage />} />
+          <Route path="/pasta" element={<PastaPage />} />
+          <Route path="/rice" element={<RicePage />} />
+          <Route path="/seafood" element={<SeafoodPage />} />
+          <Route path="/soups" element={<SoupsPage />} />
+          <Route path="/desserts" element={<DessertsPage />} />
+          <Route path="/vegetarian" element={<VegetarianPage />} />
+          <Route path="/vegan" element={<VeganPage />} />
+          <Route path="/drinks" element={<DrinksPage />} />
+          <Route path="/quick-meals" element={<QuickMealsPage />} />
+          <Route path="/chicken" element={<ChickenPage />} />
+          <Route path="/beef" element={<BeefPage />} />
+          <Route path="/asian" element={<AsianPage />} />
+          <Route path="/holidays" element={<HolidaysPage />} />
           <Route path="/add-recipe" element={<AddRecipePage />} />
           <Route
             path="/shopping-list"
@@ -128,6 +162,8 @@ function App() {
           />
           <Route path="/recipe-detail" element={<RecipeDetailPage />} />
         </Routes>
+
+        {/* Footer */}
         <Footer />
       </div>
     </Router>

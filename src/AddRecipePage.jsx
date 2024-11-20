@@ -32,9 +32,9 @@ const FormGroup = styled.div`
 const Title = styled.h2`
   text-align: center;
   margin-bottom: 30px;
-  font-family: 'EB Garamond', serif;
-  color: #333;
-  font-size: 26px;
+  font-family: 'georgia';
+  color: #8b5e3c;
+  font-size: 24px;
   font-weight: bold;
 `;
 
@@ -709,6 +709,7 @@ const validatePreparationTime = ({ value, unit }) => {
                   <option value="cup">Cup</option>
                   <option value="tbsp">Tbsp</option>
                   <option value="tsp">Tsp</option>
+                  <option value="some">Some</option>
                 </Select>
 
                 <SmallInputContainer>
@@ -780,6 +781,7 @@ const validatePreparationTime = ({ value, unit }) => {
         <option value="cup">Cup</option>
         <option value="tbsp">Tbsp</option>
         <option value="tsp">Tsp</option>
+        <option value="some">Some</option>
       </Select>
 
       <SmallInputContainer>
@@ -930,3 +932,4 @@ const validatePreparationTime = ({ value, unit }) => {
 };
 
 export default AddRecipePage;
+
