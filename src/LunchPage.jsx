@@ -20,10 +20,10 @@ const styles = {
     justifyContent: 'center',
     height: '30vh',
     width: '100%',
-    backgroundImage: `url(${lunchImage})`, // Use lunch image
+    backgroundImage: `url(${lunchImage})`, 
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    color: '#8B4513', // Text color
+    color: '#8B4513', 
     textAlign: 'center',
     position: 'relative',
   },
@@ -54,20 +54,20 @@ const styles = {
     position: 'absolute',
     top: '20px',
     left: '20px',
-    zIndex: 10, // Ensure visibility
+    zIndex: 10, 
     display: 'flex',
     alignItems: 'center',
-    padding: '8px 12px', // Reduced padding
-    fontSize: '14px', // Reduced font size
+    padding: '8px 12px', 
+    fontSize: '14px', 
     fontWeight: 'bold',
     color: '#8B4513',
     backgroundColor: '#fff',
-    border: '1.5px solid #8B4513', // Reduced border thickness
-    borderRadius: '6px', // Slightly smaller border radius
+    border: '1.5px solid #8B4513', 
+    borderRadius: '6px', 
     textDecoration: 'none',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
-    boxShadow: '0 3px 5px rgba(0, 0, 0, 0.1)', // Slightly smaller shadow
+    boxShadow: '0 3px 5px rgba(0, 0, 0, 0.1)', 
   },
   backButtonHover: {
     backgroundColor: '#8B4513',
@@ -76,7 +76,7 @@ const styles = {
     boxShadow: '0 5px 8px rgba(0, 0, 0, 0.2)',
   },
   backIcon: {
-    marginRight: '6px', // Reduced margin
+    marginRight: '6px', 
   },
 };
 
