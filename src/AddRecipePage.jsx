@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import axios from 'axios';
+
 
 
 const PageWrapper = styled.div`
@@ -452,7 +454,7 @@ const validatePreparationTime = ({ value, unit }) => {
     setIngredients(newIngredients);
     setErrors((prevErrors) => ({
       ...prevErrors,
-      [`ingredientQuantity${index}`]: /^\d+$/.test(value) || value === "" ? "" : "Quantity must be a number."
+      [`ingredientQuantity${index}`]: /^\d*\.?\d+$/.test(value) || value === "" ? "" : "Quantity must be a valid number.",
     }));
   };
 
@@ -486,7 +488,7 @@ const validatePreparationTime = ({ value, unit }) => {
     }
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
   
     // Initialize an object to track incomplete fields
@@ -522,13 +524,76 @@ const validatePreparationTime = ({ value, unit }) => {
     // Update the incomplete fields state
     setIncompleteFields(newIncompleteFields);
   
-    // If there are no incomplete fields, proceed with form submission
-    if (Object.keys(newIncompleteFields).length === 0) {
-      alert("Recipe submitted successfully!");
-    } else {
+    // If there are incomplete fields, display an alert and exit
+    if (Object.keys(newIncompleteFields).length > 0) {
       alert("Please fill out all fields correctly.");
+      return;
+    }
+  
+    // Proceed with preparing data for backend submission
+    try {
+      const formattedPreparationTime = {
+        value: preparationTime.value,
+        unit: preparationTime.unit,
+    };
+    
+   
+  
+      const skillLevelMap = {
+        Beginner: "Beginner",
+        Intermediate: "Intermediate",
+        Expert: "Expert",
+      };
+  
+      const formattedIngredients = (ingredients || []).map((ingredient) => ({
+        name: ingredient.name.trim(),
+        quantity: ingredient.quantity.trim(),
+        measure: ingredient.measure,
+        substitutes: (ingredient.substitutes || []).map((sub) => ({
+          name: sub.name.trim(),
+          quantity: sub.quantity.trim(),
+          measure: sub.measure,
+        })),
+      }));
+      
+      
+  
+      const formattedInstructions = instructions
+        .map((step) => step.trim())
+        .filter((step) => step.length > 0)
+        .join(". ");
+  
+      const payload = {
+        recipeName,
+        recipeDescription: description,
+        skillLevel: skillLevelMap[skillLevel],
+        preparationTime: formattedPreparationTime,
+        ingredients: formattedIngredients,
+        instructions: formattedInstructions,
+        labels: selectedTags.map((tag) => tag.label),
+        themes: selectedCategories,
+      };
+  
+      console.log("Submitting payload:", payload);
+  
+      await handleSubmitToBackend(payload);
+    } catch (error) {
+      console.error("Error preparing data for submission:", error);
+      alert("Failed to prepare recipe data. Please try again.");
     }
   };
+  
+  const handleSubmitToBackend = async (payload) => {
+    try {
+      const response = await axios.post("http://localhost:5001/add-recipe", payload);
+      alert("Recipe submitted successfully!");
+      console.log("Backend response:", response.data);
+    } catch (error) {
+      console.error("Error submitting recipe data to backend:", error.response || error.message);
+      alert("Failed to submit recipe data. Please check the console for details.");
+    }
+  };
+  
   
   
 
@@ -592,9 +657,9 @@ const validatePreparationTime = ({ value, unit }) => {
       style={{ width: "100%", padding: "10px", fontSize: "16px" }}
     >
       <option value="">Select Level</option>
-      <option value="Easy">Easy</option>
-      <option value="Medium">Medium</option>
-      <option value="Hard">Hard</option>
+      <option value="Beginner">Beginner</option>
+      <option value="Intermediate">Intermediate</option>
+      <option value="Expert">Expert</option>
     </Select>
   </div>
 </FormGroup>
