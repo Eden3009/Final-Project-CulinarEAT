@@ -213,7 +213,7 @@ const prepTime = preparationTime;
 
     db.query(
         insertRecipeSQL,
-        [recipeName, description || null, skillLevel, prepTimeFormatted, instructions || null, authorID],
+        [recipeName, recipeDescription || null, skillLevel, prepTimeFormatted, instructions || null, null],
         (err, result) => {
             if (err) {
                 console.error('Error inserting recipe:', err);
