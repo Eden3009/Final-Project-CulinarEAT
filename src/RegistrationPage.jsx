@@ -170,9 +170,9 @@ function RegistrationPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     // Validate all fields
     const validationErrors = {};
     Object.keys(formData).forEach((key) => {
@@ -181,15 +181,44 @@ function RegistrationPage() {
         validationErrors[key] = error;
       }
     });
-
+  
     setErrors(validationErrors);
-
+  
     // If no errors, submit the form
     if (Object.keys(validationErrors).length === 0) {
-      console.log('Form submitted:', formData);
-      // Submit logic here...
+      try {
+        const response = await fetch('http://localhost:5001/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...formData, Role: 'BasicUser' }), // Add Role field
+        });
+  
+        const data = await response.json();
+  
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to register user');
+        }
+  
+        console.log('Registration successful:', data);
+        alert('Registration successful! You can now log in.');
+        // Optionally reset the form
+        setFormData({
+          FName: '',
+          LName: '',
+          Email: '',
+          UserName: '',
+          Password: '',
+          Area: 'North',
+        });
+      } catch (error) {
+        console.error('Error registering user:', error.message);
+        setErrors({ general: error.message });
+      }
     }
   };
+  
 
   return (
     <div style={styles.page}>

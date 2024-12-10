@@ -563,16 +563,17 @@ const validatePreparationTime = ({ value, unit }) => {
         .filter((step) => step.length > 0)
         .join(". ");
   
-      const payload = {
-        recipeName,
-        recipeDescription: description,
-        skillLevel: skillLevelMap[skillLevel],
-        preparationTime: formattedPreparationTime,
-        ingredients: formattedIngredients,
-        instructions: formattedInstructions,
-        labels: selectedTags.map((tag) => tag.label),
-        themes: selectedCategories,
-      };
+        const payload = {
+          recipeName,
+          recipeDescription: description,
+          skillLevel: skillLevelMap[skillLevel],
+          preparationTime, // Already in HH:MM format from the redesigned input
+          ingredients: formattedIngredients,
+          instructions: formattedInstructions,
+          labels: selectedTags.map((tag) => tag.label),
+          themes: selectedCategories,
+        };
+        
   
       console.log("Submitting payload:", payload);
   
@@ -657,89 +658,46 @@ const validatePreparationTime = ({ value, unit }) => {
       style={{ width: "100%", padding: "10px", fontSize: "16px" }}
     >
       <option value="">Select Level</option>
-      <option value="Beginner">Beginner</option>
-      <option value="Intermediate">Intermediate</option>
-      <option value="Expert">Expert</option>
+      <option value="Beginner">Easy</option>
+      <option value="Intermediate">Medium</option>
+      <option value="Expert">Hard</option>
     </Select>
   </div>
 </FormGroup>
 
 {/* Preparation Time */}
-<FormGroup style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}>
-  {/* Time Input and Dropdown on the Same Row */}
-  <div style={{ display: "flex", gap: "20px", alignItems: "flex-start", width: "100%" }}>
-    {/* Time Input */}
-    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-      <Label htmlFor="timeValue" style={{ marginBottom: "5px" }}>Preparation Time</Label>
-      <Input
-        type="text"
-        id="timeValue"
-        placeholder="Enter time"
-        value={preparationTime.value || ""}
-        onChange={(e) => {
-          const value = e.target.value;
+<FormGroup>
+  <Label htmlFor="preparationTime">Preparation Time</Label>
+  <Input
+    type="time"
+    id="preparationTime"
+    value={preparationTime}
+    onChange={(e) => {
+      const value = e.target.value;
 
-          // Validation for numeric values
-          const numericValue = parseInt(value, 10);
+      // Split time into hours and minutes for validation
+      const [hours, minutes] = value.split(':').map(Number);
 
-          // If the input is cleared, reset the error and value
-          if (value === "") {
-            const newPreparationTime = { ...preparationTime, value: "" };
-            setPreparationTime(newPreparationTime);
-            setErrors((prevErrors) => ({
-              ...prevErrors,
-              preparationTime: "",
-            }));
-          } else if (!/^\d*$/.test(value)) {
-            // If non-numeric characters are entered
-            setErrors((prevErrors) => ({
-              ...prevErrors,
-              preparationTime: "Only numeric values are allowed.",
-            }));
-          } else {
-            const newPreparationTime = { ...preparationTime, value: numericValue };
-            setPreparationTime(newPreparationTime);
+      // Validate: Max 48:00
+      if (hours > 48 || (hours === 48 && minutes > 0)) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          preparationTime: "Maximum preparation time is 48:00.",
+        }));
+        return;
+      }
 
-            // Range validation based on the unit
-            setErrors((prevErrors) => ({
-              ...prevErrors,
-              preparationTime: validatePreparationTime(newPreparationTime),
-            }));
-          }
-        }}
-        isError={!!errors.preparationTime}
-        aria-label="Preparation time value"
-      />
-      <ErrorText isVisible={!!errors.preparationTime}>{errors.preparationTime}</ErrorText>
-    </div>
-
-    {/* Time Unit Dropdown */}
-    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-      <Label htmlFor="timeUnit" style={{ marginBottom: "5px" }}>Unit</Label>
-      <Select
-        id="timeUnit"
-        value={preparationTime.unit || ""}
-        onChange={(e) => {
-          const newUnit = e.target.value;
-          const newPreparationTime = { ...preparationTime, unit: newUnit };
-          setPreparationTime(newPreparationTime);
-
-          // Validation
-          setErrors((prevErrors) => ({
-            ...prevErrors,
-            preparationTime: validatePreparationTime(newPreparationTime),
-          }));
-        }}
-        aria-label="Select time unit"
-        style={{ width: "100%", padding: "10px", fontSize: "16px" }} // Wider dropdown
-      >
-        <option value="">Select Unit</option>
-        <option value="minutes">Minutes</option>
-        <option value="hours">Hours</option>
-      </Select>
-    </div>
-  </div>
+      setPreparationTime(value);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        preparationTime: "",
+      }));
+    }}
+    aria-label="Preparation time"
+  />
+  <ErrorText isVisible={!!errors.preparationTime}>{errors.preparationTime}</ErrorText>
 </FormGroup>
+
 
 
         {/* Ingredients */}

@@ -152,58 +152,35 @@ app.listen(port, () => {
 });
 
 
-
-// Add a new recipe
 app.post('/add-recipe', (req, res) => {
     const { recipeName, recipeDescription, skillLevel, preparationTime, instructions, ingredients, labels, themes } = req.body;
 
-// Rename preparationTime to prepTime for consistency
-const prepTime = preparationTime;
-
-
-    // Validate required fields
-    if (!recipeName || !preparationTime.value || !skillLevel) {
-        return res.status(400).json({
-            message: 'Missing required fields: Recipe Name, Preparation Time, or Skill Level.',
-        });
+    if (!recipeName || !preparationTime || !skillLevel) {
+        console.error('Validation Error:', { recipeName, preparationTime, skillLevel });
+        return res.status(400).json({ message: 'Missing required fields.', details: { recipeName, preparationTime, skillLevel } });
     }
 
-    // Validate Skill Level
-    const validSkillLevels = ['Beginner', 'Intermediate', 'Expert'];
-    if (!validSkillLevels.includes(skillLevel)) {
-        return res.status(400).json({ message: 'Invalid Skill Level.' });
+    if (!Array.isArray(ingredients) || !Array.isArray(labels) || !Array.isArray(themes)) {
+        console.error('Invalid Data Structure:', { ingredients, labels, themes });
+        return res.status(400).json({ message: 'Invalid data structure.', details: { ingredients, labels, themes } });
     }
 
-    let prepTimeFormatted1;
+    console.log('Valid payload. Proceeding with SQL query...');
 
-    // If preparationTime is a string (already in HH:MM:SS format)
-    if (typeof preparationTime === 'string') {
-        prepTimeFormatted1 = preparationTime;
-    } else if (preparationTime && preparationTime.value && preparationTime.unit) {
-        // If preparationTime is an object, format it
-        prepTimeFormatted1 =
-        preparationTime.unit === 'hours'
-                ? `${String(preparationTime.value).padStart(2, '0')}:00:00`
-                : `00:${String(preparationTime.value).padStart(2, '0')}:00`;
-    } else {
-        return res.status(400).json({ message: 'Invalid preparation time format.' });
+    // Validate preparationTime format (HH:MM)
+    const timeRegex = /^([0-9]{1,2}):([0-5][0-9])$/; // Matches HH:MM
+    if (!timeRegex.test(preparationTime)) {
+        return res.status(400).json({ message: 'Invalid preparation time format. Use HH:MM.' });
     }
-    
-    console.log("Formatted Preparation Time:", prepTimeFormatted);
-    
 
-    let prepTimeFormatted;
-    if (typeof preparationTime === 'string') {
-        // Already in 'HH:MM:SS' format
-        prepTimeFormatted = preparationTime;
-    } else if (preparationTime.value && preparationTime.unit) {
-        // Convert to 'HH:MM:SS' format
-        prepTimeFormatted = preparationTime.unit === 'hours'
-            ? `${String(preparationTime.value).padStart(2, '0')}:00:00`
-            : `00:${String(preparationTime.value).padStart(2, '0')}:00`;
-    } else {
-        return res.status(400).json({ message: 'Invalid preparation time format.' });
+    // Extract hours and minutes
+    const [hours, minutes] = preparationTime.split(':').map(Number);
+    if (hours > 48 || (hours === 48 && minutes > 0)) {
+        return res.status(400).json({ message: 'Maximum preparation time is 48:00.' });
     }
+
+    // Convert to TIME format for database (HH:MM:SS)
+    const prepTimeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
 
     // SQL query for inserting the recipe
     const insertRecipeSQL = `
@@ -213,7 +190,7 @@ const prepTime = preparationTime;
 
     db.query(
         insertRecipeSQL,
-        [recipeName, description || null, skillLevel, prepTimeFormatted, instructions || null, authorID],
+        [recipeName, recipeDescription || null, skillLevel, prepTimeFormatted, instructions || null, null],
         (err, result) => {
             if (err) {
                 console.error('Error inserting recipe:', err);
@@ -223,63 +200,72 @@ const prepTime = preparationTime;
             const recipeID = result.insertId; // Get the inserted RecipeID
             console.log('Recipe inserted with ID:', recipeID);
 
-            res.status(201).json({ message: 'Recipe added successfully!', recipeID });
+            // Call the function to handle ingredients, labels, and themes
+            addIngredientsAndSubstitutes(recipeID, ingredients, labels, themes, res);
         }
     );
 });
 
-
-// Add ingredients and handle substitutes
-const addIngredients = (recipeID, ingredients, labels, themes, res) => {
+const addIngredientsAndSubstitutes = (recipeID, ingredients, labels, themes, res) => {
     const insertIngredientSQL = `INSERT IGNORE INTO Ingredient (IngredientName) VALUES (?)`;
     const insertRecipeIngredientSQL = `
-        INSERT INTO RecipeIngredient (RecipeID, IngredientID, Quantity, MeasureID) VALUES (?, ?, ?, ?)
+        INSERT INTO RecipeIngredient (RecipeID, IngredientID, Quantity, MeasureID, SubstituteIngredientID, IsSubstitute)
+        VALUES (?, ?, ?, ?, ?, ?)
     `;
-    const updateSubstituteSQL = `UPDATE Ingredient SET SubstituteID = ? WHERE IngredientID = ?`;
+    const insertSubstituteSQL = `INSERT IGNORE INTO SubstituteIngredient (SubIngName) VALUES (?)`;
 
     ingredients.forEach((ingredient) => {
+        // Insert the primary ingredient
         db.query(insertIngredientSQL, [ingredient.name], (err, result) => {
             if (err) {
                 console.error('Error adding ingredient:', err);
                 return res.status(500).json({ message: 'Error adding ingredient.', error: err });
             }
 
-            const ingredientID = result.insertId || result[0]?.IngredientID; // Get the ID of the inserted or existing ingredient
+            const ingredientID = result.insertId || result[0]?.IngredientID;
 
-            db.query(insertRecipeIngredientSQL, [recipeID, ingredientID, ingredient.quantity, ingredient.measure], (err) => {
-                if (err) {
-                    console.error('Error linking ingredient to recipe:', err);
-                    return res.status(500).json({ message: 'Error linking ingredient to recipe.', error: err });
-                }
+            // Link the primary ingredient to the recipe
+            db.query(
+                insertRecipeIngredientSQL,
+                [recipeID, ingredientID, ingredient.quantity, ingredient.measure, null, false],
+                (err) => {
+                    if (err) {
+                        console.error('Error linking ingredient to recipe:', err);
+                        return res.status(500).json({ message: 'Error linking ingredient to recipe.', error: err });
+                    }
 
-                // Handle substitutes
-                ingredient.substitutes.forEach((substitute) => {
-                    db.query(insertIngredientSQL, [substitute.name], (err, subResult) => {
-                        if (err) {
-                            console.error('Error adding substitute ingredient:', err);
-                            return res.status(500).json({ message: 'Error adding substitute ingredient.', error: err });
-                        }
-
-                        const substituteID = subResult.insertId || subResult[0]?.IngredientID;
-
-                        // Update SubstituteID for both
-                        db.query(updateSubstituteSQL, [substituteID, ingredientID], (err) => {
+                    // Insert substitutes for the primary ingredient
+                    ingredient.substitutes.forEach((sub) => {
+                        db.query(insertSubstituteSQL, [sub.name], (err, subResult) => {
                             if (err) {
-                                console.error('Error updating substitute:', err);
-                                return res.status(500).json({ message: 'Error updating substitute.', error: err });
+                                console.error('Error adding substitute ingredient:', err);
+                                return res.status(500).json({ message: 'Error adding substitute ingredient.', error: err });
                             }
+
+                            const substituteID = subResult.insertId || subResult[0]?.SubIngID;
+
+                            // Link the substitute to the primary ingredient in RecipeIngredient
+                            db.query(
+                                insertRecipeIngredientSQL,
+                                [recipeID, ingredientID, sub.quantity, sub.measure, substituteID, true],
+                                (err) => {
+                                    if (err) {
+                                        console.error('Error linking substitute ingredient to recipe:', err);
+                                        return res.status(500).json({ message: 'Error linking substitute ingredient to recipe.', error: err });
+                                    }
+                                }
+                            );
                         });
                     });
-                });
-            });
+                }
+            );
         });
     });
 
-    // Once all ingredients are added, handle labels and themes
+    // Once all ingredients and substitutes are added, handle labels and themes
     addLabelsAndThemes(recipeID, labels, themes, res);
 };
 
-// Add labels and themes
 const addLabelsAndThemes = (recipeID, labels, themes, res) => {
     const linkLabelSQL = `
         INSERT INTO RecipeLabel (RecipeID, LabelID)
