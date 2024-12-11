@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import breakfastImage from './images/breakfast.jpg'; // Breakfast
 import lunchImage from './images/lunch.png'; // Lunch
@@ -40,7 +39,7 @@ const styles = {
     width: '100%',
   },
   heroOverlay: {
-    color: '#8B4513', // Deep brown
+    color: '#8B4513',
     fontSize: '35px',
     textAlign: 'center',
     fontFamily: 'Georgia',
@@ -63,10 +62,10 @@ const styles = {
     width: '75px',
     height: '75px',
     borderRadius: '50%',
-    border: '3px solid #D4AF37', // Golden frame
+    border: '3px solid #D4AF37',
     backgroundColor: '#fff',
-    objectFit: 'contain', // Ensure the entire image fits inside
-    padding: '5px', // Add padding to avoid cropped images
+    objectFit: 'contain',
+    padding: '5px',
     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
   },
   circleLabel: {
@@ -77,14 +76,14 @@ const styles = {
   },
   gridSection: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)', // 4 items per row
-    gap: '35px', // Increase the gap between items
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '35px',
     padding: '20px',
   },
   gridItem: {
     textAlign: 'center',
-    width: '180px', // Increase width
-    height: '200px', // Increase height
+    width: '180px',
+    height: '200px',
     position: 'relative',
     display: 'flex',
     flexDirection: 'column',
@@ -107,7 +106,7 @@ const styles = {
     left: 0,
     width: '100%',
     height: '100%',
-    backgroundColor: 'rgba(190, 196, 192, 0.1)', // Light orange tint
+    backgroundColor: 'rgba(190, 196, 192, 0.1)',
     transition: 'opacity 0.4s ease',
     opacity: 0,
   },
@@ -127,15 +126,94 @@ const styles = {
     color: '#333',
     marginTop: '10px',
   },
+  chatbotButton: {
+    position: 'fixed',
+    bottom: '20px',
+    right: '20px',
+    backgroundColor: '#D4AF37',
+    borderRadius: '50%',
+    width: '60px',
+    height: '60px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    cursor: 'pointer',
+    zIndex: 1000,
+  },
+  chatbotIcon: {
+    fontSize: '28px',
+    color: '#fff',
+  },
+  chatbotOverlay: {
+    position: 'fixed',
+    bottom: '100px',
+    right: '20px',
+    width: '320px',
+    height: '450px',
+    backgroundColor: '#fff',
+    borderRadius: '10px',
+    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
+    zIndex: 1001,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+  },
+  chatbotHeader: {
+    backgroundColor: '#D4AF37',
+    color: '#fff',
+    padding: '10px',
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  chatbotBody: {
+    flex: 1,
+    padding: '10px',
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+  },
+  chatbotFooter: {
+    display: 'flex',
+    padding: '10px',
+    borderTop: '1px solid #ddd',
+  },
+  input: {
+    flex: 1,
+    padding: '10px',
+    borderRadius: '5px',
+    border: '1px solid #ddd',
+    marginRight: '10px',
+    fontSize: '16px',
+  },
+  sendButton: {
+    padding: '10px 15px',
+    backgroundColor: '#D4AF37',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '16px',
+  },
 };
 
 function HomePage() {
   const [hoverIndex, setHoverIndex] = useState(null);
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  
+
+  const handleSendMessage = () => {
+    if (input.trim()) {
+      setMessages([...messages, { text: input, user: true }]);
+      setInput('');
+    }
+  };
 
   const categories = [
     { img: breakfastImage, label: 'Breakfast', path: '/breakfast' },
@@ -214,6 +292,48 @@ function HomePage() {
             </div>
           </Link>
         ))}
+      </div>
+
+      {/* Chatbot Overlay */}
+      {showChatbot && (
+        <div style={styles.chatbotOverlay}>
+          <div style={styles.chatbotHeader}>Chat with CulinarEAT</div>
+          <div style={styles.chatbotBody}>
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                style={{
+                  alignSelf: msg.user ? 'flex-end' : 'flex-start',
+                  backgroundColor: msg.user ? '#D4AF37' : '#f1f1f1',
+                  color: msg.user ? '#fff' : '#333',
+                  padding: '10px',
+                  borderRadius: '5px',
+                  maxWidth: '70%',
+                  wordWrap: 'break-word',
+                }}
+              >
+                {msg.text}
+              </div>
+            ))}
+          </div>
+          <div style={styles.chatbotFooter}>
+            <input
+              style={styles.input}
+              type="text"
+              placeholder="Type a message..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
+            <button style={styles.sendButton} onClick={handleSendMessage}>
+              Send
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Chatbot Button */}
+      <div style={styles.chatbotButton} onClick={() => setShowChatbot(!showChatbot)}>
+        <i className="fas fa-comment-dots" style={styles.chatbotIcon}></i>
       </div>
     </div>
   );

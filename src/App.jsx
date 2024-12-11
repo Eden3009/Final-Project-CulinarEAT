@@ -115,6 +115,7 @@ function App() {
           <Route path="/asian" element={<AsianPage />} />
           <Route path="/holidays" element={<HolidaysPage />} />
           <Route path="/add-recipe" element={<AddRecipePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route
             path="/shopping-list"
             element={

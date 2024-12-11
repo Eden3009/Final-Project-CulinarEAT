@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import logo from './logo.png'; // Import your logo image
 
@@ -35,7 +35,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'flex-end',
     flexGrow: 1, // Push content to the right
-    gap: '10px', // Reduced gap to bring items closer
+    gap: '10px',
   },
   navbarLink: {
     textDecoration: 'none',
@@ -82,7 +82,7 @@ const styles = {
 function Navbar({ isLoggedIn, setIsLoggedIn }) {
   const [hoveredLink, setHoveredLink] = useState(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Apply global styles
     Object.keys(globalStyles.htmlBody).forEach((key) => {
       document.body.style[key] = globalStyles.htmlBody[key];
@@ -99,9 +99,10 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
         </Link>
       </div>
 
-      {/* Navbar Content */}
+      {/* Navbar Links */}
       <div style={styles.navbarContent}>
-        {['Register', 'Login', 'Add Recipe'].map((text, index) => (
+        {/* Common Links */}
+        {['Register', 'Login', 'Add Recipe', 'Profile'].map((text, index) => (
           <Link
             to={`/${text.toLowerCase().replace(' ', '-')}`}
             key={index}
@@ -115,6 +116,8 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
             {text}
           </Link>
         ))}
+
+        {/* Search Bar */}
         <div style={styles.searchBar}>
           <input
             type="text"
