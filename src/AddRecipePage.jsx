@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
-
+import IngredientAutocomplete from './IngredientAutocomplete';
+import SubstituteIngredientAutocomplete from './SubstituteIngredientAutocomplete';
 
 
 const PageWrapper = styled.div`
@@ -214,6 +215,7 @@ const SubstituteButton = styled(Button)`
 `;
 
 
+
 const CameraButton = styled.div`
   width: 80px;
   height: 80px;
@@ -323,6 +325,7 @@ const CategoryOption = styled.div`
 const AddRecipePage = () => {
   const [recipeName, setRecipeName] = useState("");
   const [description, setDescription] = useState("");
+  const [measures, setMeasures] = useState([]);
   const [ingredients, setIngredients] = useState([
     {
       quantity: "",
@@ -344,7 +347,28 @@ const AddRecipePage = () => {
   const [skillLevel, setSkillLevel] = useState("");
   const [preparationTime, setPreparationTime] = useState({ value: "", unit: "" });
 
+  useEffect(() => {
+    const fetchMeasures = async () => {
+      try {
+        const response = await axios.get('http://localhost:5001/api/measures'); 
+        setMeasures(response.data);
+      } catch (error) {
+        console.error('Error fetching measures:', error);
+      }
+    };
+  
+    fetchMeasures();
+  }, []);
 
+ 
+  
+  const handleMeasureChange = (index, value) => {
+    const newIngredients = [...ingredients];
+    newIngredients[index].measure = value; // Update MeasureID
+    setIngredients(newIngredients);
+  };
+  
+  
 const validatePreparationTime = ({ value, unit }) => {
   if (!value || !unit) {
     return "Both time and unit must be provided.";
@@ -381,36 +405,66 @@ const validatePreparationTime = ({ value, unit }) => {
   }
 };
 
-  const tags = [
-    { label: "Kosher", icon: "🍞" },
-    { label: "Not Kosher", icon: "🍖" },
-    { label: "Dairy", icon: "🧀" },
-    { label: "Meat", icon: "🥩" },
-    { label: "Chicken", icon: "🍗" },
-    { label: "Fish", icon: "🐟" },
-    { label: "Desserts", icon: "🍰" },
-    { label: "Vegan", icon: "🌱" },
-    { label: "Vegetarian", icon: "🥕" },
-    { label: "Nut Free", icon: "🥜" },
-    { label: "Gluten Free", icon: "🌾" },
-    { label: "Lactose Free", icon: "🥛" },
-    { label: "Paleo", icon: "🥩" },
-    { label: "Low Carb", icon: "🥦" },
-    { label: "Low Fat", icon: "🍏" },
-  ];
 
-  const categories = [
-    "Meals in 10 Minutes",
-    "Holidays",
-    "Breakfast",
-    "Lunch",
-    "Dinner",
-    "Meals for Date",
-    "Kids' Meals",
-    "Vegetarian",
-    "Vegan",
-    "Gluten-Free",
-  ];
+  const tags = [
+    { label: "Vegetables", icon: "🥦" },
+    { label: "Herbs & Spices", icon: "🌿" },
+    { label: "Non-Kosher", icon: "🍖" },
+    { label: "Dairy", icon: "🧀" },
+    { label: "Spicy", icon: "🌶️" },
+    { label: "Alcoholic", icon: "🍸" },
+    { label: "Fruits", icon: "🍎" },
+    { label: "Dessert", icon: "🍰" },
+    { label: "Meat", icon: "🥩" },
+    { label: "Pasta", icon: "🍝" },
+    { label: "High-Protein", icon: "💪" },
+    { label: "Nuts", icon: "🥜" },
+    { label: "Gluten-Free", icon: "🌾" },
+    { label: "Seafood", icon: "🦐" },
+    { label: "Eggs", icon: "🥚" },              // New
+    { label: "Sugar-Free", icon: "🚫🍬" },      // New
+    { label: "Caffeine", icon: "☕" },          // New
+    { label: "Organic", icon: "🌱" },           // New
+    { label: "Artificial Additives", icon: "🧪" } // New
+];
+
+  
+
+
+const categories = [
+  "Meals in 10 Minutes",
+  "Holidays",
+  "Breakfast",
+  "Lunch",
+  "Dinner",
+  "Meals for Date",
+  "Kids' Meals",
+  "Vegetarian",
+  "Vegan",
+  "Gluten-Free",
+  "Fish & Sea Food",
+  "Soups",
+  "Rice Dishes",
+  "Desserts",
+  "Drinks",
+  "Chicken",
+  "Beef",
+  "Asian",
+  "Seasonal (e.g., Fall)",
+  "Comfort Food",
+  "Weeknight Dinners",
+  "Budget-Friendly",
+  "Holiday Meals",
+  "Picnic & BBQ",
+  "Quick Meals",
+  "Party Foods",
+  "Healthy Eating",
+  "Snacks",
+  "Ethnic Cuisine",
+  "Comfort Desserts",
+  "Meal Prep"
+];
+
   
 
   const handleTagClick = (tag) => {
@@ -546,15 +600,19 @@ const validatePreparationTime = ({ value, unit }) => {
       };
   
       const formattedIngredients = (ingredients || []).map((ingredient) => ({
-        name: ingredient.name.trim(),
-        quantity: ingredient.quantity.trim(),
-        measure: ingredient.measure,
+        ingredientID: ingredient.ingredientID, // Ensure IngredientID from autocomplete is included
+        name: ingredient.name.trim(),         // Keep name for reference (optional)
+        quantity: ingredient.quantity.trim(), // Quantity entered in the form
+        measure: ingredient.measure,          // MeasureID selected in the dropdown
         substitutes: (ingredient.substitutes || []).map((sub) => ({
+          ingredientID: sub.ingredientID || null, // Optional, if substitutes are pre-defined
           name: sub.name.trim(),
           quantity: sub.quantity.trim(),
           measure: sub.measure,
         })),
       }));
+      
+      
       
       
   
@@ -566,13 +624,14 @@ const validatePreparationTime = ({ value, unit }) => {
         const payload = {
           recipeName,
           recipeDescription: description,
-          skillLevel: skillLevelMap[skillLevel],
-          preparationTime, // Already in HH:MM format from the redesigned input
-          ingredients: formattedIngredients,
-          instructions: formattedInstructions,
-          labels: selectedTags.map((tag) => tag.label),
-          themes: selectedCategories,
+          skillLevel: skillLevelMap[skillLevel], // Map skill level
+          preparationTime,                      // Already in HH:MM format
+          ingredients: formattedIngredients,    // Include updated ingredients structure
+          instructions: formattedInstructions,  // Join instructions into a single string
+          labels: selectedTags.map((tag) => tag.label), // Labels from the form
+          themes: selectedCategories,           // Categories selected in the form
         };
+        
         
   
       console.log("Submitting payload:", payload);
@@ -635,7 +694,7 @@ const validatePreparationTime = ({ value, unit }) => {
         </FormGroup>
 {/* Amount of Product */}
 <FormGroup>
-  <Label htmlFor="productAmount">Amount of Product</Label>
+  <Label htmlFor="productAmount">This recipe makes</Label>
   <Input
     type="text"
     id="productAmount"
@@ -718,33 +777,46 @@ const validatePreparationTime = ({ value, unit }) => {
                 </SmallInputContainer>
                 
                 <Select
-                  value={ingredient.measure}
-                  onChange={(e) => {
-                    const newIngredients = [...ingredients];
-                    newIngredients[index].measure = e.target.value;
-                    setIngredients(newIngredients);
-                  }}
-                >
-                  <option value="">Select Measure</option>
-                  <option value="g">g</option>
-                  <option value="kg">kg</option>
-                  <option value="ml">ml</option>
-                  <option value="cup">Cup</option>
-                  <option value="tbsp">Tbsp</option>
-                  <option value="tsp">Tsp</option>
-                  <option value="some">Some</option>
-                </Select>
+  value={ingredient.measure}
+  onChange={(e) => {
+    const newIngredients = [...ingredients];
+    newIngredients[index].measure = e.target.value;
+    setIngredients(newIngredients);
+  }}
+  aria-label={`Measure for ingredient ${index + 1}`}
+>
+  <option value="">Select Measure</option>
+  {measures.map((measure) => (
+    <option key={measure.MeasureID} value={measure.MeasureID}>
+      {measure.MeasureName}
+    </option>
+  ))}
+</Select>
 
-                <SmallInputContainer>
-                  <SmallInput
-                    type="text"
-                    placeholder="Ingredient"
-                    value={ingredient.name}
-                    onChange={(e) => handleIngredientNameChange(index, e.target.value)}
-                    aria-label={`Ingredient name for ingredient ${index + 1}`}
-                  />
-                  <ErrorText isVisible={!!errors[`ingredientName${index}`]}>{errors[`ingredientName${index}`]}</ErrorText>
-                </SmallInputContainer>
+
+<SmallInputContainer>
+<IngredientAutocomplete
+  value={ingredients[index]?.name || ''} // Reflect current ingredient name
+  onSelectIngredient={(selectedIngredient) => {
+    console.log("Selected Ingredient:", selectedIngredient); // Debug log
+    const newIngredients = [...ingredients];
+    newIngredients[index] = {
+      ...newIngredients[index],
+      name: selectedIngredient.IngredientName, // Update name
+      ingredientID: selectedIngredient.IngredientID, // Update ID
+    };
+    setIngredients(newIngredients); // Update state
+    console.log("Updated Ingredients List:", newIngredients); // Debug log
+  }}
+/>
+
+
+  <ErrorText isVisible={!!errors[`ingredientName${index}`]}>
+    {errors[`ingredientName${index}`]}
+  </ErrorText>
+</SmallInputContainer>
+
+
                 
                 <DeleteButton
                   type="button"
@@ -762,18 +834,27 @@ const validatePreparationTime = ({ value, unit }) => {
                 </DeleteButton>
               </Row>
               <SubstituteButton
-                type="button"
-                onClick={() => {
-                  const newIngredients = [...ingredients];
-                  newIngredients[index].showSubstitute = !newIngredients[index].showSubstitute;
-                  setIngredients(newIngredients);
-                }}
-              >
-                {ingredient.showSubstitute ? "- Substitute" : "+ Substitute"}
-              </SubstituteButton>
-              {ingredient.showSubstitute &&
+  type="button"
+  onClick={() => {
+    const newIngredients = [...ingredients];
+    const ingredient = newIngredients[index];
+
+    // Initialize substitutes if not already defined
+    if (!ingredient.substitutes) {
+      ingredient.substitutes = [];
+    }
+
+    ingredient.showSubstitute = !ingredient.showSubstitute;
+    setIngredients(newIngredients);
+  }}
+>
+  {ingredient.showSubstitute ? "- Substitute" : "+ Substitute"}
+</SubstituteButton>
+
+{ingredient.showSubstitute &&
   ingredient.substitutes.map((substitute, subIndex) => (
     <Row key={subIndex}>
+      {/* Quantity Input */}
       <SmallInputContainer>
         <SmallInput
           type="text"
@@ -788,6 +869,7 @@ const validatePreparationTime = ({ value, unit }) => {
         />
       </SmallInputContainer>
 
+      {/* Measure Selector */}
       <Select
         value={substitute.measure}
         onChange={(e) => {
@@ -798,29 +880,30 @@ const validatePreparationTime = ({ value, unit }) => {
         aria-label={`Measure for substitute ${subIndex + 1}`}
       >
         <option value="">Select Measure</option>
-        <option value="g">g</option>
-        <option value="kg">kg</option>
-        <option value="ml">ml</option>
-        <option value="cup">Cup</option>
-        <option value="tbsp">Tbsp</option>
-        <option value="tsp">Tsp</option>
-        <option value="some">Some</option>
+        {measures.map((measure) => (
+          <option key={measure.MeasureID} value={measure.MeasureID}>
+            {measure.MeasureName}
+          </option>
+        ))}
       </Select>
 
+      {/* Ingredient Autocomplete for Substitute */}
       <SmallInputContainer>
-        <SmallInput
-          type="text"
-          placeholder="Substitute Ingredient"
-          value={substitute.name}
-          onChange={(e) => {
-            const newIngredients = [...ingredients];
-            newIngredients[index].substitutes[subIndex].name = e.target.value;
-            setIngredients(newIngredients);
-          }}
-          aria-label={`Substitute ingredient name for substitute ${subIndex + 1}`}
-        />
+<SubstituteIngredientAutocomplete
+  value={substitute.name || ''}
+  onSelectIngredient={(selectedIngredient) => {
+    const newIngredients = [...ingredients];
+    newIngredients[index].substitutes[subIndex] = {
+      ...newIngredients[index].substitutes[subIndex],
+      name: selectedIngredient.IngredientName,
+      ingredientID: selectedIngredient.IngredientID, // SubIngID
+    };
+    setIngredients(newIngredients);
+  }}
+/>
       </SmallInputContainer>
 
+      {/* Delete Substitute Button */}
       <DeleteButton
         type="button"
         onClick={() => {
@@ -835,16 +918,19 @@ const validatePreparationTime = ({ value, unit }) => {
       </DeleteButton>
     </Row>
   ))}
+
+{/* Add Another Substitute Button */}
 <AddButton
   type="button"
   onClick={() => {
     const newIngredients = [...ingredients];
-    newIngredients[index].substitutes.push({ quantity: "", measure: "", name: "" });
+    newIngredients[index].substitutes.push({ quantity: "", measure: "", name: "", ingredientID: null });
     setIngredients(newIngredients);
   }}
 >
   + Add Another Substitute
 </AddButton>
+
 
             </IngredientGroup>
           ))}

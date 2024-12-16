@@ -100,6 +100,7 @@ app.post('/login', (req, res) => {
     });
 });
 
+
 // Route to check session (if user is logged in based on the session token)
 app.get('/session', (req, res) => {
     const sessionToken = req.cookies.session_token;
@@ -130,6 +131,20 @@ app.post('/logout', (req, res) => {
     res.status(200).json({ message: 'Logout successful' });
 });
 
+// API Route to Fetch All Measures
+app.get('/api/measures', (req, res) => {
+    const fetchMeasuresSQL = `SELECT MeasureID, MeasureName FROM Measure`;
+
+    db.query(fetchMeasuresSQL, (err, results) => {
+        if (err) {
+            console.error('Error fetching measures:', err);
+            return res.status(500).json({ message: 'Database error while fetching measures.', error: err });
+        }
+
+        res.status(200).json(results); // Return the list of measures
+    });
+});
+
 // API Route to get all measures
 app.get('/measures', (req, res) => {
     const sql = 'SELECT * FROM Measure';
@@ -141,7 +156,55 @@ app.get('/measures', (req, res) => {
         res.status(200).json(results);
     });
 });
+app.get('/api/substitute-ingredients', (req, res) => {
+    const { query } = req.query;
 
+    if (!query || query.trim() === "") {
+        console.error("Invalid query parameter");
+        return res.status(400).json({ message: "Query parameter is required." });
+    }
+
+    const sql = `
+        SELECT SubIngID AS IngredientID, SubIngName AS IngredientName
+        FROM SubstituteIngredient
+        WHERE SubIngName LIKE ?
+        LIMIT 10;
+    `;
+
+    console.log("Executing SQL:", sql, `Query Param: ${query}`);
+
+    db.query(sql, [`%${query}%`], (err, results) => {
+        if (err) {
+            console.error("SQL Error:", err.message);
+            return res.status(500).json({ message: "Database error", error: err.message });
+        }
+        console.log("Query Results:", results);
+        res.status(200).json(results);
+    });
+});
+
+
+app.get('/api/ingredients', (req, res) => {
+    const { query } = req.query;
+  
+    if (!query || query.trim() === '') {
+      return res.status(400).json({ message: 'Query parameter is required.' });
+    }
+  
+    const sql = `SELECT IngredientID, IngredientName 
+                 FROM Ingredient 
+                 WHERE IngredientName LIKE ? 
+                 LIMIT 10`;
+  
+    db.query(sql, [`%${query}%`], (err, results) => {
+      if (err) {
+        console.error('Error fetching ingredient suggestions:', err);
+        return res.status(500).json({ message: 'Database error', error: err });
+      }
+      res.status(200).json(results);
+    });
+  });
+  
 
 // Handle preflight requests for all routes
 app.options('*', cors());  // Make sure preflight requests are allowed
@@ -205,66 +268,130 @@ app.post('/add-recipe', (req, res) => {
         }
     );
 });
-
-const addIngredientsAndSubstitutes = (recipeID, ingredients, labels, themes, res) => {
-    const insertIngredientSQL = `INSERT IGNORE INTO Ingredient (IngredientName) VALUES (?)`;
+const addIngredientsAndSubstitutes = async (recipeID, ingredients, labels, themes, res) => {
     const insertRecipeIngredientSQL = `
         INSERT INTO RecipeIngredient (RecipeID, IngredientID, Quantity, MeasureID, SubstituteIngredientID, IsSubstitute)
         VALUES (?, ?, ?, ?, ?, ?)
     `;
-    const insertSubstituteSQL = `INSERT IGNORE INTO SubstituteIngredient (SubIngName) VALUES (?)`;
 
-    ingredients.forEach((ingredient) => {
-        // Insert the primary ingredient
-        db.query(insertIngredientSQL, [ingredient.name], (err, result) => {
-            if (err) {
-                console.error('Error adding ingredient:', err);
-                return res.status(500).json({ message: 'Error adding ingredient.', error: err });
+    const insertIngredientMeasureSQL = `
+        INSERT IGNORE INTO IngredientMeasure (IngredientID, MeasureID)
+        VALUES (?, ?)
+    `;
+
+    const insertSubstituteSQL = `
+        INSERT IGNORE INTO Substitutes (IngredientID, SubIngID)
+        VALUES (?, ?)
+    `;
+
+    console.log("addIngredientsAndSubstitutes invoked with:");
+    console.log("Recipe ID:", recipeID);
+    console.log("Ingredients:", ingredients);
+
+    try {
+        // Process each ingredient and its substitutes
+        const ingredientPromises = ingredients.map(async (ingredient) => {
+            if (!ingredient.ingredientID) {
+                throw new Error(`Missing IngredientID for ingredient: ${ingredient.name}`);
             }
 
-            const ingredientID = result.insertId || result[0]?.IngredientID;
+            console.log(`Processing primary ingredient: ${ingredient.name}`);
 
-            // Link the primary ingredient to the recipe
-            db.query(
-                insertRecipeIngredientSQL,
-                [recipeID, ingredientID, ingredient.quantity, ingredient.measure, null, false],
-                (err) => {
-                    if (err) {
-                        console.error('Error linking ingredient to recipe:', err);
-                        return res.status(500).json({ message: 'Error linking ingredient to recipe.', error: err });
+            // 1. Insert the primary ingredient
+            await new Promise((resolve, reject) => {
+                db.query(
+                    insertRecipeIngredientSQL,
+                    [recipeID, ingredient.ingredientID, ingredient.quantity, ingredient.measure, null, false],
+                    (err) => {
+                        if (err) {
+                            console.error("Error inserting primary ingredient:", err);
+                            return reject(err);
+                        }
+                        console.log("Primary ingredient inserted:", {
+                            recipeID,
+                            ingredientID: ingredient.ingredientID,
+                            quantity: ingredient.quantity,
+                            measure: ingredient.measure,
+                        });
+                        resolve();
+                    }
+                );
+            });
+
+            // 2. Insert substitutes for the primary ingredient
+            if (Array.isArray(ingredient.substitutes) && ingredient.substitutes.length > 0) {
+                const substitutePromises = ingredient.substitutes.map(async (sub) => {
+                    if (!sub.ingredientID) {
+                        console.warn(`Skipping substitute with missing ID: ${sub.name}`);
+                        return;
                     }
 
-                    // Insert substitutes for the primary ingredient
-                    ingredient.substitutes.forEach((sub) => {
-                        db.query(insertSubstituteSQL, [sub.name], (err, subResult) => {
-                            if (err) {
-                                console.error('Error adding substitute ingredient:', err);
-                                return res.status(500).json({ message: 'Error adding substitute ingredient.', error: err });
-                            }
+                    console.log(`Processing substitute: ${sub.name}`);
 
-                            const substituteID = subResult.insertId || subResult[0]?.SubIngID;
-
-                            // Link the substitute to the primary ingredient in RecipeIngredient
-                            db.query(
-                                insertRecipeIngredientSQL,
-                                [recipeID, ingredientID, sub.quantity, sub.measure, substituteID, true],
-                                (err) => {
-                                    if (err) {
-                                        console.error('Error linking substitute ingredient to recipe:', err);
-                                        return res.status(500).json({ message: 'Error linking substitute ingredient to recipe.', error: err });
-                                    }
+                    // Insert the substitute row
+                    await new Promise((resolve, reject) => {
+                        db.query(
+                            insertRecipeIngredientSQL,
+                            [recipeID, ingredient.ingredientID, sub.quantity, sub.measure, sub.ingredientID, true],
+                            (err) => {
+                                if (err) {
+                                    console.error("Error inserting substitute ingredient:", err);
+                                    return reject(err);
                                 }
-                            );
-                        });
+                                console.log("Substitute inserted:", {
+                                    recipeID,
+                                    primaryIngredientID: ingredient.ingredientID,
+                                    substituteID: sub.ingredientID,
+                                    quantity: sub.quantity,
+                                    measure: sub.measure,
+                                });
+                                resolve();
+                            }
+                        );
                     });
-                }
-            );
-        });
-    });
 
-    // Once all ingredients and substitutes are added, handle labels and themes
-    addLabelsAndThemes(recipeID, labels, themes, res);
+                    // 3. Insert into Substitutes table
+                    await new Promise((resolve, reject) => {
+                        db.query(
+                            insertSubstituteSQL,
+                            [ingredient.ingredientID, sub.ingredientID],
+                            (err) => {
+                                if (err) {
+                                    console.error("Error inserting into Substitutes table:", err);
+                                    return reject(err);
+                                }
+                                console.log("Substitute relationship added to Substitutes table:", {
+                                    primaryIngredientID: ingredient.ingredientID,
+                                    substituteID: sub.ingredientID,
+                                });
+                                resolve();
+                            }
+                        );
+                    });
+                });
+
+                await Promise.all(substitutePromises);
+            }
+        });
+
+        await Promise.all(ingredientPromises);
+        console.log("All ingredients and substitutes processed successfully.");
+
+        // Proceed with linking labels and themes
+        addLabelsAndThemes(recipeID, labels, themes, res);
+    } catch (err) {
+        console.error("Error processing ingredients or substitutes:", err);
+        return res.status(500).json({
+            message: "Error processing ingredients or substitutes.",
+            error: err.message,
+        });
+    }
 };
+
+
+
+
+
 
 const addLabelsAndThemes = (recipeID, labels, themes, res) => {
     const linkLabelSQL = `
