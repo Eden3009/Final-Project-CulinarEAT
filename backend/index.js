@@ -6,6 +6,9 @@ const cookieParser = require('cookie-parser');  // Import cookie-parser
 const app = express();
 const port = 5001;
 
+
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+
 // Middleware
 app.use(cors({
     origin: function (origin, callback) {
@@ -124,6 +127,35 @@ app.get('/session', (req, res) => {
         res.status(200).json({ message: 'Session valid', user: { UserName: results[0].UserName, Role: results[0].Role } });
     });
 });
+
+app.get('/api/recipes', (req, res) => {
+    const { themeName } = req.query;
+    console.log('Received themeName:', themeName);
+
+    const sql = `
+        SELECT Recipe.*
+        FROM Recipe
+        JOIN Theme ON Recipe.ThemeID = Theme.ThemeID
+        WHERE Theme.ThemeName = ?
+    `;
+
+    db.query(sql, [themeName], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        console.log('Query results:', results);
+
+        if (!results || results.length === 0) {
+            return res.status(404).json({ message: 'No recipes found for this theme' });
+        }
+
+        res.status(200).json({ recipes: results });
+    });
+});
+
+  
 
 // API Route to Logout a User
 app.post('/logout', (req, res) => {

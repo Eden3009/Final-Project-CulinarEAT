@@ -216,23 +216,26 @@ function HomePage() {
   };
 
   const categories = [
-    { img: breakfastImage, label: 'Breakfast', path: '/breakfast' },
-    { img: lunchImage, label: 'Lunch', path: '/lunch' },
-    { img: dinnerImage, label: 'Dinner', path: '/dinner' },
-    { img: pastaImage, label: 'Pasta', path: '/pasta' },
-    { img: seafoodImage, label: 'Fish & Sea Food', path: '/seafood' },
-    { img: soupsImage, label: 'Soups', path: '/soups' },
-    { img: riceImage, label: 'Rice', path: '/rice' },
-    { img: dessertsImage, label: 'Desserts', path: '/desserts' },
-    { img: vegetarianImage, label: 'Vegetarian', path: '/vegetarian' },
-    { img: veganImage, label: 'Vegan', path: '/vegan' },
-    { img: drinksImage, label: 'Drinks', path: '/drinks' },
-    { img: quickMealsImage, label: 'Meals in 10 Minutes', path: '/quick-meals' },
-    { img: chickenImage, label: 'Chicken', path: '/chicken' },
-    { img: beefImage, label: 'Beef', path: '/beef' },
-    { img: asianImage, label: 'Asian', path: '/asian' },
-    { img: holidaysImage, label: 'Holidays', path: '/holidays' },
+    { img: breakfastImage, label: 'Breakfast', apiPath: '/api/recipes?category=breakfast' },
+    { img: lunchImage, label: 'Lunch', apiPath: '/api/recipes?category=lunch' },
+    { img: dinnerImage, label: 'Dinner', apiPath: '/api/recipes?category=dinner' },
+    { img: pastaImage, label: 'Pasta', apiPath: '/api/recipes?category=pasta' },
+    { img: seafoodImage, label: 'Fish & Sea Food', apiPath: '/api/recipes?category=seafood' },
+    { img: soupsImage, label: 'Soups', apiPath: '/api/recipes?category=soups' },
+    { img: riceImage, label: 'Rice', apiPath: '/api/recipes?category=rice' },
+    { img: dessertsImage, label: 'Desserts', apiPath: '/api/recipes?category=desserts' },
+    { img: vegetarianImage, label: 'Vegetarian', apiPath: '/api/recipes?category=vegetarian' },
+    { img: veganImage, label: 'Vegan', apiPath: '/api/recipes?category=vegan' },
+    { img: drinksImage, label: 'Drinks', apiPath: '/api/recipes?category=drinks' },
+    { img: quickMealsImage, label: 'Meals in 10 Minutes', apiPath: '/api/recipes?category=quick-meals' },
+    { img: chickenImage, label: 'Chicken', apiPath: '/api/recipes?category=chicken' },
+    { img: beefImage, label: 'Beef', apiPath: '/api/recipes?category=beef' },
+    { img: asianImage, label: 'Asian', apiPath: '/api/recipes?category=asian' },
+    { img: holidaysImage, label: 'Holidays', apiPath: '/api/recipes?category=holidays' },
   ];
+  
+    
+  
 
   const tips = [
     { img: aboutUsImage, label: 'About Us' },
@@ -271,28 +274,38 @@ function HomePage() {
 
       {/* Grid Section */}
       <div style={styles.gridSection}>
-        {categories.map((grid, index) => (
-          <Link to={grid.path} key={index} style={{ textDecoration: 'none' }}>
-            <div
-              style={{
-                ...styles.gridItem,
-                ...(hoverIndex === index ? styles.gridItemHover : {}),
-              }}
-              onMouseEnter={() => setHoverIndex(index)}
-              onMouseLeave={() => setHoverIndex(null)}
-            >
-              <div
-                style={{
-                  ...styles.overlay,
-                  ...(hoverIndex === index ? styles.overlayVisible : {}),
-                }}
-              ></div>
-              <img src={grid.img} alt={grid.label} style={styles.gridImage} />
-              <span style={styles.gridLabel}>{grid.label}</span>
-            </div>
-          </Link>
-        ))}
+  {categories.map((category, index) => (
+    <Link
+      to="/category" // Redirect to the reusable `CategoryPage`
+      state={{
+        img: category.img, 
+        label: category.label, 
+        apiPath: category.apiPath
+      }} // Pass the necessary data
+      key={index}
+      style={{ textDecoration: 'none' }}
+    >
+      <div
+        style={{
+          ...styles.gridItem,
+          ...(hoverIndex === index ? styles.gridItemHover : {}),
+        }}
+        onMouseEnter={() => setHoverIndex(index)}
+        onMouseLeave={() => setHoverIndex(null)}
+      >
+        <div
+          style={{
+            ...styles.overlay,
+            ...(hoverIndex === index ? styles.overlayVisible : {}),
+          }}
+        ></div>
+        <img src={category.img} alt={category.label} style={styles.gridImage} />
+        <span style={styles.gridLabel}>{category.label}</span>
       </div>
+    </Link>
+  ))}
+</div>
+
 
       {/* Chatbot Overlay */}
       {showChatbot && (

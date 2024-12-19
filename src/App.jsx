@@ -11,22 +11,7 @@ import ChatbotPage from './ChatbotPage';
 import RecipeDetailPage from './RecipeDetailPage';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import BreakfastPage from './BreakfastPage';
-import LunchPage from './LunchPage';
-import DinnerPage from './DinnerPage';
-import PastaPage from './PastaPage';
-import RicePage from './RicePage';
-import SeafoodPage from './SeafoodPage';
-import SoupsPage from './SoupsPage';
-import DessertsPage from './DessertsPage';
-import VegetarianPage from './VegetarianPage';
-import VeganPage from './VeganPage';
-import DrinksPage from './DrinksPage';
-import QuickMealsPage from './QuickMealsPage';
-import ChickenPage from './ChickenPage';
-import BeefPage from './BeefPage';
-import AsianPage from './AsianPage';
-import HolidaysPage from './HolidaysPage';
+import CategoryPage from './CategoryPage'; // Import the new reusable component
 import axios from 'axios';
 
 const appStyles = {
@@ -76,18 +61,21 @@ function App() {
   // Check for session status on initial load
   useEffect(() => {
     axios
-      .get('http://localhost:5001/session', { withCredentials: true })
-      .then((response) => {
-        if (response.data.message === 'Session valid') {
-          setIsLoggedIn(true);
-        } else {
-          setIsLoggedIn(false);
-        }
-      })
-      .catch(() => {
-        setIsLoggedIn(false);
-      });
-  }, []);
+        .get('http://localhost:5001/session', { withCredentials: true })
+        .then((response) => {
+            if (response.data.message === 'Session valid') {
+                setIsLoggedIn(true);
+            } else {
+                setIsLoggedIn(false);
+            }
+        })
+        .catch(() => {
+            // User is not logged in, but this should not block recipe fetching
+            console.warn('No active session');
+            setIsLoggedIn(false);
+        });
+}, []);
+
 
   return (
     <Router>
@@ -98,22 +86,7 @@ function App() {
         {/* Routes */}
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/breakfast" element={<BreakfastPage />} />
-          <Route path="/lunch" element={<LunchPage />} />
-          <Route path="/dinner" element={<DinnerPage />} />
-          <Route path="/pasta" element={<PastaPage />} />
-          <Route path="/rice" element={<RicePage />} />
-          <Route path="/seafood" element={<SeafoodPage />} />
-          <Route path="/soups" element={<SoupsPage />} />
-          <Route path="/desserts" element={<DessertsPage />} />
-          <Route path="/vegetarian" element={<VegetarianPage />} />
-          <Route path="/vegan" element={<VeganPage />} />
-          <Route path="/drinks" element={<DrinksPage />} />
-          <Route path="/quick-meals" element={<QuickMealsPage />} />
-          <Route path="/chicken" element={<ChickenPage />} />
-          <Route path="/beef" element={<BeefPage />} />
-          <Route path="/asian" element={<AsianPage />} />
-          <Route path="/holidays" element={<HolidaysPage />} />
+          <Route path="/category" element={<CategoryPage />} /> {/* Dynamic category route */}
           <Route path="/add-recipe" element={<AddRecipePage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route

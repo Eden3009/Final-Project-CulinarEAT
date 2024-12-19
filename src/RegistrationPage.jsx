@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import pic3 from './images/pic3.jpeg'; // Import the background image
+import { useNavigate } from 'react-router-dom'; // For redirection
 
 const styles = {
   page: {
@@ -8,6 +9,48 @@ const styles = {
     width: '100vw',
     flexDirection: 'row-reverse',
     backgroundColor: '#f9f7f4',
+  },
+  popupOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+  },
+  popupBox: {
+    backgroundColor: '#fff',
+    borderRadius: '12px',
+    padding: '30px',
+    textAlign: 'center',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    width: '300px',
+    fontFamily: "'Poppins', sans-serif",
+  },
+  popupHeader: {
+    fontSize: '22px',
+    fontWeight: 'bold',
+    color: '#8b5e3c',
+    marginBottom: '10px',
+  },
+  popupMessage: {
+    fontSize: '16px',
+    color: '#333',
+    marginBottom: '20px',
+  },
+  button: {
+    backgroundColor: '#8b5e3c',
+    color: '#fff',
+    border: 'none',
+    padding: '10px 20px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '16px',
+    fontWeight: 'bold',
   },
   formContainer: {
     flex: 1,
@@ -114,7 +157,11 @@ const styles = {
   },
 };
 
+
+
 function RegistrationPage() {
+  const navigate = useNavigate(); // React Router hook for navigation
+
   const [formData, setFormData] = useState({
     FName: '',
     LName: '',
@@ -125,6 +172,7 @@ function RegistrationPage() {
   });
 
   const [errors, setErrors] = useState({});
+  const [showPopup, setShowPopup] = useState(false);
 
   const validateField = (name, value) => {
     if (value.trim() === '') {
@@ -157,7 +205,6 @@ function RegistrationPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Validate the current field
     const error = validateField(name, value);
     setErrors((prevErrors) => ({
       ...prevErrors,
@@ -172,19 +219,14 @@ function RegistrationPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    // Validate all fields
+
     const validationErrors = {};
     Object.keys(formData).forEach((key) => {
       const error = validateField(key, formData[key]);
-      if (error) {
-        validationErrors[key] = error;
-      }
+      if (error) validationErrors[key] = error;
     });
-  
     setErrors(validationErrors);
-  
-    // If no errors, submit the form
+
     if (Object.keys(validationErrors).length === 0) {
       try {
         const response = await fetch('http://localhost:5001/register', {
@@ -192,18 +234,21 @@ function RegistrationPage() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ ...formData, Role: 'BasicUser' }), // Add Role field
+          body: JSON.stringify({ ...formData, Role: 'BasicUser' }),
         });
-  
+
         const data = await response.json();
-  
         if (!response.ok) {
           throw new Error(data.message || 'Failed to register user');
         }
-  
-        console.log('Registration successful:', data);
-        alert('Registration successful! You can now log in.');
-        // Optionally reset the form
+
+        setShowPopup(true); // Show popup
+        setTimeout(() => {
+          setShowPopup(false);
+          navigate('/login'); // Redirect after 6 seconds
+        }, 6000);
+
+        // Reset form data
         setFormData({
           FName: '',
           LName: '',
@@ -218,7 +263,6 @@ function RegistrationPage() {
       }
     }
   };
-  
 
   return (
     <div style={styles.page}>
@@ -324,6 +368,7 @@ function RegistrationPage() {
             </div>
             <button style={styles.button} type="submit">Register</button>
           </form>
+          {errors.general && <div style={{ color: '#d9534f', marginTop: '15px', fontWeight: 'bold' }}>{errors.general}</div>}
         </div>
       </div>
       <div style={styles.imageContainer}>
@@ -332,8 +377,36 @@ function RegistrationPage() {
           You're just a few clicks away from the most immersive online culinary experience.
         </div>
       </div>
+      {showPopup && (
+        <div style={{
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          width: '100%', 
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center',
+          zIndex: 999
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            padding: '20px 30px',
+            textAlign: 'center',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            width: '300px',
+          }}>
+            <h2 style={{ color: '#8b5e3c', marginBottom: '10px', fontWeight: 'bold' }}>🎉 Success!</h2>
+            <p style={{ color: '#333', marginBottom: '20px', fontSize: '16px' }}>Registration successful! Redirecting to login...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
+  
 }
 
 export default RegistrationPage;
+
