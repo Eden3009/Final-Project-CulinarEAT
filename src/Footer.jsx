@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -90,25 +91,33 @@ const Footer = () => {
             Quick Links
           </h4>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {['Home', 'About Us', 'Contact Us', 'Privacy Policy', 'Terms of Service'].map(
-              (link, index) => (
-                <li key={index} style={{ margin: '5px 0' }}>
-                  <a
-                    href={`/${link.toLowerCase().replace(' ', '')}`}
-                    style={{
-                      color: '#333',
-                      textDecoration: 'none',
-                      transition: 'color 0.3s',
-                    }}
-                    onMouseOver={(e) => (e.target.style.color = '#D4AF37')}
-                    onMouseOut={(e) => (e.target.style.color = '#333')}
-                  >
-                    {link}
-                  </a>
-                </li>
-              )
-            )}
-          </ul>
+  <li style={{ margin: '5px 0' }}>
+    <Link to="/" style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}>
+      Home Page
+    </Link>
+  </li>
+  <li style={{ margin: '5px 0' }}>
+    <Link to="/about" style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}>
+      About Us
+    </Link>
+  </li>
+  <li style={{ margin: '5px 0' }}>
+    <Link to="/contact" style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}>
+      Contact Us
+    </Link>
+  </li>
+  <li style={{ margin: '5px 0' }}>
+    <Link to="/privacy" style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}>
+      Privacy Policy
+    </Link>
+  </li>
+  <li style={{ margin: '5px 0' }}>
+    <Link to="/terms" style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}>
+      Terms of Service
+    </Link>
+  </li>
+</ul>
+
         </div>
 
         {/* Social Media Section */}

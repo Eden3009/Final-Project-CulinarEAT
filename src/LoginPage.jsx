@@ -28,11 +28,11 @@ const styles = {
     position: 'relative',
   },
   header: {
-    fontSize: '24px',
-    color: '#8b5e3c',
+    fontSize: '32px',
+    color: '#d77a65',
     fontWeight: 'bold',
     marginBottom: '20px',
-    fontFamily: 'Georgia' ,
+    fontFamily: "'Merienda', cursive",
   },
   group: {
     marginBottom: '20px',
@@ -57,7 +57,7 @@ const styles = {
   button: {
     width: '100%',
     padding: '12px',
-    backgroundColor: '#8b5e3c',
+    backgroundColor: '#d77a65',
     color: '#fff',
     border: 'none',
     borderRadius: '8px',
@@ -65,7 +65,7 @@ const styles = {
     fontSize: '16px',
     marginTop: '20px',
     fontWeight: 'bold',
-    transition: 'background-color 0.3s ease',
+    transition: 'background-color 0.3s ease, transform 0.3s ease', // Smooth transition for hover effect
   },
   errorMessage: {
     color: '#d9534f',
@@ -95,8 +95,8 @@ const styles = {
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: '12px',
     fontFamily: "'Dancing Script', cursive",
-    fontWeight: 'bold', // Make text bold
-    width: '80%', // Wider overlay
+    fontWeight: 'bold',
+    width: '80%',
     maxWidth: '600px',
     animation: 'fadeIn 1s ease-out forwards',
     opacity: 0,
@@ -109,8 +109,8 @@ function LoginPage({ setIsLoggedIn }) {
     UserName: '',
     Password: '',
   });
-
   const [errors, setErrors] = useState({});
+  const [isHovering, setIsHovering] = useState(false); // Track hover state
 
   const validateField = (name, value) => {
     if (value.trim() === '') {
@@ -204,7 +204,17 @@ function LoginPage({ setIsLoggedIn }) {
               />
               {errors.Password && <span style={styles.errorMessage}>{errors.Password}</span>}
             </div>
-            <button style={styles.button} type="submit">Sign In</button>
+            <button
+              style={{
+                ...styles.button,
+                ...(isHovering ? { backgroundColor: '#b25949', transform: 'scale(1.05)' } : {}),
+              }}
+              onMouseEnter={() => setIsHovering(true)}
+              onMouseLeave={() => setIsHovering(false)}
+              type="submit"
+            >
+              Sign In
+            </button>
           </form>
         </div>
       </div>

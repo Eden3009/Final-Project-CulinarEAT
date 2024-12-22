@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import pic3 from './images/pic3.jpeg'; // Import the background image
 import { useNavigate } from 'react-router-dom'; // For redirection
 
+
 const styles = {
   page: {
     display: 'flex',
@@ -43,14 +44,20 @@ const styles = {
     marginBottom: '20px',
   },
   button: {
-    backgroundColor: '#8b5e3c',
-    color: '#fff',
-    border: 'none',
-    padding: '10px 20px',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: 'bold',
+      width: '100%',
+      padding: '12px',
+      backgroundColor: '#d77a65', // Default background color
+      color: '#fff',
+      border: 'none',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontSize: '16px',
+      marginTop: '20px',
+      fontWeight: 'bold',
+      transition: 'background-color 0.3s ease',
+    },
+    buttonHover: {
+      backgroundColor: '#b25949', // Hover color
   },
   formContainer: {
     flex: 1,
@@ -71,11 +78,11 @@ const styles = {
     position: 'relative',
   },
   header: {
-    fontSize: '24px',
+    fontSize: '32px',
     color: '#d77a65',
     fontWeight: 'bold',
     marginBottom: '20px',
-    fontFamily: 'Georgia' ,
+    fontFamily: "'Merienda', cursive",
   },
   group: {
     marginBottom: '20px',
@@ -93,7 +100,7 @@ const styles = {
     padding: '12px',
     borderRadius: '8px',
     border: '1px solid #ccc',
-    fontSize: '16px',
+    fontSize: '18px',
     boxSizing: 'border-box',
     fontFamily: "'Poppins', sans-serif",
   },
@@ -107,19 +114,7 @@ const styles = {
     backgroundColor: '#fff',
     fontFamily: "'Poppins', sans-serif",
   },
-  button: {
-    width: '100%',
-    padding: '12px',
-    backgroundColor: '#d77a65',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    marginTop: '20px',
-    fontWeight: 'bold',
-    transition: 'background-color 0.3s ease',
-  },
+  
   errorMessage: {
     color: '#d9534f',
     fontSize: '13px',
@@ -161,7 +156,10 @@ const styles = {
 
 function RegistrationPage() {
   const navigate = useNavigate(); // React Router hook for navigation
+  
+  const [isHovering, setIsHovering] = useState(false); // Track hover state
 
+  
   const [formData, setFormData] = useState({
     FName: '',
     LName: '',
@@ -366,7 +364,18 @@ function RegistrationPage() {
                 <option value="Abroad">Abroad</option>
               </select>
             </div>
-            <button style={styles.button} type="submit">Register</button>
+            <button
+  style={{
+    ...styles.button, // Default button styles
+    ...(isHovering ? { backgroundColor: '#b25949' } : {}), // Apply hover style dynamically
+  }}
+  onMouseEnter={() => setIsHovering(true)} // Trigger hover effect
+  onMouseLeave={() => setIsHovering(false)} // Remove hover effect
+  type="submit"
+>
+  Register
+</button>
+
           </form>
           {errors.general && <div style={{ color: '#d9534f', marginTop: '15px', fontWeight: 'bold' }}>{errors.general}</div>}
         </div>

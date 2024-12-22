@@ -12,7 +12,7 @@ const PageWrapper = styled.div`
   padding: 40px;
   min-height: 100vh;
   background: linear-gradient(135deg, #e9e4e0 0%, #f3ece8 100%);
-  font-family: 'Raleway', sans-serif;
+  font-family: 'Raleway', sans-serif; // font-family: 'Merienda', cursive;
 `;
 
 const Form = styled.form`
@@ -35,11 +35,12 @@ const FormGroup = styled.div`
 const Title = styled.h2`
   text-align: center;
   margin-bottom: 30px;
-  font-family: 'georgia';
-  color: #8b5e3c;
-  font-size: 24px;
+  font-family: 'Merienda', cursive; 
+  color: #d77a65;
+  font-size: 32px;
   font-weight: bold;
 `;
+
 
 const Label = styled.label`
   font-size: 16px;
@@ -240,9 +241,9 @@ const HiddenFileInput = styled.input`
 `;
 
 const SubmitButton = styled(Button)`
-  background-color: #8B5E3C;
+  background-color: #d77a65;
   &:hover {
-    background-color: #70462c;
+    background-color: #b25949;
   }
 `;
 
