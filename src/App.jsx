@@ -11,8 +11,9 @@ import ChatbotPage from './ChatbotPage';
 import RecipeDetailPage from './RecipeDetailPage';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import CategoryPage from './CategoryPage'; // Import the new reusable component
+import CategoryPage from './CategoryPage'; // Default export
 import axios from 'axios';
+
 
 const appStyles = {
   app: {
@@ -89,6 +90,7 @@ function App() {
           <Route path="/category" element={<CategoryPage />} /> {/* Dynamic category route */}
           <Route path="/add-recipe" element={<AddRecipePage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/recipe/:RecipeID" element={<RecipeDetailPage />} />
           <Route
             path="/shopping-list"
             element={

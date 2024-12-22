@@ -129,13 +129,18 @@ app.get('/session', (req, res) => {
 });
 
 app.get('/api/recipes', (req, res) => {
-    const { themeName } = req.query;
-    console.log('Received themeName:', themeName);
+    const { themeName } = req.query; // Get the themeName from query parameters
+
+    // Check if themeName is provided
+    if (!themeName) {
+        return res.status(400).json({ message: 'Theme name is required' });
+    }
 
     const sql = `
         SELECT Recipe.*
         FROM Recipe
-        JOIN Theme ON Recipe.ThemeID = Theme.ThemeID
+        JOIN ThemeOfRecipe ON Recipe.RecipeID = ThemeOfRecipe.RecipeID
+        JOIN Theme ON Theme.ThemeID = ThemeOfRecipe.ThemeID
         WHERE Theme.ThemeName = ?
     `;
 
@@ -145,15 +150,11 @@ app.get('/api/recipes', (req, res) => {
             return res.status(500).json({ message: 'Database error', error: err });
         }
 
-        console.log('Query results:', results);
-
-        if (!results || results.length === 0) {
-            return res.status(404).json({ message: 'No recipes found for this theme' });
-        }
-
-        res.status(200).json({ recipes: results });
+        res.status(200).json({ recipes: results }); // Send the retrieved recipes as JSON
     });
 });
+
+
 
   
 
@@ -177,6 +178,62 @@ app.get('/api/measures', (req, res) => {
     });
 });
 
+app.get('/api/recipe/:id', (req, res) => {
+    const recipeId = req.params.id;
+
+    const sql = `
+      SELECT 
+    r.RecipeID, 
+    r.RecipeTitle, 
+    r.RecipeDescription, 
+    r.RecipeInstructions, 
+    r.ImageURL, 
+    r.AverageRating, 
+    r.SkillLevel,
+    r.yield,
+    GROUP_CONCAT(DISTINCT CONCAT(i.IngredientName, ' - ', ri.Quantity, ' ', m.MeasureName)) AS Ingredients,
+    GROUP_CONCAT(DISTINCT t.ThemeName) AS Themes,
+    GROUP_CONCAT(DISTINCT l.LabelName) AS Labels,
+    CONCAT('[', 
+        GROUP_CONCAT(
+            CONCAT(
+                '{',
+                '"Rating": "', rev.Rating, '", ',
+                '"Comment": "', rev.Comment, '", ',
+                '"Date": "', rev.Date, '", ',
+                '"User": "', CONCAT(u.FName, ' ', u.LName), '"',
+                '}'
+            ) SEPARATOR ','
+        ), 
+    ']') AS Reviews
+FROM 
+    Recipe r
+LEFT JOIN RecipeIngredient ri ON r.RecipeID = ri.RecipeID
+LEFT JOIN Ingredient i ON ri.IngredientID = i.IngredientID
+LEFT JOIN Measure m ON ri.MeasureID = m.MeasureID
+LEFT JOIN ThemeOfRecipe tr ON r.RecipeID = tr.RecipeID
+LEFT JOIN Theme t ON tr.ThemeID = t.ThemeID
+LEFT JOIN RecipeLabel rl ON r.RecipeID = rl.RecipeID
+LEFT JOIN Label l ON rl.LabelID = l.LabelID
+LEFT JOIN Review rev ON r.RecipeID = rev.RecipeID
+LEFT JOIN User u ON rev.UserID = u.UserID
+WHERE 
+    r.RecipeID = ?
+GROUP BY 
+    r.RecipeID;
+
+    `;
+
+    db.query(sql, [recipeId], (err, results) => {
+        if (err) {
+            res.status(500).json({ message: 'Database error', error: err });
+        } else {
+            res.status(200).json({ recipe: results[0] });
+        }
+    });
+});
+
+  
 // API Route to get all measures
 app.get('/measures', (req, res) => {
     const sql = 'SELECT * FROM Measure';
