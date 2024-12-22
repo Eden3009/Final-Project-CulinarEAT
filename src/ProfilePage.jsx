@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 
 const styles = {
   profilePage: {
-    fontFamily: "'Poppins', sans-serif",
+    fontFamily: "'Merienda', cursive",
     padding: '20px',
     maxWidth: '900px',
     margin: '0 auto',
     color: '#333',
   },
   header: {
-    fontSize: '36px',
+    fontSize: '32px',
     fontWeight: 'bold',
-    color: '#D4AF37',
+    color: '#d77a65',
     textAlign: 'center',
     marginBottom: '30px',
   },

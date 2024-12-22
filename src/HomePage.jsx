@@ -37,18 +37,22 @@ const styles = {
     alignItems: 'center',
     position: 'relative',
     width: '100%',
+    marginBottom: '1px', // Decrease space below the headline
   },
+  
   heroOverlay: {
     color: '#8B4513',
-    fontSize: '35px',
+    fontSize: '48px',
     textAlign: 'center',
-    fontFamily: 'Georgia',
+    fontFamily: 'Oregano, serif', // Headline Font
   },
+  
+
   circlesSection: {
     display: 'flex',
     justifyContent: 'center',
     gap: '20px',
-    marginTop: '20px',
+    marginTop: '-40px',
     marginBottom: '40px',
   },
   circleItem: {
