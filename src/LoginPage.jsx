@@ -65,7 +65,8 @@ const styles = {
     fontSize: '16px',
     marginTop: '20px',
     fontWeight: 'bold',
-    transition: 'background-color 0.3s ease, transform 0.3s ease', // Smooth transition for hover effect
+    fontFamily: "'Merienda', cursive", // Add the same font as the headline
+    transition: 'background-color 0.3s ease, transform 0.3s ease',
   },
   errorMessage: {
     color: '#d9534f',

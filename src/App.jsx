@@ -12,8 +12,8 @@ import RecipeDetailPage from './RecipeDetailPage';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import CategoryPage from './CategoryPage'; // Default export
+import PrivacyPolicyPage from './PrivacyPolicyPage';
 import axios from 'axios';
-
 
 const appStyles = {
   app: {
@@ -62,21 +62,20 @@ function App() {
   // Check for session status on initial load
   useEffect(() => {
     axios
-        .get('http://localhost:5001/session', { withCredentials: true })
-        .then((response) => {
-            if (response.data.message === 'Session valid') {
-                setIsLoggedIn(true);
-            } else {
-                setIsLoggedIn(false);
-            }
-        })
-        .catch(() => {
-            // User is not logged in, but this should not block recipe fetching
-            console.warn('No active session');
-            setIsLoggedIn(false);
-        });
-}, []);
-
+      .get('http://localhost:5001/session', { withCredentials: true })
+      .then((response) => {
+        if (response.data.message === 'Session valid') {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+        }
+      })
+      .catch(() => {
+        // User is not logged in, but this should not block recipe fetching
+        console.warn('No active session');
+        setIsLoggedIn(false);
+      });
+  }, []);
 
   return (
     <Router>
@@ -137,6 +136,7 @@ function App() {
             }
           />
           <Route path="/recipe-detail" element={<RecipeDetailPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} /> {/* Privacy route */}
         </Routes>
 
         {/* Footer */}
