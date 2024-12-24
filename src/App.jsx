@@ -13,6 +13,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import CategoryPage from './CategoryPage'; // Default export
 import PrivacyPolicyPage from './PrivacyPolicyPage';
+import ResetPasswordPage from './ResetPasswordPage'; // Import ResetPasswordPage
 import axios from 'axios';
 
 const appStyles = {
@@ -137,6 +138,7 @@ function App() {
           />
           <Route path="/recipe-detail" element={<RecipeDetailPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} /> {/* Privacy route */}
+          <Route path="/reset-password" element={<ResetPasswordPage />} /> {/* Reset Password route */}
         </Routes>
 
         {/* Footer */}

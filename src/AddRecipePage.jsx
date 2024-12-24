@@ -715,7 +715,7 @@ const categories = [
         </FormGroup>
 {/* Amount of Product */}
 <FormGroup>
-  <Label htmlFor="productAmount">This recipe makes</Label>
+  <Label htmlFor="productAmount">Yield</Label>
   <Input
     type="text"
     id="productAmount"

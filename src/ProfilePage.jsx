@@ -113,7 +113,7 @@ const styles = {
     marginTop: '10px',
   },
   saveButton: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#d77a65',
     color: '#FFF',
     fontWeight: 'bold',
     border: 'none',
@@ -121,9 +121,10 @@ const styles = {
     fontSize: '16px',
     borderRadius: '5px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s ease',
-    fontFamily: "'Merienda', cursive", // Updated to use Merienda font
+    fontFamily: "'Merienda', cursive",
+    transition: 'background-color 0.3s ease, transform 0.3s ease',
   },
+  
 };
 
 function ProfilePage() {
@@ -134,6 +135,7 @@ function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [passwordSaved, setPasswordSaved] = useState(false);
+  const [isHovering, setIsHovering] = useState(false); // Add this state at the top of the component
 
   useEffect(() => {
     // Fetch profile info
@@ -295,9 +297,17 @@ function ProfilePage() {
   </div>
 
   {/* Save Button */}
-  <button style={{ ...styles.saveButton, marginTop: '0' }} onClick={handlePasswordChange}>
-    Save
-  </button>
+  <button
+  style={{
+    ...styles.saveButton,
+    ...(isHovering ? { backgroundColor: '#b25949', transform: 'scale(1.05)' } : {}),
+  }}
+  onMouseEnter={() => setIsHovering(true)} // Trigger hover state
+  onMouseLeave={() => setIsHovering(false)} // Remove hover state
+  onClick={handlePasswordChange}
+>
+  Save
+</button>
 
   {/* Success Message */}
   {passwordSaved && (
