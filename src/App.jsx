@@ -14,6 +14,11 @@ import CategoryPage from './CategoryPage'; // Default export
 import PrivacyPolicyPage from './PrivacyPolicyPage';
 import ResetPasswordPage from './ResetPasswordPage'; // Import ResetPasswordPage
 import axios from 'axios';
+import RecipeViewPage from './RecipeViewPage'; // Import the new component
+
+// Inside <Routes> in App.js:
+
+
 
 
 const appStyles = {
@@ -99,8 +104,7 @@ function App() {
           <Route path="/category" element={<CategoryPage />} /> {/* Dynamic category route */}
           <Route path="/add-recipe" element={<AddRecipePage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/recipe/:RecipeID" element={<RecipeDetailPage />} />
-
+          <Route path="/recipe-view/:RecipeID" element={<RecipeViewPage />} />
           <Route
             path="/shopping-list"
             element={
@@ -146,7 +150,6 @@ function App() {
               )
             }
           />
-          <Route path="/recipe-detail" element={<RecipeDetailPage />} />
         </Routes>
         </ErrorBoundary>
 

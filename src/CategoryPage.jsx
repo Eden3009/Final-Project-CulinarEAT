@@ -212,7 +212,10 @@ function CategoryPage() {
                     <div
                       key={recipe.RecipeID}
                       style={styles.recipeCard}
-                      onClick={() => navigate(`/recipe/${recipe.RecipeID}`)
+                      onClick={() => 
+                        { const recipeIdString = String(recipe.RecipeID); // Ensure RecipeID is a string
+                            navigate(`/recipe-view/${recipeIdString}`)
+                  }
 
                     } // Navigate to recipe page
                     >
