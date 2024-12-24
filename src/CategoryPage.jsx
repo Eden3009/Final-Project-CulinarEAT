@@ -212,7 +212,9 @@ function CategoryPage() {
                     <div
                       key={recipe.RecipeID}
                       style={styles.recipeCard}
-                      onClick={() => navigate(`/recipe/${recipe.RecipeID}`)} // Navigate to recipe page
+                      onClick={() => navigate(`/recipe/${recipe.RecipeID}`)
+
+                    } // Navigate to recipe page
                     >
                       <img
                         src={recipe.ImageURL || 'default-image.jpg'}

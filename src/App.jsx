@@ -8,11 +8,12 @@ import ProfilePage from './ProfilePage';
 import LoginPage from './LoginPage';
 import RegistrationPage from './RegistrationPage';
 import ChatbotPage from './ChatbotPage';
-import RecipeDetailPage from './RecipeDetailPage';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import CategoryPage from './CategoryPage'; // Default export
 import axios from 'axios';
+import RecipeDetailPage from './RecipeDetailPage';
+
 
 
 const appStyles = {
@@ -50,6 +51,14 @@ const keyframeStyles = `
   }
 `;
 
+function ErrorBoundary({ children }) {
+  return (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      {children}
+    </React.Suspense>
+  );
+}
+
 // Inject keyframes into the document
 const styleSheet = document.createElement('style');
 styleSheet.type = 'text/css';
@@ -85,12 +94,14 @@ function App() {
         <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
 
         {/* Routes */}
+        <ErrorBoundary>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/category" element={<CategoryPage />} /> {/* Dynamic category route */}
           <Route path="/add-recipe" element={<AddRecipePage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/recipe/:RecipeID" element={<RecipeDetailPage />} />
+
           <Route
             path="/shopping-list"
             element={
@@ -136,8 +147,9 @@ function App() {
               )
             }
           />
-          <Route path="/recipe-detail" element={<RecipeDetailPage />} />
+         
         </Routes>
+        </ErrorBoundary>
 
         {/* Footer */}
         <Footer />
