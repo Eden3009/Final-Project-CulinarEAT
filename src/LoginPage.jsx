@@ -144,6 +144,7 @@ function LoginPage({ setIsLoggedIn }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate input fields
     const validationErrors = {};
     Object.keys(formData).forEach((key) => {
       const error = validateField(key, formData[key]);
@@ -155,10 +156,32 @@ function LoginPage({ setIsLoggedIn }) {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-      console.log('Login successful:', formData);
-      setIsLoggedIn(true);
+        try {
+            const response = await fetch('http://localhost:5001/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                // Handle login errors
+                setErrors({ general: data.message });
+                return;
+            }
+
+            // Login successful
+            console.log('Login successful:', data);
+            setIsLoggedIn(true);
+        } catch (error) {
+            console.error('Error during login:', error);
+            setErrors({ general: 'An error occurred. Please try again later.' });
+        }
     }
-  };
+};
 
   return (
     <div style={styles.page}>
@@ -221,17 +244,22 @@ function LoginPage({ setIsLoggedIn }) {
 >
   Forgot Password?
 </Link>
-            <button
-              style={{
-                ...styles.button,
-                ...(isHovering ? { backgroundColor: '#b25949', transform: 'scale(1.05)' } : {}),
-              }}
-              onMouseEnter={() => setIsHovering(true)}
-              onMouseLeave={() => setIsHovering(false)}
-              type="submit"
-            >
-              Sign In
-            </button>
+<button
+  style={{
+    ...styles.button,
+    ...(isHovering ? { backgroundColor: '#b25949', transform: 'scale(1.05)' } : {}),
+  }}
+  onMouseEnter={() => setIsHovering(true)}
+  onMouseLeave={() => setIsHovering(false)}
+  type="submit"
+>
+  Sign In
+</button>
+{errors.general && (
+  <div style={{ color: 'red', marginTop: '10px', fontWeight: 'bold' }}>
+    {errors.general}
+  </div>
+)}
           </form>
         </div>
       </div>
