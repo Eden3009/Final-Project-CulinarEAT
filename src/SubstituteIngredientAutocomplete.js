@@ -2,12 +2,23 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 
+// Styled Input aligned with the other input fields in AddRecipePage
 const Input = styled.input`
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
   width: 100%;
+  height: 48px; /* Matches height of other fields */
+  padding: 12px 15px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
   font-size: 16px;
+  box-sizing: border-box;
+  font-family: 'Raleway', sans-serif;
+  transition: border-color 0.3s, box-shadow 0.3s;
+
+  &:focus {
+    border-color: #5b9e5d;
+    box-shadow: 0px 0px 8px rgba(92, 158, 93, 0.3);
+    outline: none;
+  }
 `;
 
 const Dropdown = styled.ul`
@@ -21,14 +32,23 @@ const Dropdown = styled.ul`
   z-index: 10;
   max-height: 150px;
   overflow-y: auto;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const DropdownItem = styled.li`
   padding: 10px;
   cursor: pointer;
+  font-size: 16px;
   &:hover {
     background-color: #f0f0f0;
   }
+`;
+
+const AutocompleteWrapper = styled.div`
+  width: 100%;
+  height: 48px; /* Ensure consistent height */
+  position: relative; /* For dropdown positioning */
 `;
 
 const SubstituteIngredientAutocomplete = ({ value, onSelectIngredient }) => {
@@ -61,7 +81,7 @@ const SubstituteIngredientAutocomplete = ({ value, onSelectIngredient }) => {
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <AutocompleteWrapper>
       <Input
         type="text"
         placeholder="Search for substitutes"
@@ -77,7 +97,7 @@ const SubstituteIngredientAutocomplete = ({ value, onSelectIngredient }) => {
           ))}
         </Dropdown>
       )}
-    </div>
+    </AutocompleteWrapper>
   );
 };
 

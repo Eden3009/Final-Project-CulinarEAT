@@ -44,18 +44,19 @@ const styles = {
     marginBottom: '20px',
   },
   button: {
-      width: '100%',
-      padding: '12px',
-      backgroundColor: '#d77a65', // Default background color
-      color: '#fff',
-      border: 'none',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      fontSize: '16px',
-      marginTop: '20px',
-      fontWeight: 'bold',
-      transition: 'background-color 0.3s ease',
-    },
+    width: '100%',
+    padding: '12px',
+    backgroundColor: '#d77a65', // Default background color
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '16px',
+    marginTop: '20px',
+    fontWeight: 'bold',
+    fontFamily: "'Merienda', cursive", // Set font to Merienda
+    transition: 'background-color 0.3s ease',
+  },
     buttonHover: {
       backgroundColor: '#b25949', // Hover color
   },
@@ -78,7 +79,7 @@ const styles = {
     position: 'relative',
   },
   header: {
-    fontSize: '32px',
+    fontSize: '28px',
     color: '#d77a65',
     fontWeight: 'bold',
     marginBottom: '20px',

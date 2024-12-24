@@ -41,7 +41,7 @@ const styles = {
   },
   
   heroOverlay: {
-    color: '#8B4513',
+    color: '#d77a65',
     fontSize: '48px',
     textAlign: 'center',
     fontFamily: 'Oregano, serif', // Headline Font

@@ -11,7 +11,7 @@ const PageWrapper = styled.div`
   align-items: center;
   padding: 40px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #e9e4e0 0%, #f3ece8 100%);
+  background: #f9f7f4;
   font-family: 'Raleway', sans-serif; // font-family: 'Merienda', cursive;
 `;
 
@@ -168,6 +168,7 @@ const Select = styled.select`
   }
 `;
 
+// Original Button styled-component
 const Button = styled.button`
   border-radius: 12px;
   padding: 10px 16px;
@@ -178,13 +179,32 @@ const Button = styled.button`
   transition: background-color 0.3s, transform 0.2s;
   width: 100%;
   box-sizing: border-box;
+  font-family: 'Merienda', cursive;
   &:hover {
     transform: translateY(-3px);
   }
 `;
 
+// New styled-components for Add Ingredient and Add Substitute buttons
+const AddIngredientButton = styled(Button)`
+  background-color: rgba(91, 158, 93, 0.85); // Match Add Step color
+  &:hover {
+    background-color: #4a8c50; // Match Add Step hover color
+  }
+  margin-bottom: 25px;
+`;
+
+const AddSubstituteButton = styled(Button)`
+  background-color:rgb(218, 161, 76); 
+  &:hover {
+    background-color: #e68a00;
+  }
+  margin-bottom: 25px;
+`;
+
+
 const DeleteButton = styled(Button)`
-  background-color: #ff5c5c;
+  background-color:rgba(255, 92, 92, 0.89);
   width: 80px;
   height: 48px;
   display: flex;
@@ -200,7 +220,7 @@ const DeleteButton = styled(Button)`
 `;
 
 const AddButton = styled(Button)`
-  background-color: #5b9e5d;
+  background-color:rgba(91, 158, 93, 0.85);
   &:hover {
     background-color: #4a8c50;
   }
@@ -208,7 +228,7 @@ const AddButton = styled(Button)`
 `;
 
 const SubstituteButton = styled(Button)`
-  background-color: #f0a202;
+  background-color:rgb(236, 197, 138); 
   &:hover {
     background-color: #e68a00;
   }
@@ -257,7 +277,7 @@ const TagContainer = styled.div`
 const Tag = styled.div`
   padding: 8px 12px;
   border-radius: 15px;
-  background-color: #f0a202;
+  background-color:rgb(218, 161, 76);  // rgb(240, 188, 83)
   color: #fff;
   font-size: 14px;
   cursor: pointer;
@@ -695,7 +715,7 @@ const categories = [
         </FormGroup>
 {/* Amount of Product */}
 <FormGroup>
-  <Label htmlFor="productAmount">This recipe makes</Label>
+  <Label htmlFor="productAmount">Yield</Label>
   <Input
     type="text"
     id="productAmount"
@@ -921,26 +941,33 @@ const categories = [
   ))}
 
 {/* Add Another Substitute Button */}
-<AddButton
+<AddSubstituteButton
   type="button"
   onClick={() => {
     const newIngredients = [...ingredients];
-    newIngredients[index].substitutes.push({ quantity: "", measure: "", name: "", ingredientID: null });
+    newIngredients[index].substitutes.push({ quantity: "", measure: "", name: "" });
     setIngredients(newIngredients);
   }}
 >
   + Add Another Substitute
-</AddButton>
+</AddSubstituteButton>
+
 
 
             </IngredientGroup>
           ))}
-          <AddButton
-            type="button"
-            onClick={() => setIngredients([...ingredients, { quantity: "", measure: "", name: "", substitute: "", showSubstitute: false }])}
-          >
-            + Add Another Ingredient
-          </AddButton>
+        <AddIngredientButton
+  type="button"
+  onClick={() =>
+    setIngredients([
+      ...ingredients,
+      { quantity: "", measure: "", name: "", substitutes: [], showSubstitute: false },
+    ])
+  }
+>
+  + Add Another Ingredient
+</AddIngredientButton>
+
         </FormGroup>
 
         {/* Instructions */}

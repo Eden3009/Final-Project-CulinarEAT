@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import pic3 from './images/loginpic.jpg'; // Import the background image
+import { Link } from 'react-router-dom';
 
 const styles = {
   page: {
@@ -65,7 +66,8 @@ const styles = {
     fontSize: '16px',
     marginTop: '20px',
     fontWeight: 'bold',
-    transition: 'background-color 0.3s ease, transform 0.3s ease', // Smooth transition for hover effect
+    fontFamily: "'Merienda', cursive", // Add the same font as the headline
+    transition: 'background-color 0.3s ease, transform 0.3s ease',
   },
   errorMessage: {
     color: '#d9534f',
@@ -192,18 +194,33 @@ function LoginPage({ setIsLoggedIn }) {
               {errors.UserName && <span style={styles.errorMessage}>{errors.UserName}</span>}
             </div>
             <div style={styles.group}>
-              <label style={styles.label} htmlFor="Password">Password:</label>
-              <input
-                style={styles.input}
-                type="password"
-                id="Password"
-                name="Password"
-                value={formData.Password}
-                onChange={handleChange}
-                required
-              />
-              {errors.Password && <span style={styles.errorMessage}>{errors.Password}</span>}
-            </div>
+  <label style={styles.label} htmlFor="Password">Password:</label>
+  <input
+    style={styles.input}
+    type="password"
+    id="Password"
+    name="Password"
+    value={formData.Password}
+    onChange={handleChange}
+    required
+  />
+  {errors.Password && <span style={styles.errorMessage}>{errors.Password}</span>}
+</div>
+<Link
+  to="/reset-password"
+  style={{
+    display: 'block',
+    marginTop: '10px',
+    fontSize: '14px',
+    color: '#d77a65',
+    textDecoration: 'none',
+    fontFamily: "'Poppins', sans-serif",
+    fontWeight: '500',
+    textAlign: 'left',
+  }}
+>
+  Forgot Password?
+</Link>
             <button
               style={{
                 ...styles.button,

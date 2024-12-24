@@ -11,9 +11,9 @@ import ChatbotPage from './ChatbotPage';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import CategoryPage from './CategoryPage'; // Default export
+import PrivacyPolicyPage from './PrivacyPolicyPage';
+import ResetPasswordPage from './ResetPasswordPage'; // Import ResetPasswordPage
 import axios from 'axios';
-import RecipeDetailPage from './RecipeDetailPage';
-
 
 
 const appStyles = {
@@ -71,21 +71,20 @@ function App() {
   // Check for session status on initial load
   useEffect(() => {
     axios
-        .get('http://localhost:5001/session', { withCredentials: true })
-        .then((response) => {
-            if (response.data.message === 'Session valid') {
-                setIsLoggedIn(true);
-            } else {
-                setIsLoggedIn(false);
-            }
-        })
-        .catch(() => {
-            // User is not logged in, but this should not block recipe fetching
-            console.warn('No active session');
-            setIsLoggedIn(false);
-        });
-}, []);
-
+      .get('http://localhost:5001/session', { withCredentials: true })
+      .then((response) => {
+        if (response.data.message === 'Session valid') {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+        }
+      })
+      .catch(() => {
+        // User is not logged in, but this should not block recipe fetching
+        console.warn('No active session');
+        setIsLoggedIn(false);
+      });
+  }, []);
 
   return (
     <Router>
@@ -147,7 +146,7 @@ function App() {
               )
             }
           />
-         
+          <Route path="/recipe-detail" element={<RecipeDetailPage />} />
         </Routes>
         </ErrorBoundary>
 
