@@ -180,6 +180,8 @@ app.get('/api/measures', (req, res) => {
 
 app.get('/api/recipe/:id', (req, res) => {
     const recipeId = req.params.id;
+   
+  console.log('Recipe ID received in backend:', recipeId); // Debugging
 
     const sql = `
       SELECT 
