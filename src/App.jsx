@@ -100,57 +100,48 @@ function App() {
         {/* Routes */}
         <ErrorBoundary>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/category" element={<CategoryPage />} /> {/* Dynamic category route */}
-          <Route path="/add-recipe" element={<AddRecipePage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/recipe-view/:RecipeID" element={<RecipeViewPage />} />
-          <Route
-            path="/shopping-list"
-            element={
-              isLoggedIn ? (
-                <ShoppingListPage />
-              ) : (
-                <LoginPage setIsLoggedIn={setIsLoggedIn} />
-              )
-            }
-          />
-          <Route
-            path="/favorites"
-            element={
-              isLoggedIn ? (
-                <FavoritesPage />
-              ) : (
-                <LoginPage setIsLoggedIn={setIsLoggedIn} />
-              )
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              isLoggedIn ? (
-                <ProfilePage />
-              ) : (
-                <LoginPage setIsLoggedIn={setIsLoggedIn} />
-              )
-            }
-          />
-          <Route
-            path="/login"
-            element={<LoginPage setIsLoggedIn={setIsLoggedIn} />}
-          />
-          <Route path="/register" element={<RegistrationPage />} />
-          <Route
-            path="/chatbot"
-            element={
-              isLoggedIn ? (
-                <ChatbotPage />
-              ) : (
-                <LoginPage setIsLoggedIn={setIsLoggedIn} />
-              )
-            }
-          />
-        </Routes>
+  <Route path="/" element={<HomePage />} />
+  <Route path="/category" element={<CategoryPage />} /> {/* Dynamic category route */}
+  <Route path="/add-recipe" element={<AddRecipePage />} />
+  <Route path="/profile" element={<ProfilePage />} />
+  <Route path="/recipe-view/:RecipeID" element={<RecipeViewPage />} />
+  <Route path="/shopping-list" element={<ShoppingListPage />} />
+  <Route
+    path="/favorites"
+    element={
+      isLoggedIn ? (
+        <FavoritesPage />
+      ) : (
+        <LoginPage setIsLoggedIn={setIsLoggedIn} />
+      )
+    }
+  />
+  <Route
+    path="/profile"
+    element={
+      isLoggedIn ? (
+        <ProfilePage />
+      ) : (
+        <LoginPage setIsLoggedIn={setIsLoggedIn} />
+      )
+    }
+  />
+  <Route
+    path="/login"
+    element={<LoginPage setIsLoggedIn={setIsLoggedIn} />}
+  />
+  <Route path="/register" element={<RegistrationPage />} />
+  <Route
+    path="/chatbot"
+    element={
+      isLoggedIn ? (
+        <ChatbotPage />
+      ) : (
+        <LoginPage setIsLoggedIn={setIsLoggedIn} />
+      )
+    }
+  />
+</Routes>
         </ErrorBoundary>
 
         {/* Footer */}

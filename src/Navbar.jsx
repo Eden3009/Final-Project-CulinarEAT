@@ -102,7 +102,7 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
       {/* Navbar Links */}
       <div style={styles.navbarContent}>
         {/* Common Links */}
-        {['Register', 'Login', 'Add Recipe', 'Profile'].map((text, index) => (
+        {['Register', 'Login', 'Add Recipe', 'Profile', 'Shopping List'].map((text, index) => (
           <Link
             to={`/${text.toLowerCase().replace(' ', '-')}`}
             key={index}
