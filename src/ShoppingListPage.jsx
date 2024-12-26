@@ -23,9 +23,12 @@ const styles = {
   header: {
     fontSize: '32px',
     fontWeight: 'bold',
-    color: '#8B4513',
-    marginBottom: '20px',
+    color: '#d77a65', // Updated to match ProfilePage headline color
+    fontFamily: "'Merienda', cursive", // Matching font
+    textAlign: 'center',
+    marginBottom: '30px',
   },
+  
   filterContainer: {
     display: 'flex',
     gap: '10px',
@@ -46,11 +49,16 @@ const styles = {
     flex: 1,
   },
   addButton: {
-    backgroundColor: '#8B4513',
+    backgroundColor: '#d77a65', // Updated button color
     color: '#fff',
     height: '56px',
     borderRadius: '8px',
+    fontFamily: "'Merienda', cursive", // Matching font
+    fontWeight: 'bold',
+    fontSize: '16px',
+    transition: 'background-color 0.3s ease',
   },
+  
   listContainer: {
     width: '100%',
     maxWidth: '600px',
@@ -80,16 +88,41 @@ const styles = {
     gap: '10px',
   },
   exportButton: {
-    backgroundColor: '#8B4513',
-    color: '#fff',
+    backgroundColor: '#d77a65', // Updated button color
+    color: '#FFF',
+    fontWeight: 'bold',
     padding: '10px 20px',
     fontSize: '16px',
     borderRadius: '5px',
+    cursor: 'pointer',
+    fontFamily: "'Merienda', cursive", // Matching font
+    transition: 'background-color 0.3s ease',
   },
+  
   errorMessage: {
     color: 'red',
     fontSize: '14px',
+    fontFamily: 'Georgia, serif',
   },
+  
+
+  errorBubble: {
+    position: 'absolute',
+    top: 'calc(100% + 5px)', // Position below the input box with some margin
+    left: '10px',
+    backgroundColor: '#d9534f',
+    color: '#ffffff',
+    padding: '5px 10px',
+    fontSize: '12px',
+    borderRadius: '5px',
+    fontFamily: "'Poppins', sans-serif",
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px',
+  },
+  
+  
 };
 
 function ShoppingListPage() {
@@ -97,17 +130,50 @@ function ShoppingListPage() {
   const [selectedIngredient, setSelectedIngredient] = useState('');
   const [filterType, setFilterType] = useState('Category');
   const [errorMessageVisible, setErrorMessageVisible] = useState(false);
+  const [inputError, setInputError] = useState(false);
+
+
 
   const addItem = () => {
-    if (selectedIngredient && !shoppingList.some((item) => item.label.toLowerCase() === selectedIngredient.toLowerCase())) {
-      setShoppingList([...shoppingList, { label: selectedIngredient, quantity: 1, category: 'Uncategorized' }]);
+    if (!selectedIngredient.trim()) {
+      setInputError(true);
+      setTimeout(() => setInputError(false), 3000); // Hide the error bubble after 3 seconds
+      return;
+    }
+  
+    if (
+      !shoppingList.some(
+        (item) => item.label.toLowerCase() === selectedIngredient.toLowerCase()
+      )
+    ) {
+      setShoppingList([
+        ...shoppingList,
+        { label: selectedIngredient, quantity: 1, category: 'Uncategorized', isEditing: false },
+      ]);
       setSelectedIngredient('');
+      setInputError(false); // Clear error when an ingredient is added
     }
   };
+  
+  
 
   const updateQuantity = (index, quantity) => {
     const updatedList = shoppingList.map((item, i) =>
       i === index ? { ...item, quantity: Math.max(1, quantity) } : item
+    );
+    setShoppingList(updatedList);
+  };
+
+  const toggleEditing = (index) => {
+    const updatedList = shoppingList.map((item, i) =>
+      i === index ? { ...item, isEditing: !item.isEditing } : item
+    );
+    setShoppingList(updatedList);
+  };
+
+  const updateIngredientName = (index, newLabel) => {
+    const updatedList = shoppingList.map((item, i) =>
+      i === index ? { ...item, label: newLabel } : item
     );
     setShoppingList(updatedList);
   };
@@ -129,13 +195,19 @@ function ShoppingListPage() {
       setErrorMessageVisible(true);
     } else {
       setErrorMessageVisible(false);
-      alert('Exporting to WhatsApp...');
+      const message = shoppingList
+        .map((item) => `${item.label} - Quantity: ${item.quantity}`)
+        .join('%0A'); // Line break in WhatsApp message
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(
+        `Here is my shopping list:%0A${message}`
+      )}`;
+      window.open(whatsappUrl, '_blank');
     }
   };
 
   return (
     <div style={styles.pageContainer}>
-      <Typography style={styles.header}>Shopping List</Typography>
+      <h1 style={styles.header}>Shopping List</h1>
 
       {/* Filter By Section */}
       <div style={styles.filterContainer}>
@@ -154,17 +226,37 @@ function ShoppingListPage() {
 
       {/* Add Ingredient Section */}
       <div style={styles.addIngredientContainer}>
-        <TextField
-          variant="outlined"
-          label="Add Ingredient"
-          value={selectedIngredient}
-          onChange={(e) => setSelectedIngredient(e.target.value)}
-          fullWidth
-        />
-        <Button variant="contained" style={styles.addButton} onClick={addItem}>
-          Add
-        </Button>
-      </div>
+      <div style={{ position: 'relative', width: '100%' }}>
+  {inputError && (
+    <div style={styles.errorBubble}>
+      <span></span> Please enter an ingredient!
+    </div>
+  )}
+  <TextField
+    variant="outlined"
+    label="Add Ingredient"
+    value={selectedIngredient}
+    onChange={(e) => setSelectedIngredient(e.target.value)}
+    fullWidth
+  />
+</div>
+
+  <Button
+    variant="contained"
+    style={styles.addButton}
+    onClick={() => {
+      if (!selectedIngredient.trim()) {
+        setInputError(true);
+        setTimeout(() => setInputError(false), 3000); // Remove the error bubble after 3 seconds
+      } else {
+        addItem();
+      }
+    }}
+  >
+    Add
+  </Button>
+</div>
+
 
       {/* Shopping List Section */}
       <div style={styles.listContainer}>
@@ -174,7 +266,18 @@ function ShoppingListPage() {
               <Typography style={styles.categoryHeading}>{category}</Typography>
               {groupedByCategory[category].map((item, index) => (
                 <div key={index} style={styles.listItem}>
-                  <Typography>{item.label}</Typography>
+                  {item.isEditing ? (
+                    <TextField
+                      value={item.label}
+                      onChange={(e) =>
+                        updateIngredientName(index, e.target.value)
+                      }
+                      onBlur={() => toggleEditing(index)} // Save on blur
+                      autoFocus
+                    />
+                  ) : (
+                    <Typography>{item.label}</Typography>
+                  )}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <Button
                       variant="text"
@@ -188,6 +291,12 @@ function ShoppingListPage() {
                       onClick={() => updateQuantity(index, item.quantity - 1)}
                     >
                       <Remove />
+                    </Button>
+                    <Button
+                      variant="text"
+                      onClick={() => toggleEditing(index)}
+                    >
+                      <Edit />
                     </Button>
                     <Button
                       variant="contained"
@@ -206,7 +315,18 @@ function ShoppingListPage() {
             .sort((a, b) => a.label.localeCompare(b.label))
             .map((item, index) => (
               <div key={index} style={styles.listItem}>
-                <Typography>{item.label}</Typography>
+                {item.isEditing ? (
+                  <TextField
+                    value={item.label}
+                    onChange={(e) =>
+                      updateIngredientName(index, e.target.value)
+                    }
+                    onBlur={() => toggleEditing(index)} // Save on blur
+                    autoFocus
+                  />
+                ) : (
+                  <Typography>{item.label}</Typography>
+                )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <Button
                     variant="text"
@@ -220,6 +340,12 @@ function ShoppingListPage() {
                     onClick={() => updateQuantity(index, item.quantity - 1)}
                   >
                     <Remove />
+                  </Button>
+                  <Button
+                    variant="text"
+                    onClick={() => toggleEditing(index)}
+                  >
+                    <Edit />
                   </Button>
                   <Button
                     variant="contained"
