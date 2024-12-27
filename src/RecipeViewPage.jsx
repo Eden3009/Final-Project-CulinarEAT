@@ -78,15 +78,19 @@ function RecipeViewPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`/api/recipe/${RecipeID}`)
+    if (RecipeID) {
+      fetch(`http://localhost:5001/api/recipe/${RecipeID}`)
       .then((response) => response.json())
-      .then((data) => {
-        console.log('Fetched Recipe Data:', data);
-        setRecipe(data.recipe);
-      })
-      .catch((error) => console.error('Error fetching recipe:', error));
+        .then((data) => {
+          console.log('Fetched Recipe Data:', data);
+          setRecipe(data.recipe);
+        })
+        .catch((error) => console.error('Error fetching recipe:', error));
+    } else {
+      console.error('Invalid RecipeID. Cannot fetch recipe.');
+    }
   }, [RecipeID]);
-
+  
   if (!recipe) {
     return <p>Loading recipe...</p>;
   }
@@ -95,21 +99,62 @@ function RecipeViewPage() {
   }
 
   // Parse and format ingredients
-  const ingredients = recipe.Ingredients
-    ? recipe.Ingredients.split(',').map((item) => {
-        const match = item.match(/^(.*) - (.*)$/);
-        if (match) {
-          const [, ingredientName, quantityMeasure] = match; // Destructure match
-          return `${quantityMeasure} ${ingredientName}`.trim();
+  // Helper function to convert decimals to fractions
+  function convertToFraction(number) {
+    if (Number.isInteger(number)) {
+      return number.toString(); // Return the integer as a string
+    }
+  
+    const wholePart = Math.floor(number); // Extract the whole number part
+    const fractionalPart = number - wholePart;
+  
+    const fractions = [
+      { value: 0.25, display: '¼' },
+      { value: 0.33, display: '⅓' },
+      { value: 0.5, display: '½' },
+      { value: 0.66, display: '⅔' },
+      { value: 0.75, display: '¾' },
+    ];
+  
+    for (const fraction of fractions) {
+      if (Math.abs(fractionalPart - fraction.value) < 0.01) {
+        if (wholePart > 0) {
+          return `${wholePart}${fraction.display}`; // Combine whole part and fraction (e.g., "3½")
         }
-        return item.trim();
-      })
-    : [];
+        return fraction.display; // Return only the fraction (e.g., "½")
+      }
+    }
+  
+    // If no match, return the number rounded to 2 decimal places
+    return number.toFixed(2);
+  }
+  
+  
+
+// Parse and format ingredients
+const ingredients = recipe.Ingredients
+  ? recipe.Ingredients.split(',').map((item) => {
+      const match = item.match(/^(.*) - (.*)$/);
+      if (match) {
+        const [, ingredientName, quantityMeasure] = match;
+
+        const [quantity, ...rest] = quantityMeasure.split(' '); // Separate quantity from measure
+        const formattedQuantity = convertToFraction(parseFloat(quantity)); // Convert quantity to fraction if needed
+        const measure = rest.join(' '); // Combine remaining parts as the measure
+
+        return `${formattedQuantity} ${measure ? measure : ''} ${ingredientName}`.trim();
+      }
+      return item.trim();
+    })
+  : [];
+
+
 
   // Split instructions into numbered steps
   const instructions = recipe.RecipeInstructions
-    ? recipe.RecipeInstructions.split('.').map((step) => step.trim()).filter((step) => step)
-    : [];
+  ? recipe.RecipeInstructions.split('\n').filter((step) => step.trim())
+  : [];
+
 
   // Split themes and labels into arrays
   const themes = recipe.Themes ? recipe.Themes.split(',') : [];
@@ -124,10 +169,11 @@ function RecipeViewPage() {
 
       {/* Hero Image */}
       <img
-        src={recipe.ImageURL ? `/images/${recipe.ImageURL}` : lunchImage}
-        alt={recipe.RecipeTitle || 'Recipe Image'}
-        style={styles.heroImage}
-      />
+  src={recipe.ImageURL ? './images/lunch.png' : lunchImage}
+  alt={recipe.RecipeTitle || 'Recipe Image'}
+  style={styles.heroImage}
+/>
+
 
       {/* Title */}
       <h1 style={styles.title}>{recipe.RecipeTitle || 'Untitled Recipe'}</h1>
