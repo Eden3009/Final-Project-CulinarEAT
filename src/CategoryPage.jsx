@@ -220,10 +220,17 @@ function CategoryPage() {
                     } // Navigate to recipe page
                     >
                       <img
-                        src={recipe.ImageURL || 'default-image.jpg'}
-                        alt={recipe.RecipeTitle}
-                        style={styles.recipeImage}
-                      />
+  src={(function getImage() {
+    try {
+      return require(`./images/${recipe.ImageURL}.jpg`);
+    } catch {
+      return require('./images/default-image.jpg'); // Fallback if the image is missing
+    }
+  })()}
+  alt={recipe.RecipeTitle || 'Recipe Image'}
+  style={styles.recipeImage}
+/>
+
                       <h3 style={styles.recipeName}>{recipe.RecipeTitle}</h3>
                     </div>
                   ))}

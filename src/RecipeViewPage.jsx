@@ -146,7 +146,7 @@ const styles = {
   },
   checkmark: {
     content: "'✔'",
-    color: '8B4513',
+    color: 'white',
     fontSize: '13px',
     fontWeight: 'bold',
     position: 'absolute',
@@ -305,11 +305,13 @@ const ingredients = recipe.Ingredients
       </button>
   
       {/* Hero Image */}
-      <img
-        src={recipe.ImageURL ? `./images/${recipe.ImageURL}` : lunchImage}
-        alt={recipe.RecipeTitle || 'Recipe Image'}
-        style={styles.heroImage}
-      />
+      {/* Hero Image */}
+<img
+  src={recipe.ImageURL ? require(`./images/${recipe.ImageURL}.jpg`) : lunchImage}
+  alt={recipe.RecipeTitle || 'Recipe Image'}
+  style={styles.heroImage}
+/>
+
   
       {/* Title */}
       <h1 style={styles.title}>{recipe.RecipeTitle || 'Untitled Recipe'}</h1>
