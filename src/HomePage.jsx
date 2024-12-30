@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import breakfastImage from './images/breakfast.jpg'; // Breakfast
 import lunchImage from './images/lunch.png'; // Lunch
 import dinnerImage from './images/dinner.jpg'; // Dinner
@@ -200,13 +200,117 @@ const styles = {
     cursor: 'pointer',
     fontSize: '16px',
   },
+  searchBarContainer: {
+    margin: '20px 0',
+    textAlign: 'center',
+  },
+  
+  searchTabs: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '20px',
+  },
+  
+  searchInput: {
+    width: '80%',
+    padding: '15px',
+    borderRadius: '30px',
+    border: '1px solid #8B4513',
+    outline: 'none',
+    fontSize: '16px',
+  },
+  
+  searchButton: {
+    position: 'absolute',
+    right: '10px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    backgroundColor: '#8B4513',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '20px',
+    padding: '10px 20px',
+    cursor: 'pointer',
+  },
+  
+  suggestionsDropdown: {
+    position: 'absolute',
+    top: '100%',
+    left: '0',
+    width: '100%',
+    backgroundColor: '#fff',
+    border: '1px solid #ccc',
+    borderRadius: '0 0 10px 10px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    zIndex: 10,
+    listStyleType: 'none',
+    padding: '10px 0',
+    margin: '0',
+  },
+  
+  suggestionItem: {
+    padding: '10px',
+    cursor: 'pointer',
+    borderBottom: '1px solid #eee',
+  },
+  
 };
 
 function HomePage() {
+  const navigate = useNavigate(); // Initialize `navigate`
   const [hoverIndex, setHoverIndex] = useState(null);
   const [showChatbot, setShowChatbot] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchType, setSearchType] = useState('all'); // Options: 'all', 'recipe', 'ingredient'
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedIngredients, setSelectedIngredients] = useState([]);
+const [suggestedIngredients, setSuggestedIngredients] = useState([]);
+
+  
+  // Fetch suggestions dynamically
+  useEffect(() => {
+    if (searchType === 'ingredient' && searchTerm.length > 0) {
+        fetch(`http://localhost:5001/api/search?query=${searchTerm}&type=ingredient`)
+            .then((res) => res.json())
+            .then((data) => setSuggestedIngredients(data.ingredients || []))
+            .catch((error) => console.error('Error fetching ingredient suggestions:', error));
+    } else if (searchTerm.length > 0) {
+        fetch(`http://localhost:5001/api/search?query=${searchTerm}&type=${searchType}`)
+            .then((res) => res.json())
+            .then((data) => setSuggestions(data.recipes || []))
+            .catch((error) => console.error('Error fetching suggestions:', error));
+    } else {
+        setSuggestedIngredients([]);
+        setSuggestions([]);
+    }
+}, [searchTerm, searchType]);
+
+  
+const handleSearch = () => {
+  if (searchType === 'ingredient' && selectedIngredients.length > 0) {
+    const query = selectedIngredients.join(',');
+    navigate('/category', {
+      state: {
+        label: `Search Results for Ingredients`,
+        apiPath: `/api/search?query=${query}&type=ingredient`,
+      },
+    });
+  } else if (searchTerm.trim()) {
+    navigate('/category', {
+      state: {
+        label: `Search Results for '${searchTerm}'`,
+        apiPath: `/api/search?query=${searchTerm}&type=${searchType}`,
+      },
+    });
+  }
+};
+
+
+  
+  
+  
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -275,7 +379,173 @@ function HomePage() {
           </div>
         ))}
       </div>
+{/* Search Tabs */}
+<div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+  {['all', 'recipe', 'ingredient'].map((type) => (
+    <button
+      key={type}
+      onClick={() => setSearchType(type)}
+      style={{
+        padding: '10px 20px',
+        margin: '0 5px',
+        borderRadius: '20px',
+        border: searchType === type ? '2px solid #8B4513' : '1px solid #ccc',
+        backgroundColor: searchType === type ? '#8B4513' : '#fff',
+        color: searchType === type ? '#fff' : '#8B4513',
+        cursor: 'pointer',
+      }}
+    >
+      {type === 'all' ? 'Search All' : type === 'recipe' ? 'By Recipe Name' : 'By Ingredient'}
+    </button>
+  ))}
+</div>
 
+{/* Search Bar */}
+<div style={{ position: 'relative', width: '80%', margin: '0 auto' }}>
+  <input
+    type="text"
+    placeholder="Search recipes or ingredients..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    style={{
+      width: '100%',
+      padding: '15px 20px',
+      borderRadius: '30px',
+      border: '2px solid #8B4513',
+      outline: 'none',
+      fontSize: '16px',
+    }}
+  />
+  <button
+    onClick={handleSearch}
+    style={{
+      position: 'absolute',
+      right: '10px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      backgroundColor: '#8B4513',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '20px',
+      padding: '10px 20px',
+      cursor: 'pointer',
+    }}
+  >
+    Search
+  </button>
+
+{/* Selected Ingredients */}
+<div style={{ marginTop: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+  {selectedIngredients.map((ingredient, index) => (
+    <div
+      key={index}
+      style={{
+        padding: '8px 12px',
+        backgroundColor: '#8B4513',
+        color: '#fff',
+        borderRadius: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
+      }}
+    >
+      {ingredient}
+      <button
+        onClick={() =>
+          setSelectedIngredients((prev) =>
+            prev.filter((_, i) => i !== index) // Remove ingredient on click
+          )
+        }
+        style={{
+          background: 'none',
+          border: 'none',
+          color: '#fff',
+          fontSize: '16px',
+          cursor: 'pointer',
+        }}
+      >
+        ×
+      </button>
+    </div>
+  ))}
+</div>
+
+
+{/* Suggestions Dropdown */}
+{searchType === 'ingredient' && suggestedIngredients.length > 0 && (
+  <ul
+    style={{
+      position: 'absolute',
+      top: '100%',
+      left: '0',
+      width: '100%',
+      backgroundColor: '#fff',
+      border: '1px solid #ccc',
+      borderRadius: '0 0 10px 10px',
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+      zIndex: 10,
+      listStyleType: 'none',
+      padding: '10px 0',
+      margin: '0',
+    }}
+  >
+    {suggestedIngredients.map((ingredient, index) => (
+      <li
+        key={index}
+        onClick={() => {
+          setSelectedIngredients((prev) => [...prev, ingredient.IngredientName]); // Add the ingredient to selectedIngredients
+          setSearchTerm(''); // Clear the search input
+          setSuggestedIngredients([]); // Clear the dropdown
+        }}
+        style={{
+          padding: '10px',
+          cursor: 'pointer',
+          borderBottom: '1px solid #eee',
+        }}
+      >
+        {ingredient.IngredientName}
+      </li>
+    ))}
+  </ul>
+)}
+
+{/* Recipe Search Suggestions */}
+{searchType !== 'ingredient' && suggestions.length > 0 && (
+  <ul
+    style={{
+      position: 'absolute',
+      top: '100%',
+      left: '0',
+      width: '100%',
+      backgroundColor: '#fff',
+      border: '1px solid #ccc',
+      borderRadius: '0 0 10px 10px',
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+      zIndex: 10,
+      listStyleType: 'none',
+      padding: '10px 0',
+      margin: '0',
+    }}
+  >
+    {suggestions.map((recipe) => (
+      <li
+        key={recipe.RecipeID}
+        onClick={() => {
+          navigate(`/recipe-view/${recipe.RecipeID}`); // Navigate directly to the recipe page
+        }}
+        style={{
+          padding: '10px',
+          cursor: 'pointer',
+          borderBottom: '1px solid #eee',
+        }}
+      >
+        {recipe.RecipeTitle}
+      </li>
+    ))}
+  </ul>
+)}
+
+</div>
       {/* Grid Section */}
       <div style={styles.gridSection}>
   {categories.map((category, index) => (
@@ -334,13 +604,28 @@ function HomePage() {
             ))}
           </div>
           <div style={styles.chatbotFooter}>
-            <input
-              style={styles.input}
-              type="text"
-              placeholder="Type a message..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-            />
+          <input
+  type="text"
+  placeholder="Search recipes or ingredients..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter') {
+      handleSearch(); // Trigger the search logic when "Enter" is pressed
+    }
+  }}
+  style={{
+    width: '100%',
+    padding: '15px 20px',
+    borderRadius: '30px',
+    border: '2px solid #8B4513',
+    outline: 'none',
+    fontSize: '16px',
+  }}
+/>
+
+
+
             <button style={styles.sendButton} onClick={handleSendMessage}>
               Send
             </button>

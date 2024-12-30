@@ -492,6 +492,80 @@ const addIngredientsAndSubstitutes = async (recipeID, ingredients, labels, theme
     }
 };
 
+app.get('/api/search', (req, res) => {
+    const { query, type } = req.query; // 'query' is the search term, 'type' is 'recipe', 'ingredient', or 'all'
+
+    if (!query) {
+        return res.status(400).json({ message: 'Search query is required' });
+    }
+
+    let sql = '';
+    if (type === 'recipe') {
+        // Search by recipe name only
+        sql = `
+            SELECT DISTINCT r.*
+            FROM Recipe r
+            WHERE r.RecipeTitle LIKE ?
+        `;
+    } else if (type === 'ingredient') {
+        if (query.includes(',')) {
+            // Multi-ingredient search
+            const ingredients = query.split(',').map((ingredient) => ingredient.trim());
+            const placeholders = ingredients.map(() => '?').join(', ');
+
+            sql = `
+                SELECT r.*
+                FROM Recipe r
+                JOIN RecipeIngredient ri ON r.RecipeID = ri.RecipeID
+                JOIN Ingredient i ON ri.IngredientID = i.IngredientID
+                WHERE i.IngredientName IN (${placeholders})
+                GROUP BY r.RecipeID
+                HAVING COUNT(DISTINCT i.IngredientName) = ?
+            `;
+
+            db.query(sql, [...ingredients, ingredients.length], (err, results) => {
+                if (err) {
+                    console.error('Database error:', err);
+                    return res.status(500).json({ message: 'Database error', error: err });
+                }
+                return res.status(200).json({ recipes: results });
+            });
+            return;
+        } else {
+            // Fetch ingredient suggestions
+            sql = `
+                SELECT DISTINCT i.IngredientName
+                FROM Ingredient i
+                WHERE i.IngredientName LIKE ?
+            `;
+        }
+    } else {
+        // Search both recipe names and ingredients
+        sql = `
+            SELECT DISTINCT r.*
+            FROM Recipe r
+            LEFT JOIN RecipeIngredient ri ON r.RecipeID = ri.RecipeID
+            LEFT JOIN Ingredient i ON ri.IngredientID = i.IngredientID
+            WHERE r.RecipeTitle LIKE ? OR i.IngredientName LIKE ?
+        `;
+    }
+
+    // Run the query
+    db.query(sql, [`%${query}%`, `%${query}%`], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        if (type === 'ingredient' && !query.includes(',')) {
+            // If fetching ingredient suggestions
+            return res.status(200).json({ ingredients: results });
+        }
+
+        res.status(200).json({ recipes: results });
+    });
+});
+
 
 
 

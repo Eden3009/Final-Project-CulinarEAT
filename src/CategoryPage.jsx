@@ -119,46 +119,54 @@ function CategoryPage() {
     const { img, label, apiPath } = location.state || {};
   
     useEffect(() => {
-        window.scrollTo(0, 0);
-    
-        const fetchRecipes = async () => {
-            if (!label) {
-                console.error('No theme label provided.');
-                setLoading(false);
-                return;
-            }
-    
-            try {
-                const response = await fetch(`http://localhost:5001/api/recipes?themeName=${label}`);
-    
-                // Check if the response is not OK
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-    
-                // Validate if the response is JSON
-                const contentType = response.headers.get('Content-Type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Invalid response format. Expected JSON.');
-                }
-    
-                // Parse the response and update recipes
-                const data = await response.json();
-                if (data && Array.isArray(data.recipes)) {
-                    setRecipes(data.recipes); // Update recipes state
-                } else {
-                    console.warn('No recipes found or invalid data format.');
-                    setRecipes([]);
-                }
-            } catch (error) {
-                console.error('Error fetching recipes:', error);
-            } finally {
-                setLoading(false); // Ensure loading is stopped
-            }
-        };
-    
-        fetchRecipes();
-    }, [label]);
+      const fetchRecipes = async () => {
+          // Check whether we are using a label or apiPath for fetching recipes
+          if (!label && !apiPath) {
+              console.error('No label or API path provided.');
+              setLoading(false);
+              return;
+          }
+  
+          try {
+              let response;
+  
+              if (apiPath) {
+                  // Fetch based on the dynamic API path (e.g., search results)
+                  response = await fetch(`http://localhost:5001${apiPath}`);
+              } else if (label) {
+                  // Fetch recipes based on the category label
+                  response = await fetch(`http://localhost:5001/api/recipes?themeName=${label}`);
+              }
+  
+              // Check if the response is not OK
+              if (!response.ok) {
+                  throw new Error(`HTTP error! Status: ${response.status}`);
+              }
+  
+              // Validate if the response is JSON
+              const contentType = response.headers.get('Content-Type');
+              if (!contentType || !contentType.includes('application/json')) {
+                  throw new Error('Invalid response format. Expected JSON.');
+              }
+  
+              // Parse the response and update recipes
+              const data = await response.json();
+              if (data && Array.isArray(data.recipes)) {
+                  setRecipes(data.recipes); // Update recipes state
+              } else {
+                  console.warn('No recipes found or invalid data format.');
+                  setRecipes([]);
+              }
+          } catch (error) {
+              console.error('Error fetching recipes:', error);
+          } finally {
+              setLoading(false); // Ensure loading is stopped
+          }
+      };
+  
+      fetchRecipes();
+  }, [label, apiPath]); // Add `apiPath` as a dependency
+  
     
     
     
