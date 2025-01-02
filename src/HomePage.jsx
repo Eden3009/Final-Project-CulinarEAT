@@ -225,13 +225,21 @@ const styles = {
     right: '10px',
     top: '50%',
     transform: 'translateY(-50%)',
-    backgroundColor: '#8B4513',
+    backgroundColor: '#D4AF37',
     color: '#fff',
     border: 'none',
-    borderRadius: '20px',
-    padding: '10px 20px',
+    padding: '0 20px',
+    fontSize: '14px',
+    height: '100%',
     cursor: 'pointer',
+    borderTopRightRadius: '30px',
+    borderBottomRightRadius: '30px',
+    transition: 'background-color 0.3s ease', // Add transition for smooth hover effect
   },
+  searchButtonHover: {
+    backgroundColor: '#B8860B', // Change to a slightly darker shade on hover
+  },
+  
   
   suggestionsDropdown: {
     position: 'absolute',
@@ -267,6 +275,7 @@ function HomePage() {
   const [suggestions, setSuggestions] = useState([]);
   const [selectedIngredients, setSelectedIngredients] = useState([]);
 const [suggestedIngredients, setSuggestedIngredients] = useState([]);
+
 
   
   // Fetch suggestions dynamically
@@ -379,60 +388,77 @@ const handleSearch = () => {
           </div>
         ))}
       </div>
-{/* Search Tabs */}
-<div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-  {['all', 'recipe', 'ingredient'].map((type) => (
-    <button
-      key={type}
-      onClick={() => setSearchType(type)}
+
+  {/* Search Bar */}
+  <div style={{ position: 'relative', width: '50%', margin: '20px auto' }}>
+  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', border: '2px solid #D4AF37', borderRadius: '30px', height: '42px', overflow: 'hidden' }}>
+    <input
+      type="text"
+      placeholder="Search recipes or ingredients..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
       style={{
-        padding: '10px 20px',
-        margin: '0 5px',
-        borderRadius: '20px',
-        border: searchType === type ? '2px solid #8B4513' : '1px solid #ccc',
-        backgroundColor: searchType === type ? '#8B4513' : '#fff',
-        color: searchType === type ? '#fff' : '#8B4513',
-        cursor: 'pointer',
+        flex: 1,
+        border: 'none',
+        padding: '10px 16px',
+        outline: 'none',
+        fontSize: '14px',
+        height: '100%',
       }}
-    >
-      {type === 'all' ? 'Search All' : type === 'recipe' ? 'By Recipe Name' : 'By Ingredient'}
-    </button>
-  ))}
+    />
+<div
+  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#B8860B')} // Hover effect
+  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#D4AF37')} // Restore original color
+  style={{
+    backgroundColor: '#D4AF37',
+    color: '#fff',
+    border: 'none',
+    padding: '0 20px',
+    fontSize: '16px',
+    height: '100%',
+    cursor: 'pointer',
+    borderTopRightRadius: '30px',
+    borderBottomRightRadius: '30px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+  onClick={handleSearch}
+>
+  Search
 </div>
 
-{/* Search Bar */}
-<div style={{ position: 'relative', width: '80%', margin: '0 auto' }}>
-  <input
-    type="text"
-    placeholder="Search recipes or ingredients..."
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    style={{
-      width: '100%',
-      padding: '15px 20px',
-      borderRadius: '30px',
-      border: '2px solid #8B4513',
-      outline: 'none',
-      fontSize: '16px',
-    }}
-  />
-  <button
-    onClick={handleSearch}
-    style={{
-      position: 'absolute',
-      right: '10px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      backgroundColor: '#8B4513',
-      color: '#fff',
-      border: 'none',
-      borderRadius: '20px',
-      padding: '10px 20px',
-      cursor: 'pointer',
-    }}
-  >
-    Search
-  </button>
+  </div>
+
+
+
+
+    {/* Search Tabs */}
+<div style={{ position: 'relative', width: '50%', margin: '20px auto' }}>
+  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+    {['all', 'recipe', 'ingredient'].map((type) => (
+      <button
+        key={type}
+        onClick={() => setSearchType(type)}
+        style={{
+          padding: '10px 20px',
+          margin: '0 5px',
+          borderRadius: '20px',
+          border: searchType === type ? '2px solid #D4AF37' : '1px solid #D4AF37', // Matching yellow color
+          backgroundColor: searchType === type ? '#D4AF37' : '#fff', // Active button background
+          color: searchType === type ? '#fff' : '#D4AF37', // Text color
+          cursor: 'pointer',
+        }}
+      >
+        {type === 'all' ? 'Search All' : type === 'recipe' ? 'By Recipe Name' : 'By Ingredient'}
+      </button>
+    ))}
+  </div>
+
+  </div>
+
+
+
 
 {/* Selected Ingredients */}
 <div style={{ marginTop: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
