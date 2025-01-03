@@ -16,6 +16,8 @@ import dessertsImage from './images/chocolatecubes.jpg'; // Desserts
 import drinksImage from './images/beverage.jpg'; // Drinks
 import chickenImage from './images/chicken.jpg'; // Chicken
 import beefImage from './images/beef.jpg'; // Beef
+
+// Circles
 import aboutUsImage from './images/logo1.jpeg'; // About Us
 import cookingTipsImage from './images/cooking.png'; // Cooking Tips
 import bakingTipsImage from './images/baking4.png'; // Baking Tips
@@ -317,10 +319,6 @@ const handleSearch = () => {
 };
 
 
-  
-  
-  
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -344,11 +342,28 @@ const handleSearch = () => {
     { img: vegetarianImage, label: 'Vegetarian', apiPath: '/api/recipes?category=vegetarian' },
     { img: veganImage, label: 'Vegan', apiPath: '/api/recipes?category=vegan' },
     { img: drinksImage, label: 'Drinks', apiPath: '/api/recipes?category=drinks' },
-    { img: quickMealsImage, label: 'Meals in 10 Minutes', apiPath: '/api/recipes?category=quick-meals' },
+    { img: quickMealsImage, label: 'Quick Meals', apiPath: '/api/recipes?category=quick-meals' },
     { img: chickenImage, label: 'Chicken', apiPath: '/api/recipes?category=chicken' },
     { img: beefImage, label: 'Beef', apiPath: '/api/recipes?category=beef' },
     { img: asianImage, label: 'Asian', apiPath: '/api/recipes?category=asian' },
     { img: holidaysImage, label: 'Holidays', apiPath: '/api/recipes?category=holidays' },
+    { img: './images/kids.jpg', label: "Kids' Meals", apiPath: '/api/recipes?category=kids-meals' },
+    { img: './images/date.jpg', label: 'Meals for Date', apiPath: '/api/recipes?category=meals-for-date' },
+    { img: './images/budget.jpg', label: 'Budget-Friendly', apiPath: '/api/recipes?category=budget-friendly' },
+    { img: './images/holiday-meals.jpg', label: 'Holiday Meals', apiPath: '/api/recipes?category=holiday-meals' },
+    { img: './images/weeknight.jpg', label: 'Weeknight Dinners', apiPath: '/api/recipes?category=weeknight-dinners' },
+    { img: './images/ethnic.jpg', label: 'Ethnic Cuisine', apiPath: '/api/recipes?category=ethnic-cuisine' },
+    { img: './images/snacks.jpg', label: 'Snacks', apiPath: '/api/recipes?category=snacks' },
+    { img: './images/comfort.jpg', label: 'Comfort Food', apiPath: '/api/recipes?category=comfort-food' },
+    { img: './images/meal-prep.jpg', label: 'Meal Prep', apiPath: '/api/recipes?category=meal-prep' },
+    { img: './images/comfort-desserts.jpg', label: 'Comfort Desserts', apiPath: '/api/recipes?category=comfort-desserts' },
+    { img: './images/healthy.jpg', label: 'Healthy Eating', apiPath: '/api/recipes?category=healthy-eating' },
+    { img: './images/seasonal.jpg', label: 'Seasonal (e.g., Fall)', apiPath: '/api/recipes?category=seasonal' },
+    { img: './images/party.jpg', label: 'Party Foods', apiPath: '/api/recipes?category=party-foods' },
+    { img: './images/picnic.jpg', label: 'Picnic & BBQ', apiPath: '/api/recipes?category=picnic-bbq' },
+    { img: './images/gluten-free.jpg', label: 'Gluten-Free', apiPath: '/api/recipes?category=gluten-free' },
+
+  
   ];
   
     
