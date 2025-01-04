@@ -106,39 +106,51 @@ const styles = {
       position: 'relative',
     },
     heroText: {
-      fontSize: '80px',
+      fontSize: '150px',
       fontWeight: 'bold',
-      color: '#fff',
-      textShadow: '2px 2px 0 #8B4513, -2px -2px 0 #8B4513, 2px -2px 0 #8B4513, -2px 2px 0 #8B4513',
-      padding: '10px',
+      color: '#fff', // White text
+      textShadow: `
+        3px 3px 0 #d77a65,  /* Pinkish primary shadow */
+        6px 6px 0 rgba(0, 0, 0, 0.2)  /* Subtle grey shadow for depth */
+      `,
+      padding: '20px',
+      fontFamily: 'Oregano, serif', // Same font family
+      backgroundColor: 'transparent', // No background
+      border: 'none', // No border
     },
-    contentSection: {
+    
+contentSection: {
       padding: '20px',
       textAlign: 'center',
       fontFamily: 'Georgia, serif',
       color: '#333',
       width: '90%', // Adjust width to reduce dead space
       maxWidth: '1200px', // Add a max width for large screens
-    },
-    headline: {
+},
+
+headline: {
       fontSize: '32px',
       fontWeight: 'bold',
       margin: '20px 0',
-      color: '#8B4513',
-    },
-    description: {
+      color: '#d77a65',
+      fontFamily: "'Merienda', cursive", // Set font to Merienda
+},
+
+description: {
       fontSize: '20px',
       lineHeight: '1.8',
-    },
-    recipeList: {
+},
+    
+recipeList: {
       display: 'grid',
       gridTemplateColumns: 'repeat(3, 1fr)', // 3 columns
       gap: '20px',
       marginTop: '20px',
       width: '100%',
       padding: '10px',
-    },
-    recipeCard: {
+},
+
+recipeCard: {
       backgroundColor: '#fff',
       border: '1px solid #ccc',
       borderRadius: '8px',
@@ -147,25 +159,29 @@ const styles = {
       textAlign: 'center',
       cursor: 'pointer', // Indicate clickability
       transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-    },
-    recipeCardHover: {
+},
+
+recipeCardHover: {
       transform: 'scale(1.05)',
       boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
-    },
-    recipeImage: {
+},
+
+recipeImage: {
       width: '100%',
       height: '150px',
       objectFit: 'cover',
       borderRadius: '8px',
       marginBottom: '10px',
-    },
-    recipeName: {
+},
+    
+recipeName: {
       fontSize: '18px',
       fontWeight: 'bold',
       marginBottom: '10px',
       color: '#8B4513',
     },
-    backButton: {
+
+backButton: {
       position: 'absolute',
       top: '20px',
       left: '20px',
@@ -173,16 +189,24 @@ const styles = {
       display: 'flex',
       alignItems: 'center',
       padding: '8px 12px',
-      fontSize: '14px',
+      fontSize: '24px', // Slightly smaller font for a back button
       fontWeight: 'bold',
-      color: '#8B4513',
-      backgroundColor: '#fff',
-      border: '1.5px solid #8B4513',
-      borderRadius: '6px',
+      color: '#fff', // White color like the headline
+      textShadow: `
+        3px 3px 0 #d77a65,
+        6px 6px 0 rgba(0, 0, 0, 0.2)
+      `, // Same text shadow as heroText
+      fontFamily: "'Merienda', cursive", // Set font to Merienda
+      backgroundColor: 'transparent', // No background for a modern look
+      border: 'none', // Remove border
+      borderRadius: '6px', // Keep subtle rounding
       cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      boxShadow: '0 3px 5px rgba(0, 0, 0, 0.1)',
-    },
+      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+   },    
+    backButtonHover: {
+      transform: 'scale(1.1)',
+  },
+    
   };
 
 function CategoryPage() {
@@ -325,7 +349,7 @@ const filterByRecipeName = (searchTerm) => {
         <div style={styles.contentSection}>
           <h2 style={styles.headline}>{`Discover the best ${label} recipes!`}</h2>
           <p style={styles.description}>
-            Explore our curated selection of recipes, crafted to delight your taste buds.
+            Explore our curated selection of recipes, crafted to delight your taste buds!
           </p>
     
           {/* Search Bar */}
