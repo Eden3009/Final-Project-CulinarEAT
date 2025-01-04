@@ -4,18 +4,30 @@ import breakfastImage from './images/breakfast.jpg'; // Breakfast
 import lunchImage from './images/lunch.png'; // Lunch
 import dinnerImage from './images/dinner.jpg'; // Dinner
 import pastaImage from './images/pastapic.jpg'; // Pasta
-import riceImage from './images/rice.jpg'; // Rice
 import seafoodImage from './images/seafood.jpg'; // Fish & Sea Food
-import soupsImage from './images/soups.jpg'; // Soups
-import asianImage from './images/asian.jpg'; // Asian
-import vegetarianImage from './images/vegetarian.jpg'; // Vegetarian
-import veganImage from './images/vegtable.jpg'; // Vegan
-import holidaysImage from './images/holidays.jpg'; // Holidays
-import quickMealsImage from './images/10min.jpg'; // Meals in 10 Minutes
-import dessertsImage from './images/chocolatecubes.jpg'; // Desserts
-import drinksImage from './images/beverage.jpg'; // Drinks
 import chickenImage from './images/chicken.jpg'; // Chicken
 import beefImage from './images/beef.jpg'; // Beef
+import soupsImage from './images/soups.jpg'; // Soups
+import riceImage from './images/rice.jpg'; // Rice
+import dessertsImage from './images/chocolatecubes.jpg'; // Desserts
+import quickMealsImage from './images/10min.jpg'; // Meals in 10 Minutes
+import vegetarianImage from './images/vegetarian.jpg'; // Vegetarian
+import veganImage from './images/vegtable.jpg'; // Vegan
+import glutenFreeImage from './images/glutenfree.jpeg'; // Gluten Free
+import kidsMealImage from './images/kidsfood.jpg'; // Kids Meal
+import mealPrepImage from './images/mealprep.jpeg'; // Meal Prep
+import holidaysImage from './images/holidays.jpg'; // Holidays
+import budgetFriendlyImage from './images/budgetfriendly.jpeg'; // Budget Friendly
+import healthyEatingImage from './images/healthyfood.jpeg'; // Healthy Eating
+import snacksImage from './images/snacks.jpeg'; // Snacks
+import picnicAndBBQImage from './images/picnicfood.jpeg'; // Picnic & BBQ
+import asianImage from './images/asian.jpg'; // Asian
+import ethnicCuisineImage from './images/ethnicfood.jpeg'; // Ethnic Cuisine
+import dateMealsImage from './images/datemeal.jpg'; // Date Meal
+import weeknightDinnerImage from './images/weekendmeal.jpg'; // Weekend Meal
+import seasonalFoodImage from './images/seasonalfood.jpeg'; // Seasonal Food
+import partyFoodImage from './images/partyfood.jpeg'; // Party Food
+import drinksImage from './images/beverage.jpg'; // Drinks
 
 // Circles
 import aboutUsImage from './images/logo1.jpeg'; // About Us
@@ -365,23 +377,19 @@ const handleSearch = () => {
     { img: beefImage, label: 'Beef', apiPath: '/api/recipes?category=beef' },
     { img: asianImage, label: 'Asian', apiPath: '/api/recipes?category=asian' },
     { img: holidaysImage, label: 'Holidays', apiPath: '/api/recipes?category=holidays' },
-    { img: './images/kids.jpg', label: "Kids' Meals", apiPath: '/api/recipes?category=kids-meals' },
-    { img: './images/date.jpg', label: 'Meals for Date', apiPath: '/api/recipes?category=meals-for-date' },
-    { img: './images/budget.jpg', label: 'Budget-Friendly', apiPath: '/api/recipes?category=budget-friendly' },
-    { img: './images/holiday-meals.jpg', label: 'Holiday Meals', apiPath: '/api/recipes?category=holiday-meals' },
-    { img: './images/weeknight.jpg', label: 'Weeknight Dinners', apiPath: '/api/recipes?category=weeknight-dinners' },
-    { img: './images/ethnic.jpg', label: 'Ethnic Cuisine', apiPath: '/api/recipes?category=ethnic-cuisine' },
-    { img: './images/snacks.jpg', label: 'Snacks', apiPath: '/api/recipes?category=snacks' },
-    { img: './images/comfort.jpg', label: 'Comfort Food', apiPath: '/api/recipes?category=comfort-food' },
-    { img: './images/meal-prep.jpg', label: 'Meal Prep', apiPath: '/api/recipes?category=meal-prep' },
-    { img: './images/comfort-desserts.jpg', label: 'Comfort Desserts', apiPath: '/api/recipes?category=comfort-desserts' },
-    { img: './images/healthy.jpg', label: 'Healthy Eating', apiPath: '/api/recipes?category=healthy-eating' },
-    { img: './images/seasonal.jpg', label: 'Seasonal (e.g., Fall)', apiPath: '/api/recipes?category=seasonal' },
-    { img: './images/party.jpg', label: 'Party Foods', apiPath: '/api/recipes?category=party-foods' },
-    { img: './images/picnic.jpg', label: 'Picnic & BBQ', apiPath: '/api/recipes?category=picnic-bbq' },
-    { img: './images/gluten-free.jpg', label: 'Gluten-Free', apiPath: '/api/recipes?category=gluten-free' },
-
-  
+    { img: kidsMealImage, label: "Kids' Meals", apiPath: '/api/recipes?category=kids-meals' },
+    { img: dateMealsImage, label: 'Meals for Date', apiPath: '/api/recipes?category=meals-for-date' },
+    { img: budgetFriendlyImage, label: 'Budget-Friendly', apiPath: '/api/recipes?category=budget-friendly' },
+    { img: weeknightDinnerImage, label: 'Weeknight Dinners', apiPath: '/api/recipes?category=weeknight-dinners' },
+    { img: ethnicCuisineImage, label: 'Ethnic Cuisine', apiPath: '/api/recipes?category=ethnic-cuisine' },
+    { img: snacksImage, label: 'Snacks', apiPath: '/api/recipes?category=snacks' },
+    //{ img: './images/comfort.jpg', label: 'Comfort Food', apiPath: '/api/recipes?category=comfort-food' },
+    { img: mealPrepImage, label: 'Meal Prep', apiPath: '/api/recipes?category=meal-prep' },
+    { img: healthyEatingImage, label: 'Healthy Eating', apiPath: '/api/recipes?category=healthy-eating' },
+    { img: seasonalFoodImage, label: 'Seasonal (e.g., Fall)', apiPath: '/api/recipes?category=seasonal' },
+    { img: partyFoodImage, label: 'Party Foods', apiPath: '/api/recipes?category=party-foods' },
+    { img: picnicAndBBQImage, label: 'Picnic & BBQ', apiPath: '/api/recipes?category=picnic-bbq' },
+    { img: glutenFreeImage, label: 'Gluten-Free', apiPath: '/api/recipes?category=gluten-free' },
   ];
   
     
