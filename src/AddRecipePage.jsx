@@ -367,6 +367,7 @@ const AddRecipePage = () => {
   const [productAmount, setProductAmount] = useState("");
   const [skillLevel, setSkillLevel] = useState("");
   const [preparationTime, setPreparationTime] = useState({ value: "", unit: "" });
+  const [totalTime, setTotalTime] = useState({ value: "", unit: "" }); 
 
   useEffect(() => {
     const fetchMeasures = async () => {
@@ -747,27 +748,33 @@ const categories = [
 
 {/* Preparation Time */}
 <FormGroup>
-  <Label htmlFor="preparationTime">Preparation Time</Label>
+  <Label htmlFor="preparationTime">Preparation Time (HH:mm:ss)</Label>
   <Input
-    type="time"
+    type="time" // Keeps the native time picker with the clock icon
     id="preparationTime"
+    step="1" // Allows seconds in the time picker
+    style={{ width: "100%" }} // Keeps the width consistent
     value={preparationTime}
     onChange={(e) => {
       const value = e.target.value;
 
-      // Split time into hours and minutes for validation
-      const [hours, minutes] = value.split(':').map(Number);
+      // Split into hours, minutes, and seconds
+      const [hours, minutes, seconds] = value.split(':').map(Number);
 
-      // Validate: Max 48:00
-      if (hours > 48 || (hours === 48 && minutes > 0)) {
+      // Validate max time: 48:00:00
+      if (hours > 48 || (hours === 48 && (minutes > 0 || seconds > 0))) {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          preparationTime: "Maximum preparation time is 48:00.",
+          preparationTime: "Maximum preparation time is 48:00:00.",
         }));
         return;
       }
 
-      setPreparationTime(value);
+      // Format the time properly
+      setPreparationTime(
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds?.toString().padStart(2, '0') || '00'}`
+      );
+
       setErrors((prevErrors) => ({
         ...prevErrors,
         preparationTime: "",
@@ -778,6 +785,44 @@ const categories = [
   <ErrorText isVisible={!!errors.preparationTime}>{errors.preparationTime}</ErrorText>
 </FormGroup>
 
+{/* Total Time */}
+<FormGroup>
+  <Label htmlFor="totalTime">Total Time (HH:mm:ss)</Label>
+  <Input
+    type="time" // Keeps the native time picker with the clock icon
+    id="totalTime"
+    step="1" // Allows seconds in the time picker
+    style={{ width: "100%" }} // Keeps the width consistent
+    value={totalTime}
+    onChange={(e) => {
+      const value = e.target.value;
+
+      // Split into hours, minutes, and seconds
+      const [hours, minutes, seconds] = value.split(':').map(Number);
+
+      // Validate max time: 48:00:00
+      if (hours > 48 || (hours === 48 && (minutes > 0 || seconds > 0))) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          totalTime: "Maximum total time is 48:00:00.",
+        }));
+        return;
+      }
+
+      // Format the time properly
+      setTotalTime(
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds?.toString().padStart(2, '0') || '00'}`
+      );
+
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        totalTime: "",
+      }));
+    }}
+    aria-label="Total time"
+  />
+  <ErrorText isVisible={!!errors.totalTime}>{errors.totalTime}</ErrorText>
+</FormGroup>
 
 
         {/* Ingredients */}
