@@ -282,15 +282,11 @@ const styles = {
 function HomePage() {
   const navigate = useNavigate(); // Initialize `navigate`
   const [hoverIndex, setHoverIndex] = useState(null);
-  const [showChatbot, setShowChatbot] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [searchType, setSearchType] = useState('all'); // Options: 'all', 'recipe', 'ingredient'
- 
   const [selectedIngredients, setSelectedIngredients] = useState([]);
-const [suggestedIngredients, setSuggestedIngredients] = useState([]);
-const [suggestions, setSuggestions] = useState([]);
+  const [suggestedIngredients, setSuggestedIngredients] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
 
 
   
@@ -345,21 +341,9 @@ const handleSearch = () => {
   }
 };
 
-
-
-
-
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  const handleSendMessage = () => {
-    if (input.trim()) {
-      setMessages([...messages, { text: input, user: true }]);
-      setInput('');
-    }
-  };
 
   const categories = [
     { img: breakfastImage, label: 'Breakfast', apiPath: '/api/recipes?category=breakfast' },
@@ -394,7 +378,6 @@ const handleSearch = () => {
   ];
   
     
-  
 
   const tips = [
     { img: aboutUsImage, label: 'About Us' },
@@ -648,65 +631,9 @@ const handleSearch = () => {
   ))}
 </div>
 
-
-      {/* Chatbot Overlay */}
-      {showChatbot && (
-        <div style={styles.chatbotOverlay}>
-          <div style={styles.chatbotHeader}>Chat with CulinarEAT</div>
-          <div style={styles.chatbotBody}>
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                style={{
-                  alignSelf: msg.user ? 'flex-end' : 'flex-start',
-                  backgroundColor: msg.user ? '#D4AF37' : '#f1f1f1',
-                  color: msg.user ? '#fff' : '#333',
-                  padding: '10px',
-                  borderRadius: '5px',
-                  maxWidth: '70%',
-                  wordWrap: 'break-word',
-                }}
-              >
-                {msg.text}
-              </div>
-            ))}
-          </div>
-          <div style={styles.chatbotFooter}>
-          <input
-  type="text"
-  placeholder="Search recipes or ingredients..."
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-  onKeyDown={(e) => {
-    if (e.key === 'Enter') {
-      handleSearch(); // Trigger the search logic when "Enter" is pressed
-    }
-  }}
-  style={{
-    width: '100%',
-    padding: '15px 20px',
-    borderRadius: '30px',
-    border: '2px solid #8B4513',
-    outline: 'none',
-    fontSize: '16px',
-  }}
-/>
-
-
-
-            <button style={styles.sendButton} onClick={handleSendMessage}>
-              Send
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Chatbot Button */}
-      <div style={styles.chatbotButton} onClick={() => setShowChatbot(!showChatbot)}>
-        <i className="fas fa-comment-dots" style={styles.chatbotIcon}></i>
-      </div>
     </div>
   );
 }
+
 
 export default HomePage;
