@@ -200,8 +200,8 @@ const [originalRecipes, setOriginalRecipes] = useState([]); // Add this new stat
 const [suggestions, setSuggestions] = useState([]);
 
 const filterByRecipeName = (searchTerm) => {
-  if (!searchTerm) {
-    setRecipes([...originalRecipes]); // Reset to original recipes if searchTerm is empty
+  if (!searchTerm.trim()) {
+    setRecipes([...originalRecipes]); // Reset recipes if search term is empty
     return;
   }
 
@@ -209,8 +209,9 @@ const filterByRecipeName = (searchTerm) => {
     recipe.RecipeTitle.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  setRecipes(filteredRecipes); // Update the displayed recipes
+  setRecipes(filteredRecipes);
 };
+
 
   
     // Destructure data from `state` passed by `HomePage`
@@ -285,12 +286,16 @@ const filterByRecipeName = (searchTerm) => {
       window.scrollTo(0, 0); // Scroll to top on page change
     };
     const handleIngredientSearch = () => {
+      if (selectedIngredients.length === 0) return;
+    
       const query = selectedIngredients.join(",");
       fetch(`http://localhost:5001/api/search?query=${query}&type=ingredient`)
         .then((res) => res.json())
         .then((data) => setRecipes(data.recipes || []))
         .catch((error) => console.error("Error fetching recipes by ingredients:", error));
     };
+    
+
     const resetSearch = () => {
       setRecipes([...originalRecipes]); // Reset recipes to the original list
       setSearchTerm("");
@@ -300,293 +305,230 @@ const filterByRecipeName = (searchTerm) => {
     
   
     return (
-        <div style={styles.page}>
-          {/* Back Button */}
-          <button style={styles.backButton} onClick={handleBackButtonClick}>
-            <FaArrowLeft /> Back
-          </button>
-      
-          {/* Hero Section */}
-          <div
-            style={{
-              ...styles.heroSection,
-              backgroundImage: `url(${img})`, // Set background image dynamically
-            }}
-          >
-            <h1 style={styles.heroText}>{label}</h1> {/* Dynamic title */}
-          </div>
-
- {/* Content Section */}
- <div style={styles.contentSection}>
-            <h2 style={styles.headline}>{`Discover the best ${label} recipes!`}</h2>
-            <p style={styles.description}>
-              Explore our curated selection of recipes, crafted to delight your taste buds.
-            </p>
-
+      <div style={styles.page}>
+        {/* Back Button */}
+        <button style={styles.backButton} onClick={handleBackButtonClick}>
+          <FaArrowLeft /> Back
+        </button>
+    
+        {/* Hero Section */}
+        <div
+          style={{
+            ...styles.heroSection,
+            backgroundImage: `url(${img})`, // Dynamic background image
+          }}
+        >
+          <h1 style={styles.heroText}>{label}</h1> {/* Dynamic title */}
+        </div>
+    
+        {/* Content Section */}
+        <div style={styles.contentSection}>
+          <h2 style={styles.headline}>{`Discover the best ${label} recipes!`}</h2>
+          <p style={styles.description}>
+            Explore our curated selection of recipes, crafted to delight your taste buds.
+          </p>
+    
           {/* Search Bar */}
-          <div style={styles.searchBarContainer}>
-  <input
-    type="text"
-    placeholder={`Search ${label.toLowerCase()} recipes or ingredients...`}
-    value={searchTerm}
-    onChange={(e) => {
-      setSearchTerm(e.target.value);
-      if (searchType === "recipe") {
-        filterByRecipeName(e.target.value);
-      } else if (searchType === "ingredient" && e.target.value) {
-        fetch(`http://localhost:5001/api/search?query=${e.target.value}&type=ingredient`)
-          .then((res) => res.json())
-          .then((data) => setSuggestedIngredients(data.ingredients || []))
-          .catch((error) =>
-            console.error("Error fetching ingredient suggestions:", error)
-          );
-      } else {
-        setSuggestedIngredients([]);
-      }
-    }}
-    style={styles.searchInput}
-  />
-  <button
-    style={styles.searchButton}
-    onClick={() => {
-      if (selectedIngredients.length > 0) {
-        handleIngredientSearch();
-      } else {
-        filterByRecipeName(searchTerm);
-      }
-    }}
-  >
-    Search
-  </button>
-{/* Suggestions Dropdown */}
-{suggestedIngredients.length > 0 && (
-  <ul style={styles.suggestionsDropdown}>
-    {suggestedIngredients.map((ingredient, index) => (
-      <li
-        key={index}
-        onClick={() => {
-          setSelectedIngredients((prev) => [...prev, ingredient.IngredientName]);
-          setSearchTerm("");
-          setSuggestedIngredients([]);
-        }}
-        style={styles.suggestionItem}
-      >
-        {ingredient.IngredientName}
-      </li>
-    ))}
-  </ul>
-)}
-
-</div>
-
-{/* Search Tabs */}
-<div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
-  {["recipe", "ingredient"].map((type) => (
-    <button
-      key={type}
-      onClick={() => setSearchType(type)}
-      style={{
-        padding: "10px 20px",
-        margin: "0 5px",
-        borderRadius: "20px",
-        border: searchType === type ? "2px solid #D4AF37" : "1px solid #D4AF37",
-        backgroundColor: searchType === type ? "#D4AF37" : "#fff",
-        color: searchType === type ? "#fff" : "#D4AF37",
-        cursor: "pointer",
-      }}
-    >
-      {type === "recipe" ? "By Recipe Name" : "By Ingredient"}
-    </button>
-  ))}
-</div>
-
-{/* Selected Ingredients */}
-<div style={styles.selectedIngredients}>
-  {selectedIngredients.map((ingredient, index) => (
-    <div key={index} style={styles.ingredientBadge}>
-      {ingredient}
-      <button
-        onClick={() =>
-          setSelectedIngredients((prev) =>
-            prev.filter((_, i) => i !== index)
-          )
-        }
-        style={styles.ingredientRemove}
-      >
-        ×
-      </button>
-    </div>
-  ))}
-  {/* Suggestions Dropdown */}
-{searchType === 'ingredient' && suggestedIngredients.length > 0 && (
-  <ul
-    style={{
-      position: 'absolute',
-      top: '100%',
-      left: '0',
-      width: '100%',
-      backgroundColor: '#fff',
-      border: '1px solid #ccc',
-      borderRadius: '0 0 10px 10px',
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-      zIndex: 10,
-      listStyleType: 'none',
-      padding: '10px 0',
-      margin: '0',
-    }}
-  >
-    {suggestedIngredients.map((ingredient, index) => (
-      <li
-        key={index}
-        onClick={() => {
-          setSelectedIngredients((prev) => [...prev, ingredient.IngredientName]); // Add the ingredient to selectedIngredients
-          setSearchTerm(''); // Clear the search input
-          setSuggestedIngredients([]); // Clear the dropdown
-        }}
-        style={{
-          padding: '10px',
-          cursor: 'pointer',
-          borderBottom: '1px solid #eee',
-        }}
-      >
-        {ingredient.IngredientName}
-      </li>
-    ))}
-  </ul>
-)}
-
-{/* Recipe Search Suggestions */}
-{searchType !== 'ingredient' && suggestions.length > 0 && (
-  <ul
-    style={{
-      position: 'absolute',
-      top: '100%',
-      left: '0',
-      width: '100%',
-      backgroundColor: '#fff',
-      border: '1px solid #ccc',
-      borderRadius: '0 0 10px 10px',
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-      zIndex: 10,
-      listStyleType: 'none',
-      padding: '10px 0',
-      margin: '0',
-    }}
-  >
-    {suggestions.map((recipe) => (
-      <li
-        key={recipe.RecipeID}
-        onClick={() => {
-          navigate(`/recipe-view/${recipe.RecipeID}`); // Navigate directly to the recipe page
-        }}
-        style={{
-          padding: '10px',
-          cursor: 'pointer',
-          borderBottom: '1px solid #eee',
-        }}
-      >
-        {recipe.RecipeTitle}
-      </li>
-    ))}
-  </ul>
-)}
-
-</div>
-
-
-
-
-      
-            {/* Recipe List */}
-            {loading ? (
-              <p>Loading recipes...</p>
-            ) : (
-              <>
-                <div style={styles.recipeList}>
-                  {currentRecipes.map((recipe) => (
-                    <div
-                      key={recipe.RecipeID}
-                      style={styles.recipeCard}
-                      onClick={() => 
-                        { const recipeIdString = String(recipe.RecipeID); // Ensure RecipeID is a string
-                            navigate(`/recipe-view/${recipeIdString}`)
+          <div style={{ position: "relative", marginBottom: "20px" }}>
+            <div style={styles.searchBarContainer}>
+              <input
+                type="text"
+                placeholder={`Search ${label.toLowerCase()} recipes or ingredients...`}
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  if (searchType === "recipe") {
+                    filterByRecipeName(e.target.value);
+                  } else if (searchType === "ingredient" && e.target.value.trim()) {
+                    fetch(`http://localhost:5001/api/search?query=${e.target.value}&type=ingredient&action=autocomplete`)
+                      .then((res) => res.json())
+                      .then((data) => setSuggestedIngredients(data.ingredients || []))
+                      .catch((error) => console.error("Error fetching ingredient suggestions:", error));
+                  } else {
+                    setSuggestedIngredients([]);
                   }
-
-                    } // Navigate to recipe page
-                    >
-                      <img
-  src={(function getImage() {
-    try {
-      return require(`./images/${recipe.ImageURL}.jpg`);
-    } catch {
-      return require('./images/default-image.jpg'); // Fallback if the image is missing
-    }
-  })()}
-  alt={recipe.RecipeTitle || 'Recipe Image'}
-  style={styles.recipeImage}
-/>
-
-                      <h3 style={styles.recipeName}>{recipe.RecipeTitle}</h3>
-                    </div>
-                  ))}
-                </div>
-      
-                {/* Pagination */}
-                <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
-                  <button
-                    disabled={currentPage === 1}
-                    onClick={() => paginate(currentPage - 1)}
+                }}
+                style={styles.searchInput}
+              />
+              <button
+                style={styles.searchButton}
+                onClick={() => {
+                  if (searchType === "ingredient" && selectedIngredients.length > 0) {
+                    handleIngredientSearch();
+                  } else if (searchType === "recipe") {
+                    filterByRecipeName(searchTerm);
+                  }
+                }}
+              >
+                Search
+              </button>
+            </div>
+    
+            {/* Suggestions Dropdown */}
+            {suggestedIngredients.length > 0 && (
+              <ul
+                style={{
+                  position: "absolute",
+                  top: "100%", // Positioned directly below the search bar
+                  left: "0",
+                  width: "100%",
+                  backgroundColor: "#fff",
+                  border: "1px solid #ccc",
+                  borderRadius: "0 0 10px 10px",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  zIndex: 1000, // Ensure it appears above other elements
+                  listStyleType: "none",
+                  padding: "10px 0",
+                  margin: "0",
+                }}
+              >
+                {suggestedIngredients.map((ingredient, index) => (
+                  <li
+                    key={index}
+                    onClick={() => {
+                      setSelectedIngredients((prev) => [...prev, ingredient.IngredientName]);
+                      setSearchTerm("");
+                      setSuggestedIngredients([]);
+                    }}
                     style={{
-                      padding: '8px 12px',
-                      margin: '0 5px',
-                      border: '1px solid #ddd',
-                      backgroundColor: currentPage === 1 ? '#f0f0f0' : '#fff',
-                      color: currentPage === 1 ? '#ccc' : '#333',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      borderRadius: '4px',
+                      padding: "10px",
+                      cursor: "pointer",
+                      borderBottom: "1px solid #eee",
                     }}
                   >
-                    Previous
-                  </button>
-                  {Array.from({ length: totalPages }, (_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => paginate(index + 1)}
-                      style={{
-                        padding: '8px 12px',
-                        margin: '0 5px',
-                        border: '1px solid #ddd',
-                        backgroundColor: currentPage === index + 1 ? '#8B4513' : '#fff',
-                        color: currentPage === index + 1 ? '#fff' : '#333',
-                        cursor: 'pointer',
-                        borderRadius: '4px',
-                      }}
-                    >
-                      {index + 1}
-                    </button>
-                  ))}
-                  <button
-                    disabled={currentPage === totalPages}
-                    onClick={() => paginate(currentPage + 1)}
-                    style={{
-                      padding: '8px 12px',
-                      margin: '0 5px',
-                      border: '1px solid #ddd',
-                      backgroundColor: currentPage === totalPages ? '#f0f0f0' : '#fff',
-                      color: currentPage === totalPages ? '#ccc' : '#333',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      borderRadius: '4px',
-                    }}
-                  >
-                    Next
-                  </button>
-                </div>
-              </>
+                    {ingredient.IngredientName}
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
+    
+          {/* Search Tabs */}
+          <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
+            {["recipe", "ingredient"].map((type) => (
+              <button
+                key={type}
+                onClick={() => setSearchType(type)}
+                style={{
+                  padding: "10px 20px",
+                  margin: "0 5px",
+                  borderRadius: "20px",
+                  border: searchType === type ? "2px solid #D4AF37" : "1px solid #D4AF37",
+                  backgroundColor: searchType === type ? "#D4AF37" : "#fff",
+                  color: searchType === type ? "#fff" : "#D4AF37",
+                  cursor: "pointer",
+                }}
+              >
+                {type === "recipe" ? "By Recipe Name" : "By Ingredient"}
+              </button>
+            ))}
+          </div>
+    
+          {/* Selected Ingredients */}
+          <div style={styles.selectedIngredients}>
+            {selectedIngredients.map((ingredient, index) => (
+              <div key={index} style={styles.ingredientBadge}>
+                {ingredient}
+                <button
+                  onClick={() =>
+                    setSelectedIngredients((prev) =>
+                      prev.filter((_, i) => i !== index)
+                    )
+                  }
+                  style={styles.ingredientRemove}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+    
+          {/* Recipe List */}
+          {loading ? (
+            <p>Loading recipes...</p>
+          ) : (
+            <>
+              <div style={styles.recipeList}>
+                {currentRecipes.map((recipe) => (
+                  <div
+                    key={recipe.RecipeID}
+                    style={styles.recipeCard}
+                    onClick={() => {
+                      const recipeIdString = String(recipe.RecipeID); // Ensure RecipeID is a string
+                      navigate(`/recipe-view/${recipeIdString}`);
+                    }}
+                  >
+                    <img
+                      src={(function getImage() {
+                        try {
+                          return require(`./images/${recipe.ImageURL}.jpg`);
+                        } catch {
+                          return require("./images/default-image.jpg"); // Fallback if the image is missing
+                        }
+                      })()}
+                      alt={recipe.RecipeTitle || "Recipe Image"}
+                      style={styles.recipeImage}
+                    />
+                    <h3 style={styles.recipeName}>{recipe.RecipeTitle}</h3>
+                  </div>
+                ))}
+              </div>
+    
+              {/* Pagination */}
+              <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => paginate(currentPage - 1)}
+                  style={{
+                    padding: "8px 12px",
+                    margin: "0 5px",
+                    border: "1px solid #ddd",
+                    backgroundColor: currentPage === 1 ? "#f0f0f0" : "#fff",
+                    color: currentPage === 1 ? "#ccc" : "#333",
+                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                    borderRadius: "4px",
+                  }}
+                >
+                  Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => paginate(index + 1)}
+                    style={{
+                      padding: "8px 12px",
+                      margin: "0 5px",
+                      border: "1px solid #ddd",
+                      backgroundColor: currentPage === index + 1 ? "#8B4513" : "#fff",
+                      color: currentPage === index + 1 ? "#fff" : "#333",
+                      cursor: "pointer",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => paginate(currentPage + 1)}
+                  style={{
+                    padding: "8px 12px",
+                    margin: "0 5px",
+                    border: "1px solid #ddd",
+                    backgroundColor: currentPage === totalPages ? "#f0f0f0" : "#fff",
+                    color: currentPage === totalPages ? "#ccc" : "#333",
+                    cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                    borderRadius: "4px",
+                  }}
+                >
+                  Next
+                </button>
+              </div>
+            </>
+          )}
         </div>
-      );
-      
+      </div>
+    );
   }
   
   export default CategoryPage;
