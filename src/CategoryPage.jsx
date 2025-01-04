@@ -106,17 +106,20 @@ const styles = {
       position: 'relative',
     },
     heroText: {
-      fontSize: '150px',
+      position: 'relative',  // Center within the hero section instead of absolute positioning
+      fontSize: '120px', // Keep the new font size if preferred
       fontWeight: 'bold',
-      color: '#fff', // White text
+      color: '#fff',
       textShadow: `
-        3px 3px 0 #d77a65,  /* Pinkish primary shadow */
-        6px 6px 0 rgba(0, 0, 0, 0.2)  /* Subtle grey shadow for depth */
+        3px 3px 0 #d77a65,
+        6px 6px 0 rgba(0, 0, 0, 0.2)
       `,
       padding: '20px',
-      fontFamily: 'Oregano, serif', // Same font family
+      fontFamily: "'Merienda', cursive", // Consistent with the back button font
+      textAlign: 'center',  // Center the text
+      margin: '0 auto',  // Ensure the hero text is horizontally centered
       backgroundColor: 'transparent', // No background
-      border: 'none', // No border
+      border: 'none',
     },
     
 contentSection: {
@@ -181,28 +184,29 @@ recipeName: {
       color: '#8B4513',
     },
 
-backButton: {
+    backButton: {
       position: 'absolute',
       top: '20px',
-      left: '20px',
+      left: '10px', 
       zIndex: 10,
       display: 'flex',
       alignItems: 'center',
       padding: '8px 12px',
-      fontSize: '24px', // Slightly smaller font for a back button
+      fontSize: '28px', 
       fontWeight: 'bold',
-      color: '#fff', // White color like the headline
+      color: '#fff',
       textShadow: `
         3px 3px 0 #d77a65,
         6px 6px 0 rgba(0, 0, 0, 0.2)
-      `, // Same text shadow as heroText
-      fontFamily: "'Merienda', cursive", // Set font to Merienda
-      backgroundColor: 'transparent', // No background for a modern look
-      border: 'none', // Remove border
-      borderRadius: '6px', // Keep subtle rounding
+      `,
+      fontFamily: 'Oregano, serif',
+      backgroundColor: 'transparent',
+      border: 'none',
+      borderRadius: '6px',
       cursor: 'pointer',
       transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-   },    
+    },
+    
     backButtonHover: {
       transform: 'scale(1.1)',
   },
