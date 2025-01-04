@@ -5,6 +5,84 @@ import { FaArrowLeft } from 'react-icons/fa'; // Font Awesome icon
 
 
 const styles = {
+  searchBarContainer: {
+    position: "relative",
+    width: "50%", // Adjusted width for uniformity
+    margin: "20px auto",
+    display: "flex",
+    alignItems: "center",
+    border: "2px solid #D4AF37",
+    borderRadius: "30px",
+    height: "42px",
+    overflow: "hidden",
+  },
+  
+  searchInput: {
+    flex: 1,
+    border: "none",
+    padding: "10px 16px",
+    outline: "none",
+    fontSize: "14px",
+    height: "100%",
+  },
+  searchButton: {
+    backgroundColor: "#D4AF37",
+    color: "#fff",
+    border: "none",
+    padding: "0 20px",
+    fontSize: "16px",
+    height: "100%",
+    cursor: "pointer",
+    borderTopRightRadius: "30px",
+    borderBottomRightRadius: "30px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background-color 0.3s ease", // Smooth hover effect
+  },
+  
+  selectedIngredients: {
+    marginTop: "10px",
+    display: "flex",
+    gap: "10px",
+    flexWrap: "wrap",
+  },
+  ingredientBadge: {
+    padding: "8px 12px",
+    backgroundColor: "#8B4513",
+    color: "#fff",
+    borderRadius: "20px",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
+  },
+  ingredientRemove: {
+    background: "none",
+    border: "none",
+    color: "#fff",
+    fontSize: "16px",
+    cursor: "pointer",
+  },
+  suggestionsDropdown: {
+    position: "absolute",
+    top: "100%",
+    left: "0",
+    width: "100%",
+    backgroundColor: "#fff",
+    border: "1px solid #ccc",
+    borderRadius: "0 0 10px 10px",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    zIndex: 10,
+    listStyleType: "none",
+    padding: "10px 0",
+    margin: "0",
+  },
+  suggestionItem: {
+    padding: "10px",
+    cursor: "pointer",
+    borderBottom: "1px solid #eee",
+  },
+  
     page: {
       display: 'flex',
       flexDirection: 'column',
@@ -113,7 +191,27 @@ function CategoryPage() {
     const [recipes, setRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1); // Track the current page
-    const recipesPerPage = 20; // Recipes per page
+    const recipesPerPage = 21; // Recipes per page
+    const [searchTerm, setSearchTerm] = useState(""); // For dynamic search by name
+const [selectedIngredients, setSelectedIngredients] = useState([]); // For selected ingredients
+const [suggestedIngredients, setSuggestedIngredients] = useState([]); // For ingredient suggestions
+const [searchType, setSearchType] = useState("recipe"); // Default to "recipe" search type
+const [originalRecipes, setOriginalRecipes] = useState([]); // Add this new state
+const [suggestions, setSuggestions] = useState([]);
+
+const filterByRecipeName = (searchTerm) => {
+  if (!searchTerm) {
+    setRecipes([...originalRecipes]); // Reset to original recipes if searchTerm is empty
+    return;
+  }
+
+  const filteredRecipes = originalRecipes.filter((recipe) =>
+    recipe.RecipeTitle.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  setRecipes(filteredRecipes); // Update the displayed recipes
+};
+
   
     // Destructure data from `state` passed by `HomePage`
     const { img, label, apiPath } = location.state || {};
@@ -152,7 +250,8 @@ function CategoryPage() {
               // Parse the response and update recipes
               const data = await response.json();
               if (data && Array.isArray(data.recipes)) {
-                  setRecipes(data.recipes); // Update recipes state
+                setRecipes(data.recipes || []); // Update recipes state
+                setOriginalRecipes(data.recipes || []); // Save the full list for resetting
               } else {
                   console.warn('No recipes found or invalid data format.');
                   setRecipes([]);
@@ -185,6 +284,20 @@ function CategoryPage() {
       setCurrentPage(pageNumber);
       window.scrollTo(0, 0); // Scroll to top on page change
     };
+    const handleIngredientSearch = () => {
+      const query = selectedIngredients.join(",");
+      fetch(`http://localhost:5001/api/search?query=${query}&type=ingredient`)
+        .then((res) => res.json())
+        .then((data) => setRecipes(data.recipes || []))
+        .catch((error) => console.error("Error fetching recipes by ingredients:", error));
+    };
+    const resetSearch = () => {
+      setRecipes([...originalRecipes]); // Reset recipes to the original list
+      setSearchTerm("");
+      setSelectedIngredients([]);
+    };
+    
+    
   
     return (
         <div style={styles.page}>
@@ -202,13 +315,187 @@ function CategoryPage() {
           >
             <h1 style={styles.heroText}>{label}</h1> {/* Dynamic title */}
           </div>
-      
-          {/* Content Section */}
-          <div style={styles.contentSection}>
+
+ {/* Content Section */}
+ <div style={styles.contentSection}>
             <h2 style={styles.headline}>{`Discover the best ${label} recipes!`}</h2>
             <p style={styles.description}>
               Explore our curated selection of recipes, crafted to delight your taste buds.
             </p>
+
+          {/* Search Bar */}
+          <div style={styles.searchBarContainer}>
+  <input
+    type="text"
+    placeholder={`Search ${label.toLowerCase()} recipes or ingredients...`}
+    value={searchTerm}
+    onChange={(e) => {
+      setSearchTerm(e.target.value);
+      if (searchType === "recipe") {
+        filterByRecipeName(e.target.value);
+      } else if (searchType === "ingredient" && e.target.value) {
+        fetch(`http://localhost:5001/api/search?query=${e.target.value}&type=ingredient`)
+          .then((res) => res.json())
+          .then((data) => setSuggestedIngredients(data.ingredients || []))
+          .catch((error) =>
+            console.error("Error fetching ingredient suggestions:", error)
+          );
+      } else {
+        setSuggestedIngredients([]);
+      }
+    }}
+    style={styles.searchInput}
+  />
+  <button
+    style={styles.searchButton}
+    onClick={() => {
+      if (selectedIngredients.length > 0) {
+        handleIngredientSearch();
+      } else {
+        filterByRecipeName(searchTerm);
+      }
+    }}
+  >
+    Search
+  </button>
+{/* Suggestions Dropdown */}
+{suggestedIngredients.length > 0 && (
+  <ul style={styles.suggestionsDropdown}>
+    {suggestedIngredients.map((ingredient, index) => (
+      <li
+        key={index}
+        onClick={() => {
+          setSelectedIngredients((prev) => [...prev, ingredient.IngredientName]);
+          setSearchTerm("");
+          setSuggestedIngredients([]);
+        }}
+        style={styles.suggestionItem}
+      >
+        {ingredient.IngredientName}
+      </li>
+    ))}
+  </ul>
+)}
+
+</div>
+
+{/* Search Tabs */}
+<div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
+  {["recipe", "ingredient"].map((type) => (
+    <button
+      key={type}
+      onClick={() => setSearchType(type)}
+      style={{
+        padding: "10px 20px",
+        margin: "0 5px",
+        borderRadius: "20px",
+        border: searchType === type ? "2px solid #D4AF37" : "1px solid #D4AF37",
+        backgroundColor: searchType === type ? "#D4AF37" : "#fff",
+        color: searchType === type ? "#fff" : "#D4AF37",
+        cursor: "pointer",
+      }}
+    >
+      {type === "recipe" ? "By Recipe Name" : "By Ingredient"}
+    </button>
+  ))}
+</div>
+
+{/* Selected Ingredients */}
+<div style={styles.selectedIngredients}>
+  {selectedIngredients.map((ingredient, index) => (
+    <div key={index} style={styles.ingredientBadge}>
+      {ingredient}
+      <button
+        onClick={() =>
+          setSelectedIngredients((prev) =>
+            prev.filter((_, i) => i !== index)
+          )
+        }
+        style={styles.ingredientRemove}
+      >
+        ×
+      </button>
+    </div>
+  ))}
+  {/* Suggestions Dropdown */}
+{searchType === 'ingredient' && suggestedIngredients.length > 0 && (
+  <ul
+    style={{
+      position: 'absolute',
+      top: '100%',
+      left: '0',
+      width: '100%',
+      backgroundColor: '#fff',
+      border: '1px solid #ccc',
+      borderRadius: '0 0 10px 10px',
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+      zIndex: 10,
+      listStyleType: 'none',
+      padding: '10px 0',
+      margin: '0',
+    }}
+  >
+    {suggestedIngredients.map((ingredient, index) => (
+      <li
+        key={index}
+        onClick={() => {
+          setSelectedIngredients((prev) => [...prev, ingredient.IngredientName]); // Add the ingredient to selectedIngredients
+          setSearchTerm(''); // Clear the search input
+          setSuggestedIngredients([]); // Clear the dropdown
+        }}
+        style={{
+          padding: '10px',
+          cursor: 'pointer',
+          borderBottom: '1px solid #eee',
+        }}
+      >
+        {ingredient.IngredientName}
+      </li>
+    ))}
+  </ul>
+)}
+
+{/* Recipe Search Suggestions */}
+{searchType !== 'ingredient' && suggestions.length > 0 && (
+  <ul
+    style={{
+      position: 'absolute',
+      top: '100%',
+      left: '0',
+      width: '100%',
+      backgroundColor: '#fff',
+      border: '1px solid #ccc',
+      borderRadius: '0 0 10px 10px',
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+      zIndex: 10,
+      listStyleType: 'none',
+      padding: '10px 0',
+      margin: '0',
+    }}
+  >
+    {suggestions.map((recipe) => (
+      <li
+        key={recipe.RecipeID}
+        onClick={() => {
+          navigate(`/recipe-view/${recipe.RecipeID}`); // Navigate directly to the recipe page
+        }}
+        style={{
+          padding: '10px',
+          cursor: 'pointer',
+          borderBottom: '1px solid #eee',
+        }}
+      >
+        {recipe.RecipeTitle}
+      </li>
+    ))}
+  </ul>
+)}
+
+</div>
+
+
+
+
       
             {/* Recipe List */}
             {loading ? (

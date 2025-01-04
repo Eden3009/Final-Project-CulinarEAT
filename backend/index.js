@@ -491,25 +491,19 @@ const addIngredientsAndSubstitutes = async (recipeID, ingredients, labels, theme
         });
     }
 };
-
 app.get('/api/search', (req, res) => {
-    const { query, type } = req.query; // 'query' is the search term, 'type' is 'recipe', 'ingredient', or 'all'
+    const { query, type, action } = req.query; // Added `action` parameter
 
     if (!query) {
         return res.status(400).json({ message: 'Search query is required' });
     }
 
     let sql = '';
-    if (type === 'recipe') {
-        // Search by recipe name only
-        sql = `
-            SELECT DISTINCT r.*
-            FROM Recipe r
-            WHERE r.RecipeTitle LIKE ?
-        `;
-    } else if (type === 'ingredient') {
+    let params = [];
+
+    if (type === 'ingredient') {
         if (query.includes(',')) {
-            // Multi-ingredient search
+            // Case 1: Cross-reference selected ingredients with recipes
             const ingredients = query.split(',').map((ingredient) => ingredient.trim());
             const placeholders = ingredients.map(() => '?').join(', ');
 
@@ -522,25 +516,37 @@ app.get('/api/search', (req, res) => {
                 GROUP BY r.RecipeID
                 HAVING COUNT(DISTINCT i.IngredientName) = ?
             `;
-
-            db.query(sql, [...ingredients, ingredients.length], (err, results) => {
-                if (err) {
-                    console.error('Database error:', err);
-                    return res.status(500).json({ message: 'Database error', error: err });
-                }
-                return res.status(200).json({ recipes: results });
-            });
-            return;
-        } else {
-            // Fetch ingredient suggestions
+            params = [...ingredients, ingredients.length];
+        } else if (action === 'autocomplete') {
+            // Case 2: Auto-complete suggestions for ingredients (typing)
             sql = `
                 SELECT DISTINCT i.IngredientName
                 FROM Ingredient i
                 WHERE i.IngredientName LIKE ?
             `;
+            params = [`%${query}%`];
+        } else {
+            // Case 3: Single ingredient recipe search (search button)
+            sql = `
+                SELECT r.*
+                FROM Recipe r
+                JOIN RecipeIngredient ri ON r.RecipeID = ri.RecipeID
+                JOIN Ingredient i ON ri.IngredientID = i.IngredientID
+                WHERE i.IngredientName = ?
+                GROUP BY r.RecipeID
+            `;
+            params = [query.trim()];
         }
+    } else if (type === 'recipe') {
+        // Search recipes by name
+        sql = `
+            SELECT DISTINCT r.*
+            FROM Recipe r
+            WHERE r.RecipeTitle LIKE ?
+        `;
+        params = [`%${query}%`];
     } else {
-        // Search both recipe names and ingredients
+        // Search both recipes and ingredients
         sql = `
             SELECT DISTINCT r.*
             FROM Recipe r
@@ -548,23 +554,26 @@ app.get('/api/search', (req, res) => {
             LEFT JOIN Ingredient i ON ri.IngredientID = i.IngredientID
             WHERE r.RecipeTitle LIKE ? OR i.IngredientName LIKE ?
         `;
+        params = [`%${query}%`, `%${query}%`];
     }
 
-    // Run the query
-    db.query(sql, [`%${query}%`, `%${query}%`], (err, results) => {
+    db.query(sql, params, (err, results) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ message: 'Database error', error: err });
         }
 
-        if (type === 'ingredient' && !query.includes(',')) {
-            // If fetching ingredient suggestions
+        // Return results based on the type of query
+        if (type === 'ingredient' && action === 'autocomplete') {
             return res.status(200).json({ ingredients: results });
         }
-
         res.status(200).json({ recipes: results });
     });
 });
+
+
+
+
 
 
 

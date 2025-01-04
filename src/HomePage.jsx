@@ -274,20 +274,23 @@ function HomePage() {
   const [input, setInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [searchType, setSearchType] = useState('all'); // Options: 'all', 'recipe', 'ingredient'
-  const [suggestions, setSuggestions] = useState([]);
+ 
   const [selectedIngredients, setSelectedIngredients] = useState([]);
 const [suggestedIngredients, setSuggestedIngredients] = useState([]);
+const [suggestions, setSuggestions] = useState([]);
 
 
   
   // Fetch suggestions dynamically
   useEffect(() => {
     if (searchType === 'ingredient' && searchTerm.length > 0) {
-        fetch(`http://localhost:5001/api/search?query=${searchTerm}&type=ingredient`)
+        // Fetch suggestions for autocomplete
+        fetch(`http://localhost:5001/api/search?query=${searchTerm}&type=ingredient&action=autocomplete`)
             .then((res) => res.json())
             .then((data) => setSuggestedIngredients(data.ingredients || []))
             .catch((error) => console.error('Error fetching ingredient suggestions:', error));
     } else if (searchTerm.length > 0) {
+        // Fetch recipe suggestions
         fetch(`http://localhost:5001/api/search?query=${searchTerm}&type=${searchType}`)
             .then((res) => res.json())
             .then((data) => setSuggestions(data.recipes || []))
@@ -298,25 +301,40 @@ const [suggestedIngredients, setSuggestedIngredients] = useState([]);
     }
 }, [searchTerm, searchType]);
 
+
   
 const handleSearch = () => {
   if (searchType === 'ingredient' && selectedIngredients.length > 0) {
-    const query = selectedIngredients.join(',');
-    navigate('/category', {
-      state: {
-        label: `Search Results for Ingredients`,
-        apiPath: `/api/search?query=${query}&type=ingredient`,
-      },
-    });
+      // Multi-ingredient search
+      const query = selectedIngredients.join(',');
+      navigate('/category', {
+          state: {
+              label: `Recipes with Ingredients`,
+              apiPath: `/api/search?query=${query}&type=ingredient`,
+          },
+      });
+  } else if (searchType === 'ingredient' && searchTerm.trim()) {
+      // Single ingredient search
+      navigate('/category', {
+          state: {
+              label: `Recipes with '${searchTerm}'`,
+              apiPath: `/api/search?query=${searchTerm}&type=ingredient`,
+          },
+      });
   } else if (searchTerm.trim()) {
-    navigate('/category', {
-      state: {
-        label: `Search Results for '${searchTerm}'`,
-        apiPath: `/api/search?query=${searchTerm}&type=${searchType}`,
-      },
-    });
+      // Recipe name search
+      navigate('/category', {
+          state: {
+              label: `Search Results for '${searchTerm}'`,
+              apiPath: `/api/search?query=${searchTerm}&type=${searchType}`,
+          },
+      });
   }
 };
+
+
+
+
 
 
   useEffect(() => {
@@ -595,7 +613,7 @@ const handleSearch = () => {
       state={{
         img: category.img, 
         label: category.label, 
-        apiPath: category.apiPath
+        apiPath: `/api/recipes?themeName=${category.label}`
       }} // Pass the necessary data
       key={index}
       style={{ textDecoration: 'none' }}
