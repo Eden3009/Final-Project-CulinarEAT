@@ -26,6 +26,7 @@ import ethnicCuisineImage from './images/ethnicfood.jpeg'; // Ethnic Cuisine
 import dateMealsImage from './images/datemeal.jpg'; // Date Meal
 import weeknightDinnerImage from './images/weekendmeal.jpg'; // Weekend Meal
 import seasonalFoodImage from './images/seasonalfood.jpeg'; // Seasonal Food
+import comfortFoodImage from './images/comfortfood.jpeg'; // Comfort Food
 import partyFoodImage from './images/partyfood.jpeg'; // Party Food
 import drinksImage from './images/beverage.jpg'; // Drinks
 
@@ -382,8 +383,8 @@ const handleSearch = () => {
     { img: budgetFriendlyImage, label: 'Budget-Friendly', apiPath: '/api/recipes?category=budget-friendly' },
     { img: weeknightDinnerImage, label: 'Weeknight Dinners', apiPath: '/api/recipes?category=weeknight-dinners' },
     { img: ethnicCuisineImage, label: 'Ethnic Cuisine', apiPath: '/api/recipes?category=ethnic-cuisine' },
+    { img: comfortFoodImage, label: 'Comfort Food', apiPath: '/api/recipes?category=comfort-food' },
     { img: snacksImage, label: 'Snacks', apiPath: '/api/recipes?category=snacks' },
-    //{ img: './images/comfort.jpg', label: 'Comfort Food', apiPath: '/api/recipes?category=comfort-food' },
     { img: mealPrepImage, label: 'Meal Prep', apiPath: '/api/recipes?category=meal-prep' },
     { img: healthyEatingImage, label: 'Healthy Eating', apiPath: '/api/recipes?category=healthy-eating' },
     { img: seasonalFoodImage, label: 'Seasonal (e.g., Fall)', apiPath: '/api/recipes?category=seasonal' },
