@@ -354,6 +354,7 @@ const AddRecipePage = () => {
       name: "",
       substitutes: [{ quantity: "", measure: "", name: "" }],
       showSubstitute: false,
+      collapsed: false,
     },
   ]);
   
@@ -521,11 +522,18 @@ const categories = [
       description: value.length >= 10 || value === "" ? "" : "Description must be at least 10 characters."
     }));
   };
+  const toggleCollapse = (index) => {
+    const newIngredients = [...ingredients];
+    newIngredients[index].collapsed = !newIngredients[index].collapsed;
+    setIngredients(newIngredients);
+  };
 
   const handleQuantityChange = (index, value) => {
     const newIngredients = [...ingredients];
     newIngredients[index].quantity = value;
     setIngredients(newIngredients);
+
+    
     setErrors((prevErrors) => ({
       ...prevErrors,
       [`ingredientQuantity${index}`]: /^\d*\.?\d+$/.test(value) || value === "" ? "" : "Quantity must be a valid number.",
@@ -825,191 +833,204 @@ const categories = [
 
         {/* Ingredients */}
         <FormGroup>
-          <Label>Ingredients</Label>
-          {ingredients.map((ingredient, index) => (
-            <IngredientGroup key={index}>
-              <Row>
-                <SmallInputContainer>
-                  <SmallInput
-                    type="text"
-                    placeholder="Quantity"
-                    value={ingredient.quantity}
-                    onChange={(e) => handleQuantityChange(index, e.target.value)}
-                    aria-label={`Quantity for ingredient ${index + 1}`}
-                  />
-                  <ErrorText isVisible={!!errors[`ingredientQuantity${index}`]}>{errors[`ingredientQuantity${index}`]}</ErrorText>
-                </SmallInputContainer>
-                
-                <Select
-  value={ingredient.measure}
-  onChange={(e) => {
-    const newIngredients = [...ingredients];
-    newIngredients[index].measure = e.target.value;
-    setIngredients(newIngredients);
-  }}
-  aria-label={`Measure for ingredient ${index + 1}`}
->
-  <option value="">Select Measure</option>
-  {measures.map((measure) => (
-    <option key={measure.MeasureID} value={measure.MeasureID}>
-      {measure.MeasureName}
-    </option>
-  ))}
-</Select>
-
-
-<SmallInputContainer>
-<IngredientAutocomplete
-  value={ingredients[index]?.name || ''} // Reflect current ingredient name
-  onSelectIngredient={(selectedIngredient) => {
-    console.log("Selected Ingredient:", selectedIngredient); // Debug log
-    const newIngredients = [...ingredients];
-    newIngredients[index] = {
-      ...newIngredients[index],
-      name: selectedIngredient.IngredientName, // Update name
-      ingredientID: selectedIngredient.IngredientID, // Update ID
-    };
-    setIngredients(newIngredients); // Update state
-    console.log("Updated Ingredients List:", newIngredients); // Debug log
-  }}
-/>
-
-
-  <ErrorText isVisible={!!errors[`ingredientName${index}`]}>
-    {errors[`ingredientName${index}`]}
-  </ErrorText>
-</SmallInputContainer>
-
-
-                
-                <DeleteButton
-                  type="button"
-                  onClick={() => {
-                    const newIngredients = [...ingredients];
-                    newIngredients[index].showSubstitute = !newIngredients[index].showSubstitute;
-                    if (!newIngredients[index].substitutes || newIngredients[index].substitutes.length === 0) {
-                      newIngredients[index].substitutes = [{ quantity: "", measure: "", name: "" }];
-                    }
-                    setIngredients(newIngredients);
-                  }}
-                  
-                >
-                  Delete
-                </DeleteButton>
-              </Row>
-              <SubstituteButton
+        <Label>Ingredients</Label>
+{ingredients.map((ingredient, index) => (
+  <IngredientGroup key={index}>
+    {/* Expand/Collapse Header */}
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <h4>{ingredient.name || `Ingredient ${index + 1}`}</h4>
+      <button
   type="button"
-  onClick={() => {
-    const newIngredients = [...ingredients];
-    const ingredient = newIngredients[index];
-
-    // Initialize substitutes if not already defined
-    if (!ingredient.substitutes) {
-      ingredient.substitutes = [];
-    }
-
-    ingredient.showSubstitute = !ingredient.showSubstitute;
-    setIngredients(newIngredients);
+  onClick={() => toggleCollapse(index)}  // Directly call the toggleCollapse function
+  style={{
+    background: "none",
+    border: "none",
+    fontSize: "24px",
+    cursor: "pointer",
   }}
 >
-  {ingredient.showSubstitute ? "- Substitute" : "+ Substitute"}
-</SubstituteButton>
+  {ingredient.collapsed ? "+" : "-"}
+</button>
 
-{ingredient.showSubstitute &&
-  ingredient.substitutes.map((substitute, subIndex) => (
-    <Row key={subIndex}>
-      {/* Quantity Input */}
-      <SmallInputContainer>
-        <SmallInput
-          type="text"
-          placeholder="Quantity"
-          value={substitute.quantity}
-          onChange={(e) => {
+    </div>
+
+    {/* Ingredient Form - Only Show When Expanded */}
+    {!ingredient.collapsed && (
+      <>
+        <Row>
+          <SmallInputContainer>
+            <SmallInput
+              type="text"
+              placeholder="Quantity"
+              value={ingredient.quantity}
+              onChange={(e) => handleQuantityChange(index, e.target.value)}
+              aria-label={`Quantity for ingredient ${index + 1}`}
+            />
+            <ErrorText isVisible={!!errors[`ingredientQuantity${index}`]}>
+              {errors[`ingredientQuantity${index}`]}
+            </ErrorText>
+          </SmallInputContainer>
+
+          <Select
+            value={ingredient.measure}
+            onChange={(e) => {
+              const newIngredients = [...ingredients];
+              newIngredients[index].measure = e.target.value;
+              setIngredients(newIngredients);
+            }}
+            aria-label={`Measure for ingredient ${index + 1}`}
+          >
+            <option value="">Select Measure</option>
+            {measures.map((measure) => (
+              <option key={measure.MeasureID} value={measure.MeasureID}>
+                {measure.MeasureName}
+              </option>
+            ))}
+          </Select>
+
+          <SmallInputContainer>
+            <IngredientAutocomplete
+              value={ingredients[index]?.name || ""}
+              onSelectIngredient={(selectedIngredient) => {
+                const newIngredients = [...ingredients];
+                newIngredients[index] = {
+                  ...newIngredients[index],
+                  name: selectedIngredient.IngredientName,
+                  ingredientID: selectedIngredient.IngredientID,
+                };
+                setIngredients(newIngredients);
+              }}
+            />
+            <ErrorText isVisible={!!errors[`ingredientName${index}`]}>
+              {errors[`ingredientName${index}`]}
+            </ErrorText>
+          </SmallInputContainer>
+
+          <DeleteButton
+            type="button"
+            onClick={() => {
+              const newIngredients = [...ingredients];
+              newIngredients.splice(index, 1);
+              setIngredients(newIngredients);
+            }}
+          >
+            Delete
+          </DeleteButton>
+        </Row>
+
+        {/* Substitute Section */}
+        <SubstituteButton
+          type="button"
+          onClick={() => {
             const newIngredients = [...ingredients];
-            newIngredients[index].substitutes[subIndex].quantity = e.target.value;
+            const ingredient = newIngredients[index];
+            ingredient.showSubstitute = !ingredient.showSubstitute;
             setIngredients(newIngredients);
           }}
-          aria-label={`Quantity for substitute ${subIndex + 1}`}
-        />
-      </SmallInputContainer>
+        >
+          {ingredient.showSubstitute ? "- Substitute" : "+ Substitute"}
+        </SubstituteButton>
 
-      {/* Measure Selector */}
-      <Select
-        value={substitute.measure}
-        onChange={(e) => {
-          const newIngredients = [...ingredients];
-          newIngredients[index].substitutes[subIndex].measure = e.target.value;
-          setIngredients(newIngredients);
-        }}
-        aria-label={`Measure for substitute ${subIndex + 1}`}
-      >
-        <option value="">Select Measure</option>
-        {measures.map((measure) => (
-          <option key={measure.MeasureID} value={measure.MeasureID}>
-            {measure.MeasureName}
-          </option>
-        ))}
-      </Select>
+        {ingredient.showSubstitute &&
+          ingredient.substitutes.map((substitute, subIndex) => (
+            <Row key={subIndex}>
+              <SmallInputContainer>
+                <SmallInput
+                  type="text"
+                  placeholder="Quantity"
+                  value={substitute.quantity}
+                  onChange={(e) => {
+                    const newIngredients = [...ingredients];
+                    newIngredients[index].substitutes[subIndex].quantity = e.target.value;
+                    setIngredients(newIngredients);
+                  }}
+                  aria-label={`Quantity for substitute ${subIndex + 1}`}
+                />
+              </SmallInputContainer>
 
-      {/* Ingredient Autocomplete for Substitute */}
-      <SmallInputContainer>
-<SubstituteIngredientAutocomplete
-  value={substitute.name || ''}
-  onSelectIngredient={(selectedIngredient) => {
-    const newIngredients = [...ingredients];
-    newIngredients[index].substitutes[subIndex] = {
-      ...newIngredients[index].substitutes[subIndex],
-      name: selectedIngredient.IngredientName,
-      ingredientID: selectedIngredient.IngredientID, // SubIngID
-    };
-    setIngredients(newIngredients);
-  }}
-/>
-      </SmallInputContainer>
+              <Select
+                value={substitute.measure}
+                onChange={(e) => {
+                  const newIngredients = [...ingredients];
+                  newIngredients[index].substitutes[subIndex].measure = e.target.value;
+                  setIngredients(newIngredients);
+                }}
+                aria-label={`Measure for substitute ${subIndex + 1}`}
+              >
+                <option value="">Select Measure</option>
+                {measures.map((measure) => (
+                  <option key={measure.MeasureID} value={measure.MeasureID}>
+                    {measure.MeasureName}
+                  </option>
+                ))}
+              </Select>
 
-      {/* Delete Substitute Button */}
-      <DeleteButton
-        type="button"
-        onClick={() => {
-          const newIngredients = [...ingredients];
-          newIngredients[index].substitutes = newIngredients[index].substitutes.filter(
-            (_, i) => i !== subIndex
-          );
-          setIngredients(newIngredients);
-        }}
-      >
-        Delete
-      </DeleteButton>
-    </Row>
-  ))}
+              <SmallInputContainer>
+                <SubstituteIngredientAutocomplete
+                  value={substitute.name || ""}
+                  onSelectIngredient={(selectedIngredient) => {
+                    const newIngredients = [...ingredients];
+                    newIngredients[index].substitutes[subIndex] = {
+                      ...newIngredients[index].substitutes[subIndex],
+                      name: selectedIngredient.IngredientName,
+                      ingredientID: selectedIngredient.IngredientID,
+                    };
+                    setIngredients(newIngredients);
+                  }}
+                />
+              </SmallInputContainer>
 
-{/* Add Another Substitute Button */}
-<AddSubstituteButton
+              <DeleteButton
+                type="button"
+                onClick={() => {
+                  const newIngredients = [...ingredients];
+                  newIngredients[index].substitutes = newIngredients[index].substitutes.filter(
+                    (_, i) => i !== subIndex
+                  );
+                  setIngredients(newIngredients);
+                }}
+              >
+                Delete
+              </DeleteButton>
+            </Row>
+          ))}
+
+        <AddSubstituteButton
+          type="button"
+          onClick={() => {
+            const newIngredients = [...ingredients];
+            newIngredients[index].substitutes.push({ quantity: "", measure: "", name: "" });
+            setIngredients(newIngredients);
+          }}
+        >
+          + Add Another Substitute
+        </AddSubstituteButton>
+      </>
+    )}
+  </IngredientGroup>
+))}
+
+<AddIngredientButton
   type="button"
   onClick={() => {
+    // Create a copy of the ingredients array
     const newIngredients = [...ingredients];
-    newIngredients[index].substitutes.push({ quantity: "", measure: "", name: "" });
+
+    // Collapse the last ingredient (set collapsed to true if there is one)
+    if (newIngredients.length > 0) {
+      newIngredients[newIngredients.length - 1].collapsed = true;
+    }
+
+    // Add a new ingredient with default values
+    newIngredients.push({ quantity: "", measure: "", name: "", substitutes: [], showSubstitute: false, collapsed: false });
+
+    // Update state with the modified ingredients list
     setIngredients(newIngredients);
   }}
->
-  + Add Another Substitute
-</AddSubstituteButton>
-
-
-
-            </IngredientGroup>
-          ))}
-        <AddIngredientButton
-  type="button"
-  onClick={() =>
-    setIngredients([
-      ...ingredients,
-      { quantity: "", measure: "", name: "", substitutes: [], showSubstitute: false },
-    ])
-  }
 >
   + Add Another Ingredient
 </AddIngredientButton>
+
 
         </FormGroup>
 
