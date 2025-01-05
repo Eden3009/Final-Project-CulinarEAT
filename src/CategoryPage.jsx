@@ -83,7 +83,7 @@ const styles = {
     borderBottom: "1px solid #eee",
   },
   
-    page: {
+  page: {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -91,8 +91,8 @@ const styles = {
       width: '100%',
       minHeight: '100vh',
       position: 'relative',
-    },
-    heroSection: {
+  },
+  heroSection: {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -104,8 +104,8 @@ const styles = {
       color: '#8B4513',
       textAlign: 'center',
       position: 'relative',
-    },
-    heroText: {
+  },
+  heroText: {
       position: 'relative',  // Center within the hero section instead of absolute positioning
       fontSize: '120px', // Keep the new font size if preferred
       fontWeight: 'bold',
@@ -120,40 +120,40 @@ const styles = {
       margin: '0 auto',  // Ensure the hero text is horizontally centered
       backgroundColor: 'transparent', // No background
       border: 'none',
-    },
+  },
     
-contentSection: {
+  contentSection: {
       padding: '20px',
       textAlign: 'center',
       fontFamily: 'Georgia, serif',
       color: '#333',
       width: '90%', // Adjust width to reduce dead space
       maxWidth: '1200px', // Add a max width for large screens
-},
+  },
 
-headline: {
+  headline: {
       fontSize: '32px',
       fontWeight: 'bold',
       margin: '20px 0',
       color: '#d77a65',
       fontFamily: "'Merienda', cursive", // Set font to Merienda
-},
+  },
 
-description: {
+  description: {
       fontSize: '20px',
       lineHeight: '1.8',
-},
+  },
     
-recipeList: {
+  recipeList: {
       display: 'grid',
       gridTemplateColumns: 'repeat(3, 1fr)', // 3 columns
       gap: '20px',
       marginTop: '20px',
       width: '100%',
       padding: '10px',
-},
+  },
 
-recipeCard: {
+  recipeCard: {
       backgroundColor: '#fff',
       border: '1px solid #ccc',
       borderRadius: '8px',
@@ -162,29 +162,29 @@ recipeCard: {
       textAlign: 'center',
       cursor: 'pointer', // Indicate clickability
       transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-},
+  },
 
-recipeCardHover: {
+  recipeCardHover: {
       transform: 'scale(1.05)',
       boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
-},
+  },
 
-recipeImage: {
+  recipeImage: {
       width: '100%',
       height: '150px',
       objectFit: 'cover',
       borderRadius: '8px',
       marginBottom: '10px',
-},
+  },
     
-recipeName: {
+  recipeName: {
       fontSize: '18px',
       fontWeight: 'bold',
       marginBottom: '10px',
       color: '#8B4513',
-    },
+  },
 
-    backButton: {
+  backButton: {
       position: 'absolute',
       top: '20px',
       left: '10px', 
@@ -205,10 +205,29 @@ recipeName: {
       borderRadius: '6px',
       cursor: 'pointer',
       transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-    },
+  },
     
-    backButtonHover: {
+  backButtonHover: {
       transform: 'scale(1.1)',
+  },
+  paginationButton: {
+    width: '100px', // Fixed width for consistent size
+    padding: '12px',
+    backgroundColor: '#d77a65', // Default background color
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px', // Rounded corners
+    cursor: 'pointer',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    fontFamily: "'Merienda', cursive", // Font style
+    margin: '0 5px', // Add spacing between buttons
+    transition: 'background-color 0.3s ease, transform 0.2s', // Smooth transition for hover
+  },
+  
+  paginationButtonHover: {
+    backgroundColor: '#b35c4e', // Darker hover color
+    transform: 'scale(1.05)', // Slight enlargement on hover
   },
     
   };
@@ -503,55 +522,37 @@ const filterByRecipeName = (searchTerm) => {
               </div>
     
               {/* Pagination */}
-              <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
-                <button
-                  disabled={currentPage === 1}
-                  onClick={() => paginate(currentPage - 1)}
-                  style={{
-                    padding: "8px 12px",
-                    margin: "0 5px",
-                    border: "1px solid #ddd",
-                    backgroundColor: currentPage === 1 ? "#f0f0f0" : "#fff",
-                    color: currentPage === 1 ? "#ccc" : "#333",
-                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                    borderRadius: "4px",
-                  }}
-                >
-                  Previous
-                </button>
-                {Array.from({ length: totalPages }, (_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => paginate(index + 1)}
-                    style={{
-                      padding: "8px 12px",
-                      margin: "0 5px",
-                      border: "1px solid #ddd",
-                      backgroundColor: currentPage === index + 1 ? "#8B4513" : "#fff",
-                      color: currentPage === index + 1 ? "#fff" : "#333",
-                      cursor: "pointer",
-                      borderRadius: "4px",
-                    }}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-                <button
-                  disabled={currentPage === totalPages}
-                  onClick={() => paginate(currentPage + 1)}
-                  style={{
-                    padding: "8px 12px",
-                    margin: "0 5px",
-                    border: "1px solid #ddd",
-                    backgroundColor: currentPage === totalPages ? "#f0f0f0" : "#fff",
-                    color: currentPage === totalPages ? "#ccc" : "#333",
-                    cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-                    borderRadius: "4px",
-                  }}
-                >
-                  Next
-                </button>
-              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+  <button
+    disabled={currentPage === 1}
+    onClick={() => paginate(currentPage - 1)}
+    style={{
+      ...styles.paginationButton,
+      backgroundColor: currentPage === 1 ? '#f0f0f0' : '#d77a65',
+      color: currentPage === 1 ? '#ccc' : '#fff',
+      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+    }}
+    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b35c4e')}
+    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#d77a65')}
+  >
+    Previous
+  </button>
+  <button
+    disabled={currentPage === totalPages}
+    onClick={() => paginate(currentPage + 1)}
+    style={{
+      ...styles.paginationButton,
+      backgroundColor: currentPage === totalPages ? '#f0f0f0' : '#d77a65',
+      color: currentPage === totalPages ? '#ccc' : '#fff',
+      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+    }}
+    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b35c4e')}
+    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#d77a65')}
+  >
+    Next
+  </button>
+</div>
+
             </>
           )}
         </div>
