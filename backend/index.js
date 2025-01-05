@@ -1,3 +1,6 @@
+
+
+
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -7,7 +10,6 @@ const app = express();
 const port = 5001;
 
 
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 
 // Middleware
 app.use(cors({
@@ -20,6 +22,15 @@ app.use(cors({
     },
     credentials: true  // Ensure credentials are allowed if needed
 }));
+
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', req.headers.origin); // Allow the specific origin making the request
+    res.header('Access-Control-Allow-Credentials', 'true'); // Allow cookies
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS'); // Allowed HTTP methods
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With'); // Allowed headers
+    next();
+});
+app.options('*', cors()); // Handle preflight requests
 
 app.use(express.json());  // Parse JSON bodies
 app.use(cookieParser());  // Initialize cookie-parser to handle cookies
@@ -78,7 +89,8 @@ app.post('/login', (req, res) => {
 
     db.query(sql, [UserName], (err, results) => {
         if (err) {
-            return res.status(500).json({ message: 'Database error', error: err });
+            console.error('Database error:', err);
+            return res.status(500).json({ message: 'Database error' });
         }
 
         if (results.length === 0) {
@@ -87,46 +99,65 @@ app.post('/login', (req, res) => {
 
         const user = results[0];
 
-        // Check if the password matches (ideally you'd hash and compare hashed passwords)
+        // Check if the password matches
         if (user.Password !== Password) {
             return res.status(401).json({ message: 'Invalid password' });
         }
 
-        // Authentication successful, set session cookie (HttpOnly for security)
-        res.cookie('session_token', user.UserName, {  // Use a token in real cases
-            httpOnly: true,  // Makes the cookie inaccessible to client-side JavaScript
-            secure: false,   // Set to true if you're using HTTPS
-            maxAge: 24 * 60 * 60 * 1000  // 1 day expiration
+        // Successful login: set a session token (username for simplicity in testing)
+        res.cookie('session_token', user.UserName, {
+            httpOnly: true,
+            secure: false, // Use `true` if using HTTPS
+            maxAge: 24 * 60 * 60 * 1000, // 1 day
         });
 
-        res.status(200).json({ message: 'Login successful', user: { UserName: user.UserName, Role: user.Role } });
+        // Send user details back to the client
+        res.status(200).json({
+            message: 'Login successful',
+            user: {
+                UserName: user.UserName,
+                Role: user.Role, // Admin, BasicUser, etc.
+                Email: user.Email,
+            },
+        });
     });
 });
+
 
 
 // Route to check session (if user is logged in based on the session token)
 app.get('/session', (req, res) => {
     const sessionToken = req.cookies.session_token;
-    
+
     if (!sessionToken) {
         return res.status(401).json({ message: 'Not logged in' });
     }
 
-    // Verify if the user exists in the database by session token (UserName in this case)
+    // Query to verify the session token (username in this case)
     const sql = 'SELECT * FROM User WHERE UserName = ?';
 
     db.query(sql, [sessionToken], (err, results) => {
         if (err) {
-            return res.status(500).json({ message: 'Database error', error: err });
+            console.error('Database error:', err);
+            return res.status(500).json({ message: 'Database error' });
         }
 
         if (results.length === 0) {
-            return res.status(401).json({ message: 'Session invalid' });
+            return res.status(401).json({ message: 'Invalid session' });
         }
 
-        res.status(200).json({ message: 'Session valid', user: { UserName: results[0].UserName, Role: results[0].Role } });
+        // Return user details
+        res.status(200).json({
+            message: 'Session valid',
+            user: {
+                UserName: results[0].UserName,
+                Role: results[0].Role,
+                Email: results[0].Email,
+            },
+        });
     });
 });
+
 
 app.get('/api/recipes', (req, res) => {
     const { themeName } = req.query; // Get the themeName from query parameters
@@ -160,9 +191,10 @@ app.get('/api/recipes', (req, res) => {
 
 // API Route to Logout a User
 app.post('/logout', (req, res) => {
-    res.clearCookie('session_token');  // Clear the session cookie
+    res.clearCookie('session_token');
     res.status(200).json({ message: 'Logout successful' });
 });
+
 
 // API Route to Fetch All Measures
 app.get('/api/measures', (req, res) => {

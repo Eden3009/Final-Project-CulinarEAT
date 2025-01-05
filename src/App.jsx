@@ -15,6 +15,9 @@ import PrivacyPolicyPage from './PrivacyPolicyPage';
 import ResetPasswordPage from './ResetPasswordPage'; // Import ResetPasswordPage
 import axios from 'axios';
 import RecipeViewPage from './RecipeViewPage'; // Import the new component
+import { UserProvider } from './UserContext';
+
+
 
 // Inside <Routes> in App.js:
 
@@ -91,7 +94,10 @@ function App() {
       });
   }, []);
 
+ 
+
   return (
+    <UserProvider> {/* Wrap the app with UserProvider */}
     <Router>
       <div style={appStyles.app}>
         {/* Navbar */}
@@ -148,6 +154,7 @@ function App() {
         <Footer />
       </div>
     </Router>
+    </UserProvider> // End wrapping
   );
 }
 

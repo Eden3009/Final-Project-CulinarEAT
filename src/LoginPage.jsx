@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import pic3 from './images/loginpic.jpg'; // Import the background image
 import { Link } from 'react-router-dom';
+import Popup from './Popup'; // Import the Popup component
+import { useNavigate } from 'react-router-dom';
+
+
 
 const styles = {
   page: {
@@ -113,6 +117,8 @@ function LoginPage({ setIsLoggedIn }) {
   });
   const [errors, setErrors] = useState({});
   const [isHovering, setIsHovering] = useState(false); // Track hover state
+  const [showPopup, setShowPopup] = useState(false);
+  const navigate = useNavigate();
 
   const validateField = (name, value) => {
     if (value.trim() === '') {
@@ -156,14 +162,16 @@ function LoginPage({ setIsLoggedIn }) {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-        try {
-            const response = await fetch('http://localhost:5001/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
+      try {
+          // Fetch API with CORS configuration
+          const response = await fetch('http://localhost:5001/login', {
+              method: 'POST',
+              credentials: 'include', // Ensure credentials are included
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(formData), // Send user input data
+          });
 
             const data = await response.json();
 
@@ -176,12 +184,18 @@ function LoginPage({ setIsLoggedIn }) {
             // Login successful
             console.log('Login successful:', data);
             setIsLoggedIn(true);
-        } catch (error) {
+            setShowPopup(true); // Show success popup
+
+            // Redirect to homepage after 4 seconds
+            setTimeout(() => {
+              navigate('/');
+            }, 4000);
+          } catch (error) {
             console.error('Error during login:', error);
             setErrors({ general: 'An error occurred. Please try again later.' });
+          }
         }
-    }
-};
+      };
 
   return (
     <div style={styles.page}>
@@ -269,7 +283,12 @@ function LoginPage({ setIsLoggedIn }) {
           Login to continue your culinary journey.
         </div>
       </div>
+      <div>
+      {showPopup && <Popup message="Login successful! Redirecting to the homepage..." onClose={() => setShowPopup(false)} />}
+      {/* Rest of the login form */}
     </div>
+    </div>
+    
   );
 }
 

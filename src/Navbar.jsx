@@ -1,16 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import logo from './logo.png'; // Import your logo image
-
-const globalStyles = {
-  htmlBody: {
-    margin: 0,
-    padding: 0,
-    width: '100%',
-    overflowX: 'hidden', // Prevent horizontal scrolling
-    boxSizing: 'border-box',
-  },
-};
+import { UserContext } from './UserContext';
+import logo from './logo.png';
 
 const styles = {
   navbar: {
@@ -21,11 +12,10 @@ const styles = {
     width: '100%',
     fontFamily: "'Poppins', sans-serif",
     borderBottom: '2px solid #D4AF37',
-    boxSizing: 'border-box', // Ensure padding/borders are included in width
-    overflowX: 'hidden', // Prevent horizontal scrolling
+    boxSizing: 'border-box',
   },
   navbarLogo: {
-    marginRight: 'auto', // Push logo to the far left
+    marginRight: 'auto',
   },
   logoImage: {
     width: '120px',
@@ -34,7 +24,6 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    flexGrow: 1, // Push content to the right
     gap: '10px',
   },
   navbarLink: {
@@ -46,96 +35,69 @@ const styles = {
     borderRadius: '5px',
     transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
   },
-  navbarLinkHover: {
-    backgroundColor: '#D4AF37', // Change background on hover
-    color: '#FFF',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // Subtle shadow for modern look
-  },
-  searchBar: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '5px',
-  },
-  searchInput: {
-    padding: '5px',
-    fontSize: '1rem',
-    borderRadius: '5px',
-    border: '1px solid #D4AF37',
-    backgroundColor: '#F9F5F0',
-    color: '#333333',
-  },
-  searchButton: {
-    padding: '10px 15px',
-    backgroundColor: '#D4AF37',
+  logoutButton: {
+    backgroundColor: 'red',
     color: '#FFF',
     border: 'none',
+    padding: '10px 15px',
     borderRadius: '5px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
-  },
-  searchButtonHover: {
-    backgroundColor: '#B58929', // Slightly darker gold
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // Subtle shadow for button lift
   },
 };
 
-function Navbar({ isLoggedIn, setIsLoggedIn }) {
-  const [hoveredLink, setHoveredLink] = useState(null);
+function Navbar() {
+  const { user, setUser } = useContext(UserContext);
 
-  useEffect(() => {
-    // Apply global styles
-    Object.keys(globalStyles.htmlBody).forEach((key) => {
-      document.body.style[key] = globalStyles.htmlBody[key];
-      document.documentElement.style[key] = globalStyles.htmlBody[key];
-    });
-  }, []);
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        setUser(null); // Clear user context
+      } else {
+        console.error('Failed to log out');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
 
   return (
     <nav style={styles.navbar}>
-      {/* Logo Section */}
       <div style={styles.navbarLogo}>
         <Link to="/">
           <img src={logo} alt="Culinareat Logo" style={styles.logoImage} />
         </Link>
       </div>
-
-      {/* Navbar Links */}
       <div style={styles.navbarContent}>
-        {/* Common Links */}
-        {['Register', 'Login', 'Add Recipe', 'Profile', 'Shopping List'].map((text, index) => (
-          <Link
-            to={`/${text.toLowerCase().replace(' ', '-')}`}
-            key={index}
-            style={{
-              ...styles.navbarLink,
-              ...(hoveredLink === index ? styles.navbarLinkHover : {}),
-            }}
-            onMouseEnter={() => setHoveredLink(index)}
-            onMouseLeave={() => setHoveredLink(null)}
-          >
-            {text}
-          </Link>
-        ))}
-
-        {/* Search Bar */}
-        <div style={styles.searchBar}>
-          <input
-            type="text"
-            placeholder="Search recipes..."
-            style={styles.searchInput}
-          />
-          <button
-            type="submit"
-            style={{
-              ...styles.searchButton,
-              ...(hoveredLink === 'search' ? styles.searchButtonHover : {}),
-            }}
-            onMouseEnter={() => setHoveredLink('search')}
-            onMouseLeave={() => setHoveredLink(null)}
-          >
-            Search
-          </button>
-        </div>
+        {!user ? (
+          <>
+            <Link to="/register" style={styles.navbarLink}>
+              Register
+            </Link>
+            <Link to="/login" style={styles.navbarLink}>
+              Login
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link to="/add-recipe" style={styles.navbarLink}>
+              Add Recipe
+            </Link>
+            <Link to="/profile" style={styles.navbarLink}>
+              Profile
+            </Link>
+            <Link to="/shopping-list" style={styles.navbarLink}>
+              Shopping List
+            </Link>
+            <button style={styles.logoutButton} onClick={handleLogout}>
+              Logout
+            </button>
+          </>
+        )}
       </div>
     </nav>
   );
