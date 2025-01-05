@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa'; // Font Awesome icon
+import SearchIcon from '@mui/icons-material/Search'; // MUI Search Icon
 
 
 
@@ -375,41 +376,76 @@ const filterByRecipeName = (searchTerm) => {
             Explore our curated selection of recipes, crafted to delight your taste buds!
           </p>
     
-          {/* Search Bar */}
-          <div style={{ position: "relative", marginBottom: "20px" }}>
-            <div style={styles.searchBarContainer}>
-              <input
-                type="text"
-                placeholder={`Search ${label.toLowerCase()} recipes or ingredients...`}
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  if (searchType === "recipe") {
-                    filterByRecipeName(e.target.value);
-                  } else if (searchType === "ingredient" && e.target.value.trim()) {
-                    fetch(`http://localhost:5001/api/search?query=${e.target.value}&type=ingredient&action=autocomplete`)
-                      .then((res) => res.json())
-                      .then((data) => setSuggestedIngredients(data.ingredients || []))
-                      .catch((error) => console.error("Error fetching ingredient suggestions:", error));
-                  } else {
-                    setSuggestedIngredients([]);
-                  }
-                }}
-                style={styles.searchInput}
-              />
-              <button
-                style={styles.searchButton}
-                onClick={() => {
-                  if (searchType === "ingredient" && selectedIngredients.length > 0) {
-                    handleIngredientSearch();
-                  } else if (searchType === "recipe") {
-                    filterByRecipeName(searchTerm);
-                  }
-                }}
-              >
-                Search
-              </button>
-            </div>
+    {/* Search Bar */}  
+<div style={{ width: '100%', margin: '30px auto', maxWidth: '600px', position: 'relative' }}>
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      backgroundColor: '#fff',
+      borderRadius: '50px',
+      padding: '8px 16px',
+      boxShadow: '0 5px 10px rgba(0, 0, 0, 0.1)',
+    }}
+  >
+    <input
+      type="text"
+      placeholder={`Search ${label.toLowerCase()} recipes or ingredients...`}
+      value={searchTerm}
+      onChange={(e) => {
+        setSearchTerm(e.target.value);
+        if (searchType === 'recipe') {
+          filterByRecipeName(e.target.value);
+        } else if (searchType === 'ingredient' && e.target.value.trim()) {
+          fetch(`http://localhost:5001/api/search?query=${e.target.value}&type=ingredient&action=autocomplete`)
+            .then((res) => res.json())
+            .then((data) => setSuggestedIngredients(data.ingredients || []))
+            .catch((error) => console.error('Error fetching ingredient suggestions:', error));
+        } else {
+          setSuggestedIngredients([]);
+        }
+      }}
+      style={{
+        flex: 1,
+        border: 'none',
+        fontSize: '16px',
+        borderRadius: '50px',
+        padding: '12px 16px',
+        outline: 'none',
+      }}
+    />
+    <button
+      onClick={() => {
+        if (searchType === 'ingredient' && selectedIngredients.length > 0) {
+          handleIngredientSearch();
+        } else if (searchType === 'recipe') {
+          filterByRecipeName(searchTerm);
+        }
+      }}
+      style={{
+        backgroundColor: 'transparent',
+        border: 'none',
+        padding: '10px 12px',
+        borderRadius: '50px',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <SearchIcon
+        sx={{
+          color: '#D77A65',
+          fontSize: '28px', // Larger magnifying glass
+          transition: 'color 0.3s ease',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = '#B55335')} // Darker pink on hover
+        onMouseLeave={(e) => (e.currentTarget.style.color = '#D77A65')}
+      />
+    </button>
+  </div>
+
+
     
             {/* Suggestions Dropdown */}
             {suggestedIngredients.length > 0 && (
@@ -450,27 +486,30 @@ const filterByRecipeName = (searchTerm) => {
             )}
           </div>
     
-          {/* Search Tabs */}
-          <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
-            {["recipe", "ingredient"].map((type) => (
-              <button
-                key={type}
-                onClick={() => setSearchType(type)}
-                style={{
-                  padding: "10px 20px",
-                  margin: "0 5px",
-                  borderRadius: "20px",
-                  border: searchType === type ? "2px solid #D4AF37" : "1px solid #D4AF37",
-                  backgroundColor: searchType === type ? "#D4AF37" : "#fff",
-                  color: searchType === type ? "#fff" : "#D4AF37",
-                  cursor: "pointer",
-                }}
-              >
-                {type === "recipe" ? "By Recipe Name" : "By Ingredient"}
-              </button>
-            ))}
-          </div>
-    
+       {/* Search Tabs */}
+    <div style={{ textAlign: 'center', marginTop: '20px' }}>
+  {['all', 'recipe', 'ingredient'].map((type) => (
+    <button
+      key={type}
+      onClick={() => setSearchType(type)}
+      style={{
+        padding: '10px 20px',
+        margin: '0 10px',
+        borderRadius: '40px',
+        border: searchType === type ? '2px solid #D77A65' : '2px solid #ccc',
+        backgroundColor: searchType === type ? '#D77A65': '#fff',
+        color: searchType === type ? '#fff' : '#D77A65',
+        fontSize: '16px',
+        cursor: 'pointer',
+        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+        transition: 'all 0.3s ease',
+      }}
+    >
+      {type === 'all' ? 'Search All' : type === 'recipe' ? 'By Recipe Name' : 'By Ingredient'}
+    </button>
+  ))}
+</div>
+
           {/* Selected Ingredients */}
           <div style={styles.selectedIngredients}>
             {selectedIngredients.map((ingredient, index) => (
@@ -542,7 +581,7 @@ const filterByRecipeName = (searchTerm) => {
     onClick={() => paginate(currentPage + 1)}
     style={{
       ...styles.paginationButton,
-      backgroundColor: currentPage === totalPages ? '#f0f0f0' : '#d77a65',
+      backgroundColor: currentPage === totalPages ? '#fff' : '#d77a65',
       color: currentPage === totalPages ? '#ccc' : '#fff',
       cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
     }}
