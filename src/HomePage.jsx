@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { TextField, InputAdornment, Button } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search'; // MUI Search Icon
 import breakfastImage from './images/breakfast.jpg'; // Breakfast
 import lunchImage from './images/lunch.png'; // Lunch
 import dinnerImage from './images/dinner.jpg'; // Dinner
@@ -415,8 +417,18 @@ const handleSearch = () => {
       </div>
 
   {/* Search Bar */}
-  <div style={{ position: 'relative', width: '50%', margin: '20px auto' }}>
-  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', border: '2px solid #D4AF37', borderRadius: '30px', height: '42px', overflow: 'hidden' }}>
+{/* Search Bar */}  
+<div style={{ width: '100%', margin: '30px auto', maxWidth: '600px', position: 'relative' }}>
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      backgroundColor: '#fff',
+      borderRadius: '50px',
+      padding: '8px 16px',
+      boxShadow: '0 5px 10px rgba(0, 0, 0, 0.1)',
+    }}
+  >
     <input
       type="text"
       placeholder="Search recipes or ingredients..."
@@ -425,62 +437,64 @@ const handleSearch = () => {
       style={{
         flex: 1,
         border: 'none',
-        padding: '10px 16px',
-        outline: 'none',
-        fontSize: '14px',
-        height: '100%',
+        fontSize: '16px',
+        borderRadius: '50px',
+        padding: '12px 16px',
+        outline: 'none', // Removes the outline
       }}
     />
-<div
-  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#B8860B')} // Hover effect
-  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#D4AF37')} // Restore original color
-  style={{
-    backgroundColor: '#D4AF37',
-    color: '#fff',
-    border: 'none',
-    padding: '0 20px',
-    fontSize: '16px',
-    height: '100%',
-    cursor: 'pointer',
-    borderTopRightRadius: '30px',
-    borderBottomRightRadius: '30px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }}
-  onClick={handleSearch}
->
-  Search
-</div>
-
+    <button
+      onClick={handleSearch}
+      style={{
+        backgroundColor: 'transparent', // No background
+        border: 'none',
+        padding: '10px 12px',
+        borderRadius: '50px',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <SearchIcon
+        sx={{
+          color: '#D77A65', // Pink color for the magnifying glass
+          fontSize: '28px', // Adjust the size if needed
+          transition: 'color 0.3s ease',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = '#B55335')} // Darker pink on hover
+        onMouseLeave={(e) => (e.currentTarget.style.color = '#D77A65')}
+      />
+    </button>
   </div>
+
 
 
 
 
     {/* Search Tabs */}
-<div style={{ position: 'relative', width: '50%', margin: '20px auto' }}>
-  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-    {['all', 'recipe', 'ingredient'].map((type) => (
-      <button
-        key={type}
-        onClick={() => setSearchType(type)}
-        style={{
-          padding: '10px 20px',
-          margin: '0 5px',
-          borderRadius: '20px',
-          border: searchType === type ? '2px solid #D4AF37' : '1px solid #D4AF37', // Matching yellow color
-          backgroundColor: searchType === type ? '#D4AF37' : '#fff', // Active button background
-          color: searchType === type ? '#fff' : '#D4AF37', // Text color
-          cursor: 'pointer',
-        }}
-      >
-        {type === 'all' ? 'Search All' : type === 'recipe' ? 'By Recipe Name' : 'By Ingredient'}
-      </button>
-    ))}
-  </div>
-
-  </div>
+    <div style={{ textAlign: 'center', marginTop: '20px' }}>
+  {['all', 'recipe', 'ingredient'].map((type) => (
+    <button
+      key={type}
+      onClick={() => setSearchType(type)}
+      style={{
+        padding: '10px 20px',
+        margin: '0 10px',
+        borderRadius: '40px',
+        border: searchType === type ? '2px solid #D77A65' : '2px solid #ccc',
+        backgroundColor: searchType === type ? '#D77A65': '#fff',
+        color: searchType === type ? '#fff' : '#D77A65',
+        fontSize: '16px',
+        cursor: 'pointer',
+        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+        transition: 'all 0.3s ease',
+      }}
+    >
+      {type === 'all' ? 'Search All' : type === 'recipe' ? 'By Recipe Name' : 'By Ingredient'}
+    </button>
+  ))}
+</div>
 
 
 
