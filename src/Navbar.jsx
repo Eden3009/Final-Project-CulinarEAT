@@ -1,7 +1,10 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { UserContext } from './UserContext';
+import { FaPowerOff } from 'react-icons/fa'; // Import a power-off icon
 import logo from './logo.png';
+import { ToastContainer, toast } from 'react-toastify'; // Import Toastify
+import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
 
 const styles = {
   navbar: {
@@ -31,27 +34,51 @@ const styles = {
     color: '#F9F5F0',
     fontSize: '1rem',
     padding: '10px 15px',
-    fontFamily: "'Poppins', sans-serif",
     borderRadius: '5px',
-    transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
   },
   logoutButton: {
-    backgroundColor: 'red',
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: '#FF6B6B',
     color: '#FFF',
     border: 'none',
-    padding: '10px 15px',
+    padding: '10px 20px',
+    borderRadius: '20px',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    gap: '8px',
+  },
+  toastButtons: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginTop: '10px',
+  },
+  confirmButton: {
+    backgroundColor: '#FF6B6B',
+    color: '#FFF',
+    padding: '5px 10px',
     borderRadius: '5px',
     cursor: 'pointer',
+    border: 'none',
+  },
+  cancelButton: {
+    backgroundColor: '#D3D3D3',
+    color: '#333',
+    padding: '5px 10px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    border: 'none',
   },
 };
 
 function Navbar() {
   const { user, setUser } = useContext(UserContext);
 
-  // Check if the user is logged in by determining if `user` exists
+  // Check if the user is logged in
   const isLoggedIn = !!user;
 
   const handleLogout = async () => {
+    toast.dismiss(); // Dismiss the confirmation toast immediately
     try {
       const response = await fetch('http://localhost:5001/logout', {
         method: 'POST',
@@ -59,13 +86,45 @@ function Navbar() {
       });
 
       if (response.ok) {
-        setUser(null); // Clear user context
+        toast.success('You have been logged out successfully!', {
+          position: 'top-center',
+          autoClose: 3000,
+        });
+        setUser(null); // Clear user context after logout
       } else {
-        console.error('Failed to log out');
+        toast.error('Failed to log out. Please try again.', {
+          position: 'top-center',
+        });
       }
     } catch (error) {
-      console.error('Error during logout:', error);
+      toast.error(`Error during logout: ${error.message}`, {
+        position: 'top-center',
+      });
     }
+  };
+
+  const confirmLogout = () => {
+    toast.info(
+      <div>
+        <p>Are you sure you want to log out?</p>
+        <div style={styles.toastButtons}>
+          <button style={styles.confirmButton} onClick={handleLogout}>
+            Yes
+          </button>
+          <button
+            style={styles.cancelButton}
+            onClick={() => toast.dismiss()}
+          >
+            No
+          </button>
+        </div>
+      </div>,
+      {
+        position: 'top-center',
+        autoClose: false, // Keep the toast open until the user selects an option
+        closeButton: false, // Remove default close button
+      }
+    );
   };
 
   return (
@@ -104,14 +163,16 @@ function Navbar() {
               Chatbot
             </Link>
             <button
-              onClick={handleLogout}
+              onClick={confirmLogout}
               style={styles.logoutButton}
             >
-              Logout
+              <FaPowerOff /> Logout
             </button>
           </>
         )}
       </div>
+
+      <ToastContainer />
     </nav>
   );
 }
