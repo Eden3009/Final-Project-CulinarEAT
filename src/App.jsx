@@ -16,6 +16,8 @@ import ResetPasswordPage from './ResetPasswordPage'; // Import ResetPasswordPage
 import axios from 'axios';
 import RecipeViewPage from './RecipeViewPage'; // Import the new component
 import { UserProvider } from './UserContext';
+import ProtectedRoute from './ProtectedRoute';
+
 
 
 
@@ -106,48 +108,56 @@ function App() {
         {/* Routes */}
         <ErrorBoundary>
         <Routes>
+  {/* Public Routes */}
   <Route path="/" element={<HomePage />} />
-  <Route path="/category" element={<CategoryPage />} /> {/* Dynamic category route */}
-  <Route path="/add-recipe" element={<AddRecipePage />} />
-  <Route path="/profile" element={<ProfilePage />} />
+  <Route path="/category" element={<CategoryPage />} />
   <Route path="/recipe-view/:RecipeID" element={<RecipeViewPage />} />
-  <Route path="/shopping-list" element={<ShoppingListPage />} />
+  <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} />
+  <Route path="/register" element={<RegistrationPage />} />
+
+  {/* Protected Routes */}
   <Route
-    path="/favorites"
+    path="/add-recipe"
     element={
-      isLoggedIn ? (
-        <FavoritesPage />
-      ) : (
-        <LoginPage setIsLoggedIn={setIsLoggedIn} />
-      )
+      <ProtectedRoute>
+        <AddRecipePage />
+      </ProtectedRoute>
     }
   />
   <Route
     path="/profile"
     element={
-      isLoggedIn ? (
+      <ProtectedRoute>
         <ProfilePage />
-      ) : (
-        <LoginPage setIsLoggedIn={setIsLoggedIn} />
-      )
+      </ProtectedRoute>
     }
   />
   <Route
-    path="/login"
-    element={<LoginPage setIsLoggedIn={setIsLoggedIn} />}
+    path="/favorites"
+    element={
+      <ProtectedRoute>
+        <FavoritesPage />
+      </ProtectedRoute>
+    }
   />
-  <Route path="/register" element={<RegistrationPage />} />
   <Route
     path="/chatbot"
     element={
-      isLoggedIn ? (
+      <ProtectedRoute>
         <ChatbotPage />
-      ) : (
-        <LoginPage setIsLoggedIn={setIsLoggedIn} />
-      )
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/shopping-list"
+    element={
+      <ProtectedRoute>
+        <ShoppingListPage />
+      </ProtectedRoute>
     }
   />
 </Routes>
+
         </ErrorBoundary>
 
         {/* Footer */}

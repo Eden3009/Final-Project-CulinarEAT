@@ -48,6 +48,9 @@ const styles = {
 function Navbar() {
   const { user, setUser } = useContext(UserContext);
 
+  // Check if the user is logged in by determining if `user` exists
+  const isLoggedIn = !!user;
+
   const handleLogout = async () => {
     try {
       const response = await fetch('http://localhost:5001/logout', {
@@ -72,8 +75,9 @@ function Navbar() {
           <img src={logo} alt="Culinareat Logo" style={styles.logoImage} />
         </Link>
       </div>
+
       <div style={styles.navbarContent}>
-        {!user ? (
+        {!isLoggedIn ? (
           <>
             <Link to="/register" style={styles.navbarLink}>
               Register
@@ -88,12 +92,21 @@ function Navbar() {
               Add Recipe
             </Link>
             <Link to="/profile" style={styles.navbarLink}>
-              Profile
+              Profile ({user?.UserName || 'User'})
             </Link>
             <Link to="/shopping-list" style={styles.navbarLink}>
               Shopping List
             </Link>
-            <button style={styles.logoutButton} onClick={handleLogout}>
+            <Link to="/favorites" style={styles.navbarLink}>
+              Favorites
+            </Link>
+            <Link to="/chatbot" style={styles.navbarLink}>
+              Chatbot
+            </Link>
+            <button
+              onClick={handleLogout}
+              style={styles.logoutButton}
+            >
               Logout
             </button>
           </>

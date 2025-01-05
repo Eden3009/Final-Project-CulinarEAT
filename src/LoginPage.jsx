@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react'; // Added useContext
 import pic3 from './images/loginpic.jpg'; // Import the background image
 import { Link } from 'react-router-dom';
 import Popup from './Popup'; // Import the Popup component
 import { useNavigate } from 'react-router-dom';
+import { UserContext } from './UserContext'; // Added UserContext import
+
+
 
 
 
@@ -119,6 +122,8 @@ function LoginPage({ setIsLoggedIn }) {
   const [isHovering, setIsHovering] = useState(false); // Track hover state
   const [showPopup, setShowPopup] = useState(false);
   const navigate = useNavigate();
+  const { setUser } = useContext(UserContext); // Access setUser from context
+
 
   const validateField = (name, value) => {
     if (value.trim() === '') {
@@ -184,6 +189,8 @@ function LoginPage({ setIsLoggedIn }) {
             // Login successful
             console.log('Login successful:', data);
             setIsLoggedIn(true);
+            setUser(data.user); // Ensure this is the correct user object
+
             setShowPopup(true); // Show success popup
 
             // Redirect to homepage after 4 seconds
