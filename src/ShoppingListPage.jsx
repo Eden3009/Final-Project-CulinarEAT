@@ -9,6 +9,7 @@ import {
   Select,
 } from '@mui/material';
 import { Edit, Add, Remove } from '@mui/icons-material';
+import { ToggleButtonGroup, ToggleButton } from '@mui/material';
 
 const styles = {
   pageContainer: {
@@ -211,18 +212,49 @@ function ShoppingListPage() {
 
       {/* Filter By Section */}
       <div style={styles.filterContainer}>
-        <FormControl style={styles.formControl} variant="outlined">
-          <InputLabel>Filter By</InputLabel>
-          <Select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            label="Filter By"
-          >
-            <MenuItem value="Alphabetical">Alphabetical</MenuItem>
-            <MenuItem value="Category">Category</MenuItem>
-          </Select>
-        </FormControl>
-      </div>
+  <ToggleButtonGroup
+    value={filterType}
+    exclusive
+    onChange={(e, newValue) => {
+      if (newValue) setFilterType(newValue); // Prevents deselection
+    }}
+    fullWidth
+    style={{
+      backgroundColor: 'transparent',
+      border: '1px solid rgba(0, 0, 0, 0.23)',
+      borderRadius: '8px',
+    }}
+  >
+    <ToggleButton
+      value="Alphabetical"
+      style={{
+        fontFamily: '"Source Sans Pro", sans-serif',
+        fontWeight: 'bold',
+        fontSize: '16px',
+        color: filterType === 'Alphabetical' ? '#d77a65' : '#555',
+        borderRadius: '8px 0 0 8px',
+        backgroundColor: filterType === 'Alphabetical' ? '#d3d3d3' : 'transparent', // Darker gray when selected
+      }}
+    >
+      Alphabetical
+    </ToggleButton>
+    <ToggleButton
+      value="Category"
+      style={{
+        fontFamily: '"Source Sans Pro", sans-serif',
+        fontWeight: 'bold',
+        fontSize: '16px',
+        color: filterType === 'Category' ? '#d77a65' : '#555',
+        borderRadius: '0 8px 8px 0',
+        backgroundColor: filterType === 'Category' ? '#d3d3d3' : 'transparent', // Darker gray when selected
+      }}
+    >
+      Category
+    </ToggleButton>
+  </ToggleButtonGroup>
+</div>
+
+
 
       {/* Add Ingredient Section */}
       <div style={styles.addIngredientContainer}>

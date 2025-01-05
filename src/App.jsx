@@ -18,6 +18,7 @@ import RecipeViewPage from './RecipeViewPage'; // Import the new component
 import { UserProvider } from './UserContext';
 import ProtectedRoute from './ProtectedRoute';
 
+
 const appStyles = {
   app: {
     textAlign: 'center',

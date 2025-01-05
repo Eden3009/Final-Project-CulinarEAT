@@ -167,6 +167,7 @@ function RegistrationPage() {
     Email: '',
     UserName: '',
     Password: '',
+
   });
 
   const [errors, setErrors] = useState({});
@@ -232,7 +233,7 @@ function RegistrationPage() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ FName: formData.FName, LName: formData.LName, Email: formData.Email, UserName: formData.UserName, Password: formData.Password, Role: 'BasicUser' }),
+          body: JSON.stringify({ ...formData, Role: 'BasicUser' }),
         });
 
         const data = await response.json();
@@ -346,7 +347,24 @@ function RegistrationPage() {
               />
               {errors.Password && <span style={styles.errorMessage}>{errors.Password}</span>}
             </div>
-           
+            <div style={styles.group}>
+              <label style={styles.label} htmlFor="Area">Area:</label>
+              <select
+                style={styles.select}
+                id="Area"
+                name="Area"
+                value={formData.Area}
+                onChange={handleChange}
+                required
+              >
+                <option value="North">North</option>
+                <option value="Center">Center</option>
+                <option value="Jerusalem">Jerusalem</option>
+                <option value="South">South</option>
+                <option value="Judea and Samaria">Judea and Samaria</option>
+                <option value="Abroad">Abroad</option>
+              </select>
+            </div>
             <button
   style={{
     ...styles.button, // Default button styles
