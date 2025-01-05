@@ -18,14 +18,6 @@ import RecipeViewPage from './RecipeViewPage'; // Import the new component
 import { UserProvider } from './UserContext';
 import ProtectedRoute from './ProtectedRoute';
 
-
-
-
-// Inside <Routes> in App.js:
-
-
-
-
 const appStyles = {
   app: {
     textAlign: 'center',
@@ -96,75 +88,74 @@ function App() {
       });
   }, []);
 
- 
-
   return (
     <UserProvider> {/* Wrap the app with UserProvider */}
-    <Router>
       <div style={appStyles.app}>
-        {/* Navbar */}
-        <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+        <Router>
+          {/* Navbar */}
+          <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
 
-        {/* Routes */}
-        <ErrorBoundary>
-        <Routes>
-  {/* Public Routes */}
-  <Route path="/" element={<HomePage />} />
-  <Route path="/category" element={<CategoryPage />} />
-  <Route path="/recipe-view/:RecipeID" element={<RecipeViewPage />} />
-  <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} />
-  <Route path="/register" element={<RegistrationPage />} />
+          {/* Routes */}
+          <ErrorBoundary>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/category" element={<CategoryPage />} /> {/* Dynamic category route */}
+              <Route path="/recipe-view/:RecipeID" element={<RecipeViewPage />} />
+              <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} />
+              <Route path="/register" element={<RegistrationPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/privacy" element={<PrivacyPolicyPage />} /> {/* Privacy route */}
 
-  {/* Protected Routes */}
-  <Route
-    path="/add-recipe"
-    element={
-      <ProtectedRoute>
-        <AddRecipePage />
-      </ProtectedRoute>
-    }
-  />
-  <Route
-    path="/profile"
-    element={
-      <ProtectedRoute>
-        <ProfilePage />
-      </ProtectedRoute>
-    }
-  />
-  <Route
-    path="/favorites"
-    element={
-      <ProtectedRoute>
-        <FavoritesPage />
-      </ProtectedRoute>
-    }
-  />
-  <Route
-    path="/chatbot"
-    element={
-      <ProtectedRoute>
-        <ChatbotPage />
-      </ProtectedRoute>
-    }
-  />
-  <Route
-    path="/shopping-list"
-    element={
-      <ProtectedRoute>
-        <ShoppingListPage />
-      </ProtectedRoute>
-    }
-  />
-</Routes>
+              {/* Protected Routes */}
+              <Route
+                path="/add-recipe"
+                element={
+                  <ProtectedRoute>
+                    <AddRecipePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/favorites"
+                element={
+                  <ProtectedRoute>
+                    <FavoritesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/chatbot"
+                element={
+                  <ProtectedRoute>
+                    <ChatbotPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/shopping-list"
+                element={
+                  <ProtectedRoute>
+                    <ShoppingListPage />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </ErrorBoundary>
 
-        </ErrorBoundary>
-
-        {/* Footer */}
-        <Footer />
+          {/* Footer */}
+          <Footer />
+        </Router>
       </div>
-    </Router>
-    </UserProvider> // End wrapping
+    </UserProvider>
   );
 }
 

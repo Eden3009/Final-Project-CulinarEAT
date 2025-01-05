@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import pic3 from './images/resetpassword.jpeg';
+import { ToastContainer, toast } from 'react-toastify'; // Import Toastify
+import 'react-toastify/dist/ReactToastify.css'; // Import Toastify styles
+
 
 const styles = {
   page: {
@@ -153,25 +156,30 @@ function ResetPasswordPage() {
       setError('');
     }
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateEmail(email)) {
-      setError('Please enter a valid email address.');
-      setSuccess('');
+      toast.error('Please enter a valid email address.', {
+        position: 'top-center',
+        autoClose: 3000,
+      });
       return;
     }
-    setError('');
-    setSuccess('Password reset instructions have been sent to your email.');
-
-    // Show navigation message and navigate to login page after 5 seconds
+  
+    toast.success('Password reset instructions have been sent to your email. ', {
+      position: 'top-center',
+      autoClose: 5000,
+    });
+  
+    // Navigate to login screen after 5 seconds
     setTimeout(() => {
       navigate('/login');
     }, 5000);
   };
-
+  
   return (
     <div style={styles.page}>
+      <ToastContainer />
       <div style={styles.formContainer}>
         <div style={styles.formBox}>
           <h1 style={styles.header}>Reset Password</h1>
