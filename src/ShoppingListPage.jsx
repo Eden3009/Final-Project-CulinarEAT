@@ -10,6 +10,11 @@ import {
 } from '@mui/material';
 import { Edit, Add, Remove } from '@mui/icons-material';
 import { ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { toast, ToastContainer, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
+
+
 
 const styles = {
   pageContainer: {
@@ -84,22 +89,44 @@ const styles = {
   exportContainer: {
     marginTop: '20px',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column', // Ensure that the error message goes beneath
     alignItems: 'center',
     gap: '10px',
   },
-  exportButton: {
-    backgroundColor: '#d77a65', // Updated button color
-    color: '#FFF',
-    fontWeight: 'bold',
-    padding: '10px 20px',
-    fontSize: '16px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    fontFamily: "'Merienda', cursive", // Matching font
-    transition: 'background-color 0.3s ease',
+  buttonRow: {
+    display: 'flex',
+    flexDirection: 'row', // Side by side buttons
+    gap: '10px',
+    justifyContent: 'center',
   },
   
+exportButton: {
+  backgroundColor: '#d77a65',
+  color: '#FFF',
+  fontWeight: 'bold',
+  padding: '8px 16px', // Reduced padding to make the button more compact
+  fontSize: '14px', // Reduced font size
+  borderRadius: '5px',
+  cursor: 'pointer',
+  fontFamily: "'Merienda', cursive",
+  transition: 'background-color 0.3s ease',
+  width: '150px', // Reduced the width to 150px
+  textAlign: 'center',
+},
+saveButton: {
+  backgroundColor: '#4caf50',
+  color: '#FFF',
+  fontWeight: 'bold',
+  padding: '8px 16px', // Reduced padding to match the export button
+  fontSize: '14px', // Reduced font size to match
+  borderRadius: '5px',
+  cursor: 'pointer',
+  fontFamily: "'Merienda', cursive",
+  transition: 'background-color 0.3s ease',
+  width: '150px', // Same width as the export button
+  textAlign: 'center',
+},
+
   errorMessage: {
     color: 'red',
     fontSize: '14px',
@@ -129,10 +156,10 @@ const styles = {
 function ShoppingListPage() {
   const [shoppingList, setShoppingList] = useState([]);
   const [selectedIngredient, setSelectedIngredient] = useState('');
-  const [filterType, setFilterType] = useState('Category');
+  const [filterType, setFilterType] = useState('Label');
   const [errorMessageVisible, setErrorMessageVisible] = useState(false);
   const [inputError, setInputError] = useState(false);
-
+  const navigate = useNavigate(); // Add the `useNavigate` hook for navigation
 
 
   const addItem = () => {
@@ -149,8 +176,9 @@ function ShoppingListPage() {
     ) {
       setShoppingList([
         ...shoppingList,
-        { label: selectedIngredient, quantity: 1, category: 'Uncategorized', isEditing: false },
+        { label: selectedIngredient, quantity: 1, unit: 'unit', category: 'Uncategorized', isEditing: false },
       ]);
+      
       setSelectedIngredient('');
       setInputError(false); // Clear error when an ingredient is added
     }
@@ -183,32 +211,71 @@ function ShoppingListPage() {
     setShoppingList(shoppingList.filter((_, i) => i !== index));
   };
 
-  const groupedByCategory = shoppingList.reduce((acc, item) => {
+  const updateUnit = (index, newUnit) => {
+    const updatedList = shoppingList.map((item, i) =>
+      i === index ? { ...item, unit: newUnit } : item
+    );
+    setShoppingList(updatedList);
+  };
+  
+  const groupedByLabel = shoppingList.reduce((acc, item) => {
     if (!acc[item.category]) {
       acc[item.category] = [];
     }
     acc[item.category].push(item);
     return acc;
   }, {});
-
+  const saveToProfile = () => {
+    if (shoppingList.length === 0) {
+      // Show the regular error message
+      setErrorMessageVisible(true);
+  
+      // Hide the error message after 3 seconds, regardless of what happens
+      setTimeout(() => {
+        setErrorMessageVisible(false);
+      }, 3000); // 3 seconds
+    } else {
+      setErrorMessageVisible(false); // Hide regular error message if it was showing
+      toast.success('Shopping list saved successfully!', {
+        position: "top-center",
+        autoClose: 2000, // Closes after 2 seconds
+        transition: Slide,
+      });
+      setTimeout(() => {
+        navigate('/profile'); // Redirect to the profile page
+      }, 2000); // Redirect after the toast disappears
+    }
+  };
+  
+  
+  
   const exportToWhatsApp = () => {
     if (shoppingList.length === 0) {
-      setErrorMessageVisible(true);
+      setErrorMessageVisible(true); // Show the error message
+  
+      // Hide the error message after 3 seconds
+      setTimeout(() => {
+        setErrorMessageVisible(false);
+      }, 3000); // 3 seconds
     } else {
-      setErrorMessageVisible(false);
+      setErrorMessageVisible(false); // Hide the error message if list is not empty
       const message = shoppingList
-        .map((item) => `${item.label} - Quantity: ${item.quantity}`)
-        .join('%0A'); // Line break in WhatsApp message
+      .map((item) => `${item.label} - Quantity: ${item.quantity} ${item.unit}`)
+      .join('%0A');
+    
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(
         `Here is my shopping list:%0A${message}`
       )}`;
       window.open(whatsappUrl, '_blank');
     }
   };
-
+  
   return (
     <div style={styles.pageContainer}>
       <h1 style={styles.header}>Shopping List</h1>
+      
+
+
 
       {/* Filter By Section */}
       <div style={styles.filterContainer}>
@@ -239,17 +306,17 @@ function ShoppingListPage() {
       Alphabetical
     </ToggleButton>
     <ToggleButton
-      value="Category"
+      value="Label"
       style={{
         fontFamily: '"Source Sans Pro", sans-serif',
         fontWeight: 'bold',
         fontSize: '16px',
-        color: filterType === 'Category' ? '#d77a65' : '#555',
+        color: filterType === 'Label' ? '#d77a65' : '#555',
         borderRadius: '0 8px 8px 0',
-        backgroundColor: filterType === 'Category' ? '#d3d3d3' : 'transparent', // Darker gray when selected
+        backgroundColor: filterType === 'Label' ? '#d3d3d3' : 'transparent', // Darker gray when selected
       }}
     >
-      Category
+      Label
     </ToggleButton>
   </ToggleButtonGroup>
 </div>
@@ -292,11 +359,11 @@ function ShoppingListPage() {
 
       {/* Shopping List Section */}
       <div style={styles.listContainer}>
-        {filterType === 'Category' ? (
-          Object.keys(groupedByCategory).map((category) => (
-            <div key={category}>
-              <Typography style={styles.categoryHeading}>{category}</Typography>
-              {groupedByCategory[category].map((item, index) => (
+        {filterType === 'Label' ? (
+          Object.keys(groupedByLabel).map((label) => (
+            <div key={label}>
+              <Typography style={styles.categoryHeading}>{label}</Typography>
+              {groupedByLabel[label].map((item, index) => (
                 <div key={index} style={styles.listItem}>
                   {item.isEditing ? (
                     <TextField
@@ -366,7 +433,26 @@ function ShoppingListPage() {
                   >
                     <Add />
                   </Button>
-                  <Typography>{item.quantity}</Typography>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+  <Typography>{item.quantity}</Typography>
+  <FormControl variant="outlined" size="small" style={{ width: '80px' }}>
+    <Select
+      value={item.unit || 'unit'}
+      onChange={(e) => updateUnit(index, e.target.value)}
+    >
+      <MenuItem value="unit">unit</MenuItem>
+      <MenuItem value="g">g</MenuItem>
+      <MenuItem value="kg">kg</MenuItem>
+      <MenuItem value="ml">ml</MenuItem>
+      <MenuItem value="l">l</MenuItem>
+      <MenuItem value="tsp">tsp</MenuItem>
+      <MenuItem value="tbsp">tbsp</MenuItem>
+      <MenuItem value="cup">cup</MenuItem>
+    </Select>
+  </FormControl>
+</div>
+
+
                   <Button
                     variant="text"
                     onClick={() => updateQuantity(index, item.quantity - 1)}
@@ -392,21 +478,31 @@ function ShoppingListPage() {
         )}
       </div>
 
-      {/* Export Section */}
       <div style={styles.exportContainer}>
-        <Button
-          variant="contained"
-          style={styles.exportButton}
-          onClick={exportToWhatsApp}
-        >
-          Export to WhatsApp
-        </Button>
-        {errorMessageVisible && (
-          <Typography style={styles.errorMessage}>
-            The shopping list is empty. Add items before exporting.
-          </Typography>
-        )}
-      </div>
+  <div style={styles.buttonRow}>
+    <Button
+      variant="contained"
+      style={styles.exportButton}
+      onClick={exportToWhatsApp}
+    >
+      Export to WhatsApp
+    </Button>
+    <Button
+      variant="contained"
+      style={styles.saveButton}
+      onClick={saveToProfile}
+    >
+      Save to Profile
+    </Button>
+  </div>
+  {errorMessageVisible && (
+    <Typography style={styles.errorMessage}>
+      The shopping list is empty. Add items before exporting or saving.
+    </Typography>
+  )}
+<ToastContainer />
+</div>
+
     </div>
   );
 }

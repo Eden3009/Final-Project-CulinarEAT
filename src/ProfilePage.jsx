@@ -37,7 +37,7 @@ const styles = {
     fontSize: '22px',
     fontWeight: 'bold',
     marginBottom: '15px',
-    color: '#8B4513',
+    color: '#d77a65',
     borderBottom: '2px solid #D4AF37',
     paddingBottom: '5px',
   },
@@ -136,7 +136,17 @@ function ProfilePage() {
   const [errors, setErrors] = useState({});
   const [passwordSaved, setPasswordSaved] = useState(false);
   const [isHovering, setIsHovering] = useState(false); // Add this state at the top of the component
+  const [shoppingLists, setShoppingLists] = useState([]);
 
+  useEffect(() => {
+    // Fetch shopping lists
+    fetch('/api/user/shoppingLists')
+      .then((res) => res.json())
+      .then((data) => setShoppingLists(data))
+      .catch((err) => console.error(err));
+  }, []);
+  
+  
   useEffect(() => {
     // Fetch profile info
     fetch('/api/profile')
@@ -247,6 +257,46 @@ function ProfilePage() {
             <p>No reviews added yet.</p>
           )}
         </div>
+
+{/* My Shopping Lists Section */}
+<div style={styles.section}>
+  <h2 style={styles.sectionHeader}>My Shopping Lists</h2>
+  {shoppingLists.length > 0 ? (
+    shoppingLists.map((list) => (
+      <div key={list.id} style={styles.recipeCard}>
+        <div>
+          <p style={styles.userDetails}>
+            <strong>Date:</strong> {new Date(list.createdAt).toLocaleDateString()}
+          </p>
+          <p style={styles.userDetails}>
+            <strong>Ingredients:</strong>
+          </p>
+          <ul>
+            {list.ingredients.map((ingredient, index) => (
+              <li key={index} style={styles.reviewText}>{ingredient}</li>
+            ))}
+          </ul>
+        </div>
+        <div style={styles.actionButtons}>
+          <button
+            style={{ ...styles.button, ...styles.editButton }}
+            onClick={() => console.log(`Edit shopping list ID: ${list.id}`)}
+          >
+            Edit
+          </button>
+          <button
+            style={{ ...styles.button, ...styles.deleteButton }}
+            onClick={() => console.log(`Delete shopping list ID: ${list.id}`)}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ))
+  ) : (
+    <p>No shopping lists saved yet.</p>
+  )}
+</div>
 
         {/* Change Password */}
         <div style={{ ...styles.section, ...styles.changePasswordSection }}>
