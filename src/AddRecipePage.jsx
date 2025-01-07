@@ -7,6 +7,8 @@ import { useContext } from 'react';
 import { UserContext } from './UserContext';
 
 
+
+
 const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -349,6 +351,8 @@ const AddRecipePage = () => {
   const [recipeName, setRecipeName] = useState("");
   const [description, setDescription] = useState("");
   const [measures, setMeasures] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [isAdding, setIsAdding] = useState(false);
   const [ingredients, setIngredients] = useState([
     {
       quantity: "",
@@ -871,18 +875,44 @@ const categories = [
           </Select>
 
           <SmallInputContainer>
-            <IngredientAutocomplete
-              value={ingredients[index]?.name || ""}
-              onSelectIngredient={(selectedIngredient) => {
-                const newIngredients = [...ingredients];
-                newIngredients[index] = {
-                  ...newIngredients[index],
-                  name: selectedIngredient.IngredientName,
-                  ingredientID: selectedIngredient.IngredientID,
-                };
-                setIngredients(newIngredients);
-              }}
-            />
+          <IngredientAutocomplete
+  value={ingredients[index]?.name || ""}
+  onSelectIngredient={(selectedIngredient) => {
+    const newIngredients = [...ingredients];
+    newIngredients[index] = {
+      ...newIngredients[index],
+      name: selectedIngredient.IngredientName,
+      ingredientID: selectedIngredient.IngredientID,
+    };
+    setIngredients(newIngredients);
+  }}
+  onAddNewIngredient={async (newIngredientName) => {
+    if (isAdding) return;
+    setIsAdding(true);  // Prevent duplicate submissions
+  
+    try {
+      const response = await axios.post('http://localhost:5001/api/ingredients', { ingredientName: newIngredientName });
+      if (response.status === 201 && response.data?.ingredientID) {
+        alert(`"${newIngredientName}" added successfully to the database!`);
+        setSuggestions((prevSuggestions) => [
+          ...prevSuggestions,
+          { IngredientName: newIngredientName, IngredientID: response.data.ingredientID },
+        ]);
+      }
+      return response;  // Return the response to IngredientAutocomplete
+    } catch (error) {
+      console.error('Error adding new ingredient:', error);
+      throw error;  // Throw the error so it can be caught by the autocomplete
+    } finally {
+      setIsAdding(false);  // Reset loading state after request finishes
+    }
+  }}
+  
+  
+/>
+
+
+            
             <ErrorText isVisible={!!errors[`ingredientName${index}`]}>
               {errors[`ingredientName${index}`]}
             </ErrorText>

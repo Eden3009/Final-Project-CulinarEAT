@@ -363,6 +363,30 @@ app.get('/api/substitute-ingredients', (req, res) => {
     });
 });
 
+// Add New Ingredient to the Database
+app.post('/api/ingredients', (req, res) => {
+    const { ingredientName } = req.body;
+
+    if (!ingredientName || ingredientName.trim() === '') {
+        return res.status(400).json({ success: false, message: 'Ingredient name is required.' });
+    }
+
+    const sql = `INSERT INTO Ingredient (IngredientName) VALUES (?)`;
+
+    db.query(sql, [ingredientName.trim()], (err, result) => {
+        if (err) {
+            console.error('Error adding ingredient:', err);
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ success: false, message: 'Ingredient already exists.' });
+            }
+            return res.status(500).json({ success: false, message: 'Database error while adding ingredient.', error: err });
+        }
+
+        res.status(201).json({ success: true, message: `Ingredient "${ingredientName}" added successfully!`, ingredientID: result.insertId });
+    });
+});
+
+
 
 app.get('/api/ingredients', (req, res) => {
     const { query } = req.query;
@@ -371,10 +395,13 @@ app.get('/api/ingredients', (req, res) => {
       return res.status(400).json({ message: 'Query parameter is required.' });
     }
   
-    const sql = `SELECT IngredientID, IngredientName 
-                 FROM Ingredient 
-                 WHERE IngredientName LIKE ? 
-                 LIMIT 10`;
+    const sql = `
+    SELECT IngredientID, IngredientName
+    FROM Ingredient
+    WHERE IngredientName LIKE ?
+    ORDER BY IngredientName = ? ASC, IngredientName ASC
+    LIMIT 10
+`;
   
     db.query(sql, [`%${query}%`], (err, results) => {
       if (err) {
