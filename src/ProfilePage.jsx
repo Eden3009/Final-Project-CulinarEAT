@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { UserContext } from './UserContext';
+import { useNavigate } from 'react-router-dom';
+
+
 
 const styles = {
   pageWrapper: {
@@ -124,10 +128,68 @@ const styles = {
     fontFamily: "'Merienda', cursive",
     transition: 'background-color 0.3s ease, transform 0.3s ease',
   },
+  recipeGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '20px',
+    padding: '20px 0',
+},
+recipeCard: {
+    backgroundColor: '#fff',
+    borderRadius: '10px',
+    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: '15px',
+},
+recipeImage: {
+    width: '100%',
+    height: '150px',
+    objectFit: 'cover',
+    borderRadius: '8px',
+},
+recipeDetails: {
+    textAlign: 'center',
+    marginTop: '10px',
+},
+recipeTitle: {
+    fontSize: '18px',
+    fontWeight: 'bold',
+    color: '#d77a65',
+},
+recipeDescription: {
+    fontSize: '14px',
+    color: '#555',
+    margin: '10px 0',
+},
+recipeRating: {
+    fontSize: '14px',
+    fontWeight: 'bold',
+    color: '#8B4513',
+    marginBottom: '10px',
+},
+viewButton: {
+    backgroundColor: '#d77a65',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    padding: '10px 15px',
+    fontSize: '14px',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease',
+},
+viewButtonHover: {
+    backgroundColor: '#b25949',
+},
+
   
 };
 
 function ProfilePage() {
+  const navigate = useNavigate();
+
   const [profile, setProfile] = useState({ username: '', email: '' });
   const [recipes, setRecipes] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -137,6 +199,11 @@ function ProfilePage() {
   const [passwordSaved, setPasswordSaved] = useState(false);
   const [isHovering, setIsHovering] = useState(false); // Add this state at the top of the component
   const [shoppingLists, setShoppingLists] = useState([]);
+  const { user } = useContext(UserContext);
+  const defaultImage = './images/defaultRecipeImage.jpg'; // Replace with your actual fallback image path
+
+
+
 
   useEffect(() => {
     // Fetch shopping lists
@@ -146,7 +213,23 @@ function ProfilePage() {
       .catch((err) => console.error(err));
   }, []);
   
-  
+  useEffect(() => {
+    if (user && user.UserID) {
+        // Fetch user recipes
+        fetch(`/api/user/recipes?userId=${user.UserID}`)
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error('Failed to fetch recipes');
+                }
+                return res.json();
+            })
+            .then((data) => {
+                setRecipes(data.recipes || []); // Set recipes to the state
+            })
+            .catch((err) => console.error('Error fetching user recipes:', err));
+    }
+}, [user]); // Re-run when the user changes
+
   useEffect(() => {
     // Fetch profile info
     fetch('/api/profile')
@@ -154,12 +237,7 @@ function ProfilePage() {
       .then((data) => setProfile(data))
       .catch((err) => console.error(err));
 
-    // Fetch user recipes
-    fetch('/api/user/recipes')
-      .then((res) => res.json())
-      .then((data) => setRecipes(data))
-      .catch((err) => console.error(err));
-
+   
     // Fetch user reviews
     fetch('/api/user/reviews')
       .then((res) => res.json())
@@ -189,46 +267,61 @@ function ProfilePage() {
   return (
     <div style={styles.pageWrapper}>
       <div style={styles.profilePage}>
-        <h1 style={styles.header}>{profile.username}'s Profile</h1>
+
+<h1 style={styles.header}>
+  {user ? `${user.UserName}'s Profile` : 'Your Profile'}
+</h1>
+
 
         {/* Profile Information */}
         <div style={styles.section}>
-          <h2 style={styles.sectionHeader}>Profile Information</h2>
-          <p style={styles.userDetails}>
-            <strong>Username:</strong> {profile.username}
-          </p>
-          <p style={styles.userDetails}>
-            <strong>Email:</strong> {profile.email}
-          </p>
-        </div>
+  <h2 style={styles.sectionHeader}>Profile Information</h2>
+  <p style={styles.userDetails}>
+    <strong>Username:</strong> {user ? user.UserName : 'Not Available'}
+  </p>
+  <p style={styles.userDetails}>
+    <strong>Email:</strong> {user ? user.Email : 'Not Available'}
+  </p>
+</div>
 
-        {/* My Recipes */}
-        <div style={styles.section}>
-          <h2 style={styles.sectionHeader}>My Recipes</h2>
-          {recipes.length > 0 ? (
-            recipes.map((recipe) => (
-              <div key={recipe.id} style={styles.recipeCard}>
-                <span style={styles.recipeName}>{recipe.name}</span>
-                <div style={styles.actionButtons}>
-                  <button
-                    style={{ ...styles.button, ...styles.editButton }}
-                    onClick={() => console.log(`Edit recipe with ID: ${recipe.id}`)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    style={{ ...styles.button, ...styles.deleteButton }}
-                    onClick={() => console.log(`Delete recipe with ID: ${recipe.id}`)}
-                  >
-                    Delete
-                  </button>
+       {/* My Recipes */}
+<div style={styles.section}>
+    <h2 style={styles.sectionHeader}>My Recipes</h2>
+    {recipes.length > 0 ? (
+        <div style={styles.recipeGrid}>
+            {recipes.map((recipe) => (
+                <div key={recipe.RecipeID} style={styles.recipeCard}>
+                    {/* Recipe Image */}
+                    <img
+                        src={recipe.ImageURL ? require(`./images/${recipe.ImageURL}.jpg`) : defaultImage}
+                        alt={recipe.RecipeTitle}
+                        style={styles.recipeImage}
+                    />
+
+                    {/* Recipe Details */}
+                    <div style={styles.recipeDetails}>
+                        <h3 style={styles.recipeTitle}>{recipe.RecipeTitle}</h3>
+                        <p style={styles.recipeDescription}>
+                            {recipe.RecipeDescription || 'No description available.'}
+                        </p>
+                        <p style={styles.recipeRating}>
+                            Rating: {recipe.AverageRating || 'Not rated yet'}
+                        </p>
+                        <button
+                            style={styles.viewButton}
+                            onClick={() => navigate(`/recipe/${recipe.RecipeID}`)}
+                        >
+                            View Recipe
+                        </button>
+                    </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            <p>No recipes added yet.</p>
-          )}
+            ))}
         </div>
+    ) : (
+        <p>No recipes added yet.</p>
+    )}
+</div>
+
 
         {/* My Reviews */}
         <div style={styles.section}>

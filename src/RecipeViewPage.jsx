@@ -298,6 +298,28 @@ const ingredients = recipe.Ingredients
   const themes = recipe.Themes ? recipe.Themes.split(',') : [];
   const labels = recipe.Labels ? recipe.Labels.split(',') : [];
 
+  const renderChefHats = (rating) => {
+    const maxHats = 5; // Maximum number of hats
+    const hats = Math.round(rating); // Round to nearest integer
+  
+    return (
+      <div style={{ display: 'flex', gap: '5px' }}>
+        {Array.from({ length: maxHats }, (_, index) => (
+          <span
+            key={index}
+            style={{
+              fontSize: '20px',
+              color: index < hats ? '#FFD700' : '#ccc', // Gold for filled, grey for empty
+            }}
+          >
+            🍳 {/* Chef hat emoji */}
+          </span>
+        ))}
+      </div>
+    );
+  };
+  
+
   return (
     <div style={styles.page}>
       {/* Back Button */}
@@ -316,19 +338,45 @@ const ingredients = recipe.Ingredients
   
       {/* Title */}
       <h1 style={styles.title}>{recipe.RecipeTitle || 'Untitled Recipe'}</h1>
-  
+<p style={{ fontSize: '14px', fontStyle: 'italic', margin: '10px 0', color: '#555' }}>
+  by: {recipe.AuthorName || 'Unknown Author'}
+</p>
+
+<div style={{ marginBottom: '20px', textAlign: 'center' }}>
+  {renderChefHats(recipe.AverageRating || 0)}
+  <p style={{ fontSize: '14px', color: '#555' }}>
+    {recipe.AverageRating ? `${recipe.AverageRating}/5` : 'Not Rated'}
+  </p>
+</div>
+
       {/* Meta Info */}
       <div style={styles.metaInfo}>
-        <div>
-          <strong>Level:</strong> {recipe.SkillLevel || 'N/A'}
-        </div>
-        <div>
-          <strong>Rating:</strong> {recipe.AverageRating || 'Not Rated'}
-        </div>
-        <div>
-          <strong>Yield:</strong> {recipe.yield || 'N/A'}
-        </div>
-      </div>
+  <div>
+    <strong>Level:</strong> {recipe.SkillLevel || 'N/A'}
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <p style={{ fontSize: '16px', fontWeight: 'bold', margin: '0', color: '#8B4513' }}>
+      Total Time
+    </p>
+    <p style={{ fontSize: '16px', margin: '0', color: '#555' }}>
+      {recipe.TotalTime || 'N/A'}
+    </p>
+    {recipe.PreparationTime && (
+      <>
+        <p style={{ fontSize: '16px', fontWeight: 'bold', margin: '10px 0 0 0', color: '#8B4513' }}>
+          Prep Time
+        </p>
+        <p style={{ fontSize: '16px', margin: '0', color: '#555' }}>
+          {recipe.PreparationTime}
+        </p>
+      </>
+    )}
+  </div>
+  <div>
+    <strong>Yield:</strong> {recipe.yield || 'N/A'}
+  </div>
+</div>
+
   
       {/* Description */}
       {recipe.RecipeDescription && (
