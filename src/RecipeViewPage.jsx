@@ -201,6 +201,7 @@ function RecipeViewPage() {
   const [recipe, setRecipe] = useState(null);
   const navigate = useNavigate();
   const [checkedIngredients, setCheckedIngredients] = useState([]);
+  
 
   const handleCheckboxChange = (event, ingredient) => {
     if (event.target.checked) {

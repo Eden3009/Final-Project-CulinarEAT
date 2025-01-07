@@ -115,6 +115,7 @@ app.post('/login', (req, res) => {
         res.status(200).json({
             message: 'Login successful',
             user: {
+                UserID: user.UserID, // Include UserID
                 UserName: user.UserName,
                 Role: user.Role, // Admin, BasicUser, etc.
                 Email: user.Email,
@@ -133,8 +134,7 @@ app.get('/session', (req, res) => {
         return res.status(401).json({ message: 'Not logged in' });
     }
 
-    // Query to verify the session token (username in this case)
-    const sql = 'SELECT * FROM User WHERE UserName = ?';
+    const sql = 'SELECT UserID, UserName, Role, Email FROM User WHERE UserName = ?';
 
     db.query(sql, [sessionToken], (err, results) => {
         if (err) {
@@ -146,10 +146,11 @@ app.get('/session', (req, res) => {
             return res.status(401).json({ message: 'Invalid session' });
         }
 
-        // Return user details
+        // Return full user details, including UserID
         res.status(200).json({
             message: 'Session valid',
             user: {
+                UserID: results[0].UserID,
                 UserName: results[0].UserName,
                 Role: results[0].Role,
                 Email: results[0].Email,
@@ -157,6 +158,7 @@ app.get('/session', (req, res) => {
         });
     });
 });
+
 
 
 app.get('/api/recipes', (req, res) => {
@@ -350,9 +352,30 @@ app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
 
+function formatTimeToHHMMSS(time) {
+    const timeRegex = /^([0-9]{1,2}):([0-5][0-9]):([0-5][0-9])$/; // Matches HH:mm:ss format
+    
+    // Validate time format
+    if (!timeRegex.test(time)) {
+        throw new Error('Invalid time format. Expected HH:mm:ss.');
+    }
+
+    // Extract hours, minutes, and optional seconds
+    const [hours, minutes, seconds = 0] = time.split(':').map(Number);
+
+    // Ensure hours, minutes, and seconds are within bounds
+    if (hours > 48 || (hours === 48 && (minutes > 0 || seconds > 0))) {
+        throw new Error('Maximum allowed time is 48:00:00.');
+    }
+
+    // Format time as HH:mm:ss
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+
 
 app.post('/add-recipe', (req, res) => {
-    const { recipeName, recipeDescription, skillLevel, preparationTime, instructions, ingredients, labels, themes } = req.body;
+    const { recipeName, recipeDescription, skillLevel, preparationTime, totalTime, instructions, ingredients, labels, themes, authorID } = req.body;
 
     if (!recipeName || !preparationTime || !skillLevel) {
         console.error('Validation Error:', { recipeName, preparationTime, skillLevel });
@@ -365,44 +388,50 @@ app.post('/add-recipe', (req, res) => {
     }
 
     console.log('Valid payload. Proceeding with SQL query...');
+    let prepTimeFormatted, totalTimeFormatted;
 
-    // Validate preparationTime format (HH:MM)
-    const timeRegex = /^([0-9]{1,2}):([0-5][0-9])$/; // Matches HH:MM
-    if (!timeRegex.test(preparationTime)) {
-        return res.status(400).json({ message: 'Invalid preparation time format. Use HH:MM.' });
+    try {
+        prepTimeFormatted = formatTimeToHHMMSS(preparationTime);
+        totalTimeFormatted = totalTime ? formatTimeToHHMMSS(totalTime) : null; // Format totalTime as well
+    } catch (error) {
+        console.error('Time formatting error:', error.message);
+        return res.status(400).json({ message: error.message });
     }
-
-    // Extract hours and minutes
-    const [hours, minutes] = preparationTime.split(':').map(Number);
-    if (hours > 48 || (hours === 48 && minutes > 0)) {
-        return res.status(400).json({ message: 'Maximum preparation time is 48:00.' });
-    }
-
-    // Convert to TIME format for database (HH:MM:SS)
-    const prepTimeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
+    
 
     // SQL query for inserting the recipe
     const insertRecipeSQL = `
-        INSERT INTO Recipe (RecipeTitle, RecipeDescription, SkillLevel, PreparationTime, RecipeInstructions, AuthorID)
-        VALUES (?, ?, ?, ?, ?, ?)
-    `;
+    INSERT INTO Recipe (RecipeTitle, RecipeDescription, SkillLevel, PreparationTime, TotalTime, RecipeInstructions, AuthorID)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+`;
 
-    db.query(
-        insertRecipeSQL,
-        [recipeName, recipeDescription || null, skillLevel, prepTimeFormatted, instructions || null, null],
-        (err, result) => {
-            if (err) {
-                console.error('Error inserting recipe:', err);
-                return res.status(500).json({ message: 'Database error while adding recipe.', error: err });
-            }
 
-            const recipeID = result.insertId; // Get the inserted RecipeID
-            console.log('Recipe inserted with ID:', recipeID);
+db.query(
+    insertRecipeSQL,
+    [
+        recipeName,
+        recipeDescription || null,
+        skillLevel,
+        prepTimeFormatted,
+        totalTimeFormatted || null, // Use formatted TotalTime
+        instructions || null,
+        authorID || null,  // Add AuthorID
+    ],
 
-            // Call the function to handle ingredients, labels, and themes
-            addIngredientsAndSubstitutes(recipeID, ingredients, labels, themes, res);
+    (err, result) => {
+        if (err) {
+            console.error('Error inserting recipe:', err);
+            return res.status(500).json({ message: 'Database error while adding recipe.', error: err });
         }
-    );
+
+        const recipeID = result.insertId; // Get the inserted RecipeID
+        console.log('Recipe inserted with ID:', recipeID);
+
+        // Call the function to handle ingredients, labels, and themes
+        addIngredientsAndSubstitutes(recipeID, ingredients, labels, themes, res);
+    }
+);
+
 });
 const addIngredientsAndSubstitutes = async (recipeID, ingredients, labels, themes, res) => {
     const insertRecipeIngredientSQL = `

@@ -125,6 +125,7 @@ function LoginPage({ setIsLoggedIn }) {
   const { setUser } = useContext(UserContext); // Access setUser from context
 
 
+
   const validateField = (name, value) => {
     if (value.trim() === '') {
       return `${name} is required.`;
@@ -190,7 +191,6 @@ function LoginPage({ setIsLoggedIn }) {
             console.log('Login successful:', data);
             setIsLoggedIn(true);
             setUser(data.user); // Ensure this is the correct user object
-
             setShowPopup(true); // Show success popup
 
             // Redirect to homepage after 4 seconds

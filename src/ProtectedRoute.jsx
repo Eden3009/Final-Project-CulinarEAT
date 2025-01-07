@@ -5,11 +5,8 @@ import { UserContext } from './UserContext';
 function ProtectedRoute({ children }) {
   const { isLoggedIn } = useContext(UserContext);
 
-  if (!isLoggedIn) {
-    // Redirect to the login page if the user is not logged in
-    return <Navigate to="/login" />;
-  }
-  
+
+
 // Render nothing while session is still being checked
 if (isLoggedIn === null) {
     return <div>Loading...</div>;

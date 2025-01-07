@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import axios from 'axios';
 import IngredientAutocomplete from './IngredientAutocomplete';
 import SubstituteIngredientAutocomplete from './SubstituteIngredientAutocomplete';
+import { useContext } from 'react';
+import { UserContext } from './UserContext';
 
 
 const PageWrapper = styled.div`
@@ -367,8 +369,10 @@ const AddRecipePage = () => {
   const [incompleteFields, setIncompleteFields] = useState({});
   const [productAmount, setProductAmount] = useState("");
   const [skillLevel, setSkillLevel] = useState("");
-  const [preparationTime, setPreparationTime] = useState({ value: "", unit: "" });
-  const [totalTime, setTotalTime] = useState({ value: "", unit: "" }); 
+  const [preparationTime, setPreparationTime] = useState("");
+const [totalTime, setTotalTime] = useState("");
+  const { user } = useContext(UserContext);
+
 
   useEffect(() => {
     const fetchMeasures = async () => {
@@ -408,18 +412,21 @@ const validatePreparationTime = ({ value, unit }) => {
 };
 
 
-  const isFormValid = () => {
-    return (
-      recipeName.trim().length >= 3 &&
-      description.trim().length >= 10 &&
-      ingredients.every(
-        (ingredient) =>
-          ingredient.quantity.trim() !== "" &&
-          ingredient.name.trim() !== ""
-      ) &&
-      instructions.every((step) => step.trim().length >= 10)
-    );
-  };
+const isFormValid = () => {
+  return (
+    recipeName.trim().length >= 3 &&
+    description.trim().length >= 10 &&
+    preparationTime !== "" && // Check preparation time
+    totalTime !== "" && // Check total time
+    ingredients.every(
+      (ingredient) =>
+        ingredient.quantity.trim() !== "" &&
+        ingredient.name.trim() !== ""
+    ) &&
+    instructions.every((step) => step.trim().length >= 10)
+  );
+};
+
   
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -649,17 +656,29 @@ const categories = [
         .filter((step) => step.length > 0)
         .join(". ");
   
+        const formatTimeToHHMMSS = (time) => {
+          const [hours, minutes] = time.split(':').map((part) => part.padStart(2, '0'));
+          const seconds = '00'; // Default seconds
+          return `${hours}:${minutes}:${seconds}`;
+        };
+        
+        
         const payload = {
           recipeName,
           recipeDescription: description,
-          skillLevel: skillLevelMap[skillLevel], // Map skill level
-          preparationTime,                      // Already in HH:MM format
-          ingredients: formattedIngredients,    // Include updated ingredients structure
-          instructions: formattedInstructions,  // Join instructions into a single string
-          labels: selectedTags.map((tag) => tag.label), // Labels from the form
-          themes: selectedCategories,           // Categories selected in the form
+          skillLevel,
+          preparationTime: formatTimeToHHMMSS(preparationTime), // Ensure HH:mm:ss format
+          totalTime: formatTimeToHHMMSS(totalTime), // Ensure HH:mm:ss format
+          ingredients: formattedIngredients,
+          instructions: formattedInstructions,
+          labels: selectedTags.map((tag) => tag.label),
+          themes: selectedCategories,
+          productAmount,
+          authorID: user?.UserID,
         };
         
+      
+      
         
   
       console.log("Submitting payload:", payload);
@@ -756,79 +775,42 @@ const categories = [
 <FormGroup>
   <Label htmlFor="preparationTime">Preparation Time (HH:mm:ss)</Label>
   <Input
-    type="time" // Keeps the native time picker with the clock icon
+    type="time" // Use time picker
     id="preparationTime"
-    step="1" // Allows seconds in the time picker
-    style={{ width: "100%" }} // Keeps the width consistent
+    step="1" // Enable seconds in picker
+    style={{ width: "100%" }}
     value={preparationTime}
     onChange={(e) => {
-      const value = e.target.value;
-
-      // Split into hours, minutes, and seconds
-      const [hours, minutes, seconds] = value.split(':').map(Number);
-
-      // Validate max time: 48:00:00
-      if (hours > 48 || (hours === 48 && (minutes > 0 || seconds > 0))) {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          preparationTime: "Maximum preparation time is 48:00:00.",
-        }));
-        return;
-      }
-
-      // Format the time properly
-      setPreparationTime(
-        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds?.toString().padStart(2, '0') || '00'}`
-      );
-
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        preparationTime: "",
-      }));
+      const value = e.target.value; // e.g., "HH:mm" or "HH:mm:ss"
+      const [hours, minutes] = value.split(":"); // Extract hours and minutes
+      const seconds = "00"; // Always default seconds to "00"
+      setPreparationTime(`${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}:${seconds}`);
     }}
     aria-label="Preparation time"
   />
   <ErrorText isVisible={!!errors.preparationTime}>{errors.preparationTime}</ErrorText>
 </FormGroup>
+{/* total Time */}
 
-{/* Total Time */}
 <FormGroup>
   <Label htmlFor="totalTime">Total Time (HH:mm:ss)</Label>
   <Input
-    type="time" // Keeps the native time picker with the clock icon
+    type="time"
     id="totalTime"
-    step="1" // Allows seconds in the time picker
-    style={{ width: "100%" }} // Keeps the width consistent
+    step="1"
+    style={{ width: "100%" }}
     value={totalTime}
     onChange={(e) => {
-      const value = e.target.value;
-
-      // Split into hours, minutes, and seconds
-      const [hours, minutes, seconds] = value.split(':').map(Number);
-
-      // Validate max time: 48:00:00
-      if (hours > 48 || (hours === 48 && (minutes > 0 || seconds > 0))) {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          totalTime: "Maximum total time is 48:00:00.",
-        }));
-        return;
-      }
-
-      // Format the time properly
-      setTotalTime(
-        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds?.toString().padStart(2, '0') || '00'}`
-      );
-
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        totalTime: "",
-      }));
+      const value = e.target.value; // e.g., "HH:mm" or "HH:mm:ss"
+      const [hours, minutes] = value.split(":"); // Extract hours and minutes
+      const seconds = "00"; // Always default seconds to "00"
+      setTotalTime(`${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}:${seconds}`);
     }}
     aria-label="Total time"
   />
   <ErrorText isVisible={!!errors.totalTime}>{errors.totalTime}</ErrorText>
 </FormGroup>
+
 
 
         {/* Ingredients */}
