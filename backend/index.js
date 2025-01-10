@@ -255,87 +255,75 @@ app.get('/api/recipe/:id', (req, res) => {
     console.log('Recipe ID received in backend:', recipeId); // Debugging
 
     const sql = `
-  SELECT 
-    r.RecipeID, 
-    r.RecipeTitle, 
-    r.RecipeDescription, 
-    r.RecipeInstructions, 
-    r.ImageURL, 
-    r.AverageRating, 
-    r.SkillLevel,
-    r.yield,
-    GROUP_CONCAT(DISTINCT 
-        CONCAT(i.IngredientName, 
-               CASE 
-                   WHEN ri.Comments IS NOT NULL AND ri.Comments != '' THEN CONCAT(' (', ri.Comments, ')') 
-                   ELSE '' 
-               END, 
-               ' - ', 
-               ri.Quantity, 
-               ' ', 
-               CASE 
-                   WHEN m.MeasureName = 'some' THEN '' 
-                   ELSE m.MeasureName 
-               END)
-    ) AS Ingredients,
-    GROUP_CONCAT(DISTINCT t.ThemeName) AS Themes,
-    GROUP_CONCAT(DISTINCT l.LabelName) AS Labels,
-    CONCAT('[', 
-        GROUP_CONCAT(
-            CONCAT(
-                '{',
-                '"Rating": "', rev.Rating, '", ',
-                '"Comment": "', rev.Comment, '", ',
-                '"Date": "', rev.Date, '", ',
-                '"User": "', CONCAT(u.FName, ' ', u.LName), '"',
-                '}'
-            ) SEPARATOR ','
-        ), 
-    ']') AS Reviews,
-    CONCAT(a.FName, ' ', a.LName) AS AuthorName, -- Add author's name
-    r.PreparationTime, -- Include preparation time
-    r.TotalTime        -- Include total time
-FROM 
-    Recipe r
-LEFT JOIN RecipeIngredient ri ON r.RecipeID = ri.RecipeID
-LEFT JOIN Ingredient i ON ri.IngredientID = i.IngredientID
-LEFT JOIN Measure m ON ri.MeasureID = m.MeasureID
-LEFT JOIN ThemeOfRecipe tr ON r.RecipeID = tr.RecipeID
-LEFT JOIN Theme t ON tr.ThemeID = t.ThemeID
-LEFT JOIN RecipeLabel rl ON r.RecipeID = rl.RecipeID
-LEFT JOIN Label l ON rl.LabelID = l.LabelID
-LEFT JOIN Review rev ON r.RecipeID = rev.RecipeID
-LEFT JOIN User u ON rev.UserID = u.UserID
-LEFT JOIN User a ON r.AuthorID = a.UserID -- Join to fetch author details
-WHERE 
-    r.RecipeID = ?
-GROUP BY 
-    r.RecipeID;
-
+        SELECT 
+            r.RecipeID, 
+            r.RecipeTitle, 
+            r.RecipeDescription, 
+            r.RecipeInstructions, 
+            r.ImageURL, 
+            r.AverageRating, 
+            r.SkillLevel,
+            r.yield,
+            GROUP_CONCAT(DISTINCT 
+                CONCAT(i.IngredientName, 
+                    CASE 
+                        WHEN ri.Comments IS NOT NULL AND ri.Comments != '' THEN CONCAT(' (', ri.Comments, ')') 
+                        ELSE '' 
+                    END, 
+                    ' - ', 
+                    ri.Quantity, 
+                    ' ', 
+                    CASE 
+                        WHEN m.MeasureName = 'some' THEN '' 
+                        ELSE m.MeasureName 
+                    END)
+            ) AS Ingredients,
+            GROUP_CONCAT(DISTINCT t.ThemeName) AS Themes,
+            GROUP_CONCAT(DISTINCT l.LabelName) AS Labels,
+            CONCAT('[', 
+                GROUP_CONCAT(
+                    CONCAT(
+                        '{',
+                        '"Rating": "', rev.Rating, '", ',
+                        '"Comment": "', rev.Comment, '", ',
+                        '"Date": "', rev.Date, '", ',
+                        '"User": "', CONCAT(u.FName, ' ', u.LName), '"',
+                        '}'
+                    ) SEPARATOR ','
+                ), 
+            ']') AS Reviews,
+            CONCAT(a.FName, ' ', a.LName) AS AuthorName,
+            r.PreparationTime,
+            r.TotalTime
+        FROM 
+            Recipe r
+        LEFT JOIN RecipeIngredient ri ON r.RecipeID = ri.RecipeID
+        LEFT JOIN Ingredient i ON ri.IngredientID = i.IngredientID
+        LEFT JOIN Measure m ON ri.MeasureID = m.MeasureID
+        LEFT JOIN ThemeOfRecipe tr ON r.RecipeID = tr.RecipeID
+        LEFT JOIN Theme t ON tr.ThemeID = t.ThemeID
+        LEFT JOIN RecipeLabel rl ON r.RecipeID = rl.RecipeID
+        LEFT JOIN Label l ON rl.LabelID = l.LabelID
+        LEFT JOIN Review rev ON r.RecipeID = rev.RecipeID
+        LEFT JOIN User u ON rev.UserID = u.UserID
+        LEFT JOIN User a ON r.AuthorID = a.UserID
+        WHERE 
+            r.RecipeID = ?
+        GROUP BY 
+            r.RecipeID;
     `;
 
     db.query(sql, [recipeId], (err, results) => {
         if (err) {
+            console.error('Database error:', err);  // Debug log
             res.status(500).json({ message: 'Database error', error: err });
         } else {
+            console.log('SQL Result:', results);  // Add this log to see results
             res.status(200).json({ recipe: results[0] });
         }
     });
 });
 
-
-  
-// API Route to get all measures
-app.get('/measures', (req, res) => {
-    const sql = 'SELECT * FROM Measure';
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error('Error fetching measures:', err);
-            return res.status(500).json({ message: 'Database error', error: err });
-        }
-        res.status(200).json(results);
-    });
-});
 app.get('/api/substitute-ingredients', (req, res) => {
     const { query } = req.query;
 
@@ -365,7 +353,7 @@ app.get('/api/substitute-ingredients', (req, res) => {
 
 // Add New Ingredient to the Database
 app.post('/api/ingredients', (req, res) => {
-    const { ingredientName } = req.body;
+   const { ingredientName } = req.body;
 
     if (!ingredientName || ingredientName.trim() === '') {
         return res.status(400).json({ success: false, message: 'Ingredient name is required.' });
@@ -375,8 +363,8 @@ app.post('/api/ingredients', (req, res) => {
 
     db.query(sql, [ingredientName.trim()], (err, result) => {
         if (err) {
-            console.error('Error adding ingredient:', err);
-            if (err.code === 'ER_DUP_ENTRY') {
+          console.error('Error adding ingredient:', err);
+           if (err.code === 'ER_DUP_ENTRY') {
                 return res.status(400).json({ success: false, message: 'Ingredient already exists.' });
             }
             return res.status(500).json({ success: false, message: 'Database error while adding ingredient.', error: err });

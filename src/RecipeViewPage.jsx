@@ -2,6 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
 import lunchImage from './images/lunch.png'; // Default image for recipes
+import { GiChefToque } from 'react-icons/gi'; // Import chef hat icon
+import { FaCheckCircle } from 'react-icons/fa'; // Icon for completed steps
+import { MdOutlineDirections } from 'react-icons/md';
+import { FaTag } from 'react-icons/fa'; // FontAwesome Tag icon
+import { MdLabelOutline } from 'react-icons/md'; // Import Material Design Label Outline Icon
+import { AiOutlineTag } from 'react-icons/ai'; // Import gray outline tag icon
+import { AiOutlineUser, AiOutlineFieldNumber, AiOutlineClockCircle } from 'react-icons/ai';
 
 const styles = {
   page: {
@@ -70,17 +77,31 @@ const styles = {
   },
 
   backButton: {
-    alignSelf: 'flex-start',
-    marginBottom: '20px',
-    padding: '10px 15px',
-    backgroundColor: '#fff',
-    border: '1px solid #8B4513',
-    color: '#8B4513',
-    borderRadius: '5px',
-    cursor: 'pointer',
+    position: 'absolute',
+    top: '20px',
+    left: '10px', 
+    zIndex: 10,
     display: 'flex',
     alignItems: 'center',
-  },
+    padding: '80px 12px',
+    fontSize: '28px', 
+    fontWeight: 'bold',
+    color: '#fff',
+    textShadow: `
+      3px 3px 0 #d77a65,
+      6px 6px 0 rgba(0, 0, 0, 0.2)
+    `,
+    fontFamily: 'Oregano, serif',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+},
+  
+backButtonHover: {
+    transform: 'scale(1.1)',
+},
   heroImage: {
     width: '100%',
     maxHeight: '400px',
@@ -103,17 +124,7 @@ const styles = {
     fontSize: '16px',
     color: '#555',
   },
-  section: {
-    width: '100%',
-    maxWidth: '800px',
-    marginBottom: '20px',
-  },
-  sectionTitle: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    marginBottom: '10px',
-    color: '#8B4513',
-  },
+
   
   checkboxContainer: {
     display: 'flex',
@@ -202,7 +213,6 @@ function RecipeViewPage() {
   const navigate = useNavigate();
   const [checkedIngredients, setCheckedIngredients] = useState([]);
   
-
   const handleCheckboxChange = (event, ingredient) => {
     if (event.target.checked) {
       setCheckedIngredients((prev) => [...prev, ingredient]);
@@ -213,14 +223,13 @@ function RecipeViewPage() {
     }
   };
   
-  
-
   useEffect(() => {
     if (RecipeID) {
+      console.log('RecipeID from params:', RecipeID);  // Add this to check the ID
       fetch(`http://localhost:5001/api/recipe/${RecipeID}`)
-      .then((response) => response.json())
+        .then((response) => response.json())
         .then((data) => {
-          console.log('Fetched Recipe Data:', data);
+          console.log('Fetched Recipe Data:', data);  // Log the fetched data
           setRecipe(data.recipe);
         })
         .catch((error) => console.error('Error fetching recipe:', error));
@@ -229,12 +238,6 @@ function RecipeViewPage() {
     }
   }, [RecipeID]);
   
-  if (!recipe) {
-    return <p>Loading recipe...</p>;
-  }
-  if (recipe && Object.keys(recipe).length === 0) {
-    return <p>Recipe data not found.</p>;
-  }
 
   // Parse and format ingredients
   // Helper function to convert decimals to fractions
@@ -267,10 +270,8 @@ function RecipeViewPage() {
     return number.toFixed(2);
   }
   
-  
-
 // Parse and format ingredients
-const ingredients = recipe.Ingredients
+const ingredients = recipe && recipe.Ingredients
   ? recipe.Ingredients.split(',').map((item) => {
       const match = item.match(/^(.*) - (.*)$/);
       if (match) {
@@ -284,15 +285,15 @@ const ingredients = recipe.Ingredients
       }
       return item.trim();
     })
-  : [];
-
-
-
+  : [];  // If `recipe.Ingredients` is null, return an empty list
+  if (!recipe) {
+    return <p>Loading recipe...</p>;  // Return a loading message until the data is fetched
+  }
+  
   // Split instructions into numbered steps
   const instructions = recipe.RecipeInstructions
   ? recipe.RecipeInstructions.split('\n').filter((step) => step.trim())
   : [];
-
 
   // Split themes and labels into arrays
   const themes = recipe.Themes ? recipe.Themes.split(',') : [];
@@ -319,170 +320,501 @@ const ingredients = recipe.Ingredients
     );
   };
   
-
   return (
     <div style={styles.page}>
       {/* Back Button */}
       <button style={styles.backButton} onClick={() => navigate(-1)}>
         <FaArrowLeft /> Back
       </button>
-  
-      {/* Hero Image */}
-      {/* Hero Image */}
-<img
-  src={recipe.ImageURL ? require(`./images/${recipe.ImageURL}.jpg`) : lunchImage}
-  alt={recipe.RecipeTitle || 'Recipe Image'}
-  style={styles.heroImage}
-/>
-
-  
-      {/* Title */}
-      <h1 style={styles.title}>{recipe.RecipeTitle || 'Untitled Recipe'}</h1>
-<p style={{ fontSize: '14px', fontStyle: 'italic', margin: '10px 0', color: '#555' }}>
-  by: {recipe.AuthorName || 'Unknown Author'}
-</p>
-
-<div style={{ marginBottom: '20px', textAlign: 'center' }}>
-  {renderChefHats(recipe.AverageRating || 0)}
-  <p style={{ fontSize: '14px', color: '#555' }}>
-    {recipe.AverageRating ? `${recipe.AverageRating}/5` : 'Not Rated'}
+     
+ {/* Hero Section */}
+<div style={{ textAlign: 'center', marginBottom: '30px' }}>
+  <img
+    src={recipe.ImageURL ? require(`./images/${recipe.ImageURL}.jpg`) : lunchImage}
+    alt={recipe.RecipeTitle || 'Recipe Image'}
+    style={{
+      width: '100%',
+      maxWidth: '600px',  // Match size in the example
+      height: 'auto',
+      borderRadius: '12px',
+      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',  // Softer shadow
+      marginBottom: '10px',
+    }}
+  />
+  <h1 style={{
+    fontSize: '40px',
+    fontFamily: "'Merienda', cursive",
+    fontWeight: 'bold',
+    color: '#4E342E',  // Dark chocolate color
+    marginBottom: '5px',
+  }}>
+    {recipe.RecipeTitle || 'Untitled Recipe'}
+  </h1>
+  <p style={{ fontSize: '16px', fontStyle: 'italic', color: '#555', marginBottom: '10px' }}>
+    by: {recipe.AuthorName || 'Unknown Author'}
   </p>
+
+  {/* Rating Section */}
+  <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', marginTop: '10px' }}>
+    {Array.from({ length: 5 }, (_, index) => (
+      <GiChefToque
+        key={index}
+        style={{
+          fontSize: '30px',
+          color: index < (recipe.AverageRating || 0) ? '#FFD700' : '#ccc', // Gold for selected, gray for unselected
+        }}
+      />
+    ))}
+  </div>
+  <p style={{ fontSize: '14px', marginTop: '5px', color: '#555' }}>
+    {recipe.AverageRating ? `${recipe.AverageRating}/5` : 'Not Rated Yet'}
+  </p>
+
+  {/* Description Section */}
+  {recipe.RecipeDescription && (
+    <div style={{
+      marginTop: '10px',
+      textAlign: 'center',
+      maxWidth: '600px',
+      marginLeft: 'auto',
+      marginRight: 'auto',
+    }}>
+      <p style={{ fontSize: '18px', lineHeight: '1.6', fontStyle: 'italic', color: '#555' }}>
+        {recipe.RecipeDescription}
+      </p>
+    </div>
+  )}
 </div>
 
-      {/* Meta Info */}
-      <div style={styles.metaInfo}>
-  <div>
-    <strong>Level:</strong> {recipe.SkillLevel || 'N/A'}
+{/* Meta Info Section */}
+<div style={{
+  display: 'flex',
+  justifyContent: 'space-around',  // Adds space between items
+  maxWidth: '1000px',  // Wider container for more spacing
+  margin: '0 auto',
+  paddingBottom: '10px',
+}}>
+  {/* Skill Level */}
+  <div style={{
+    textAlign: 'center',
+    marginRight: '30px',  // Add spacing between sections
+  }}>
+    <p style={{
+      fontSize: '16px',
+      fontWeight: 'bold',
+      color: '#4E342E',
+      marginBottom: '5px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: '8px',
+    }}>
+      <AiOutlineUser style={{ fontSize: '20px', color: '#666' }} />
+      Skill Level
+    </p>
+    <p style={{ fontSize: '18px', color: '#333' }}>{recipe.SkillLevel || 'N/A'}</p>
   </div>
+
+  {/* Yield */}
+  <div style={{
+    textAlign: 'center',
+    marginRight: '30px',  // Add spacing between sections
+  }}>
+    <p style={{
+      fontSize: '16px',
+      fontWeight: 'bold',
+      color: '#4E342E',
+      marginBottom: '5px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: '8px',
+    }}>
+      <AiOutlineFieldNumber style={{ fontSize: '20px', color: '#666' }} />
+      Yield
+    </p>
+    <p style={{ fontSize: '18px', color: '#333' }}>{recipe.Yield || 'N/A'}</p>
+  </div>
+
+  {/* Prep Time */}
+  <div style={{
+    textAlign: 'center',
+    marginRight: '30px',  // Add spacing between sections
+  }}>
+    <p style={{
+      fontSize: '16px',
+      fontWeight: 'bold',
+      color: '#4E342E',
+      marginBottom: '5px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: '8px',
+    }}>
+      <AiOutlineClockCircle style={{ fontSize: '20px', color: '#666' }} />
+      Prep Time
+    </p>
+    <p style={{ fontSize: '18px', color: '#333' }}>{recipe.PreparationTime || 'N/A'}</p>
+  </div>
+
+  {/* Total Time */}
   <div style={{ textAlign: 'center' }}>
-    <p style={{ fontSize: '16px', fontWeight: 'bold', margin: '0', color: '#8B4513' }}>
+    <p style={{
+      fontSize: '16px',
+      fontWeight: 'bold',
+      color: '#4E342E',
+      marginBottom: '5px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: '8px',
+    }}>
+      <AiOutlineClockCircle style={{ fontSize: '20px', color: '#666' }} />
       Total Time
     </p>
-    <p style={{ fontSize: '16px', margin: '0', color: '#555' }}>
-      {recipe.TotalTime || 'N/A'}
-    </p>
-    {recipe.PreparationTime && (
-      <>
-        <p style={{ fontSize: '16px', fontWeight: 'bold', margin: '10px 0 0 0', color: '#8B4513' }}>
-          Prep Time
-        </p>
-        <p style={{ fontSize: '16px', margin: '0', color: '#555' }}>
-          {recipe.PreparationTime}
-        </p>
-      </>
-    )}
-  </div>
-  <div>
-    <strong>Yield:</strong> {recipe.yield || 'N/A'}
+    <p style={{ fontSize: '18px', color: '#333' }}>{recipe.TotalTime || 'N/A'}</p>
   </div>
 </div>
 
-  
-      {/* Description */}
-      {recipe.RecipeDescription && (
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>Description</h2>
-          <p>{recipe.RecipeDescription}</p>
-        </div>
-      )}
-  
-  <div style={styles.contentContainer}>
+{/* Long Horizontal Line */}
+<div style={{
+  width: '90%',  // Line spans 80% of the width
+  height: '2px',
+  backgroundColor: '#E0E0E0',
+  margin: '20px auto 30px',  // Adds spacing above and below the line
+}}>
+</div>
+
+
+{/* Ingredients and Directions Container */}
+<div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap', marginTop: '30px' }}>
+{/* Ingredients and Instructions Container */}
+<div style={{
+  display: 'flex',
+  gap: '40px',  // Space between the sections
+  alignItems: 'flex-start',
+  padding: '20px 0',
+}}>
+
   {/* Ingredients Section */}
-  <div style={styles.section}>
-    <h2 style={styles.sectionTitle}>Ingredients</h2>
-    <ul style={styles.list}>
-      {ingredients.map((ingredient, index) => (
-        <li key={index} style={styles.listItem}>
-          <label style={styles.checkboxContainer}>
-            <input
-              type="checkbox"
-              style={styles.checkbox} // Styled checkbox
-              checked={checkedIngredients.includes(ingredient)}
-              onChange={(e) => handleCheckboxChange(e, ingredient)}
-            />
-            <span
-              style={{
-                ...styles.customCheckbox,
-                ...(checkedIngredients.includes(ingredient)
-                  ? styles.customCheckboxChecked
-                  : {}),
-              }}
-            >
-              <span
-                style={{
-                  ...styles.checkmark,
-                  ...(checkedIngredients.includes(ingredient)
-                    ? styles.checkmarkVisible
-                    : {}),
-                }}
-              >
-                ✔
-              </span>
-            </span>
-          </label>
-          {ingredient}
-        </li>
-      ))}
-    </ul>
-  </div>
-
- 
-
-{/* Instructions Section */}
-<div style={styles.section}>
-  <h2 style={styles.sectionTitle}>Directions</h2>
-  <ul style={styles.instructionsList}>
-    {instructions.map((step, index) => (
-      <li key={index} style={styles.instructionsItem}>
-        <span style={styles.instructionNumber}>{index + 1}</span>
-        <p style={styles.instructionText}>{step}</p>
+<div style={{
+  flex: '1',
+  textAlign: 'left',
+  paddingRight: '40px',
+  paddingLeft: '40px',  // Added left padding to move it away from the edge
+  borderRight: '2px solid #E0E0E0',  // Single vertical line for separation
+}}>
+  <h2 style={{
+    fontSize: '26px',
+    fontWeight: 'bold',
+    fontFamily: "'Georgia', serif",
+    color: '#4E342E',
+    marginBottom: '15px',
+  }}>
+    Ingredients
+  </h2>
+  <ul style={{
+    listStyleType: 'none',
+    padding: '0',
+    margin: '0',
+    fontSize: '18px',
+    lineHeight: '1.8',
+    fontFamily: "'Georgia', serif",
+    color: '#333',
+  }}>
+    {ingredients.map((ingredient, index) => (
+      <li key={index} style={{
+        marginBottom: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+      }}>
+        {/* Custom Checkbox */}
+        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            style={{
+              appearance: 'none',  // Hide default checkbox
+              width: '22px',
+              height: '22px',
+              borderRadius: '50%',
+              border: '1px solid #8B4513',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              outline: 'none',
+              transition: 'background-color 0.3s ease, transform 0.2s ease',
+            }}
+            onChange={(e) => handleCheckboxChange(e, ingredient)}
+            onMouseEnter={(e) => {
+              if (!e.target.checked) e.target.style.backgroundColor = '#F5F5DC';  // Beige hover effect
+            }}
+            onMouseLeave={(e) => {
+              if (!e.target.checked) e.target.style.backgroundColor = 'transparent';  // Reset hover
+            }}
+            onClick={(e) => {
+              e.target.style.backgroundColor = e.target.checked ? '#8B4513' : 'transparent';
+              e.target.style.transform = 'scale(1.1)';
+              setTimeout(() => (e.target.style.transform = 'scale(1)'), 200);  // Reset scale
+            }}
+          />
+          {/* Ingredient Text */}
+          <span style={{ marginLeft: '10px' }}>{ingredient}</span>
+        </label>
       </li>
     ))}
   </ul>
 </div>
+
+  {/* Instructions Section */}
+  <div style={{
+    flex: '2',
+    paddingLeft: '20px',  // Ensure enough space
+  }}>
+    <h2 style={{
+      fontSize: '26px',  // Same size as "Ingredients" headline
+      fontWeight: 'bold',
+      fontFamily: "'Georgia', serif",
+      color: '#4E342E',
+      textAlign: 'left',  // Align same as "Ingredients"
+      marginBottom: '20px',
+    }}>
+      Directions
+    </h2>
+    <ol style={{
+      padding: '0',
+      margin: '0',
+      listStyleType: 'none',
+      textAlign: 'left',
+    }}>
+      {instructions.map((step, index) => (
+        <li key={index} style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          marginBottom: '20px',
+          gap: '15px',
+        }}>
+          {/* Number without circle */}
+          <div style={{
+            fontSize: '22px',
+            fontWeight: 'bold',
+            color: '#8B4513',
+            minWidth: '30px',
+            textAlign: 'center',
+          }}>
+            {index + 1}.
+          </div>
+          {/* Instruction Text */}
+          <p style={{
+            margin: 0,
+            fontSize: '18px',
+            lineHeight: '1.6',
+            fontFamily: "'Georgia', serif",
+            color: '#333',
+          }}>
+            {step}
+          </p>
+        </li>
+      ))}
+    </ol>
+  </div>
+
 </div>
 
 
+</div>
   
-      {/* Themes */}
-      {themes.length > 0 && (
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>Themes</h2>
-          <p>{themes.join(', ')}</p>
-        </div>
-      )}
+   {/* Themes and Labels Section */}
+<div style={{ margin: '40px 0', fontFamily: 'Arial, sans-serif' }}>
+  {/* Themes Section */}
+<div style={{ marginBottom: '20px', textAlign: 'center' }}>
+  <h2 style={{
+    fontSize: '24px',  // Same size as other headlines
+    fontWeight: 'bold',
+    fontFamily: "'Georgia', serif",  // Same font as Ingredients/Directions
+    color: '#4E342E',  // Consistent dark brown color
+    marginBottom: '12px',
+  }}>
+    Recipe Themes
+  </h2>
+  <div style={{
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: '10px',
+    padding: '8px',
+  }}>
+    {themes.map((theme, index) => (
+      <div
+        key={index}
+        style={{
+          padding: '10px 16px',
+          backgroundColor: '#FAF9F6',
+          color: '#5A5A5A',
+          borderRadius: '12px',
+          fontSize: '16px',
+          fontFamily: "'Georgia', serif",  // Same font for theme text
+          fontWeight: 'bold',
+          minWidth: '100px',
+          textAlign: 'center',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          textTransform: 'capitalize',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+          cursor: 'default',
+          border: '1px solid #E0E0E0',
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.transform = 'translateY(-3px)';
+          e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.12)';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
+        }}
+      >
+        {theme}
+      </div>
+    ))}
+  </div>
+</div>
+
+
+
+
+{/* Labels Section with Elegant Gray Tag Icon */} 
+<div style={{
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginTop: '40px',
+  gap: '10px', // Space between the icon and labels
+}}>
+  {/* Gray Tag Icon */}
+  <AiOutlineTag style={{
+    fontSize: '28px', // Icon size
+    color: '#777', // Neutral gray color
+  }} />
+
+  {/* Labels Row */}
+  <div style={{
+    display: 'flex',
+    gap: '15px',
+    flexWrap: 'wrap',
+  }}>
+    {labels.map((label, index) => (
+      <span
+        key={index}
+        style={{
+          fontSize: '20px',
+          fontFamily: "'Georgia', serif",
+          fontWeight: '500',
+          color: '#4E342E',
+          borderBottom: '2px solid transparent',
+          cursor: 'default',
+          transition: 'all 0.3s ease',
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.borderBottom = '2px solid #8B4513'; // Underline on hover
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.borderBottom = '2px solid transparent'; // Remove underline
+        }}
+      >
+        {label}
+      </span>
+    ))}
+  </div>
+</div>
+
+
+
+</div>
+
   
-      {/* Labels */}
-      {labels.length > 0 && (
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>Labels</h2>
-          <p>{labels.join(', ')}</p>
-        </div>
-      )}
-  
-      {/* Reviews */}
-      {recipe.Reviews && recipe.Reviews.length > 0 ? (
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>Reviews</h2>
-          <ul>
-            {recipe.Reviews.map((review, index) => (
-              <li key={index}>
-                <p>
-                  <strong>{review.User}:</strong> {review.Comment}
-                </p>
-                <p>
-                  <em>Rating: {review.Rating}</em>
-                </p>
-              </li>
+      
+
+{/* Reviews Section */}
+<div style={{ marginTop: '40px', textAlign: 'center' }}>
+  <h2 style={{
+    fontSize: '26px',
+    fontWeight: 'bold',
+    fontFamily: "'Georgia', serif",
+    color: '#4E342E',
+    marginBottom: '20px',
+  }}>
+    Reviews
+  </h2>
+
+  {recipe.Reviews && recipe.Reviews.length > 0 ? (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '20px',
+      maxWidth: '700px',
+      margin: '0 auto',
+    }}>
+      {recipe.Reviews.map((review, index) => (
+        <div key={index} style={{
+          backgroundColor: '#F9F7F4',  // Subtle beige background
+          border: '1px solid #E0E0E0',
+          borderRadius: '12px',
+          padding: '20px',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <strong style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              fontFamily: "'Georgia', serif",
+              color: '#4E342E',
+            }}>
+              {review.User || 'Anonymous'}
+            </strong>
+            <span style={{ fontSize: '14px', color: '#777' }}>
+              {review.Timestamp || 'No Date'}
+            </span>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-start',
+            gap: '5px',
+            marginBottom: '10px',
+          }}>
+            {/* Chef Hat Icons for Rating */}
+            {Array.from({ length: 5 }).map((_, i) => (
+              <GiChefToque
+                key={i}
+                style={{
+                  fontSize: '24px',
+                  color: i < review.Rating ? '#FFD700' : '#ccc', // Gold for filled hats, gray for empty
+                }}
+              />
             ))}
-          </ul>
+          </div>
+
+          <p style={{
+            fontSize: '18px',
+            fontFamily: "'Georgia', serif",
+            color: '#333',
+            lineHeight: '1.6',
+            margin: 0,
+          }}>
+            {review.Comment || 'No comment provided.'}
+          </p>
         </div>
-      ) : (
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>Reviews</h2>
-          <p>No reviews available.</p>
-        </div>
-      )}
+      ))}
+    </div>
+  ) : (
+    <p style={{
+      fontSize: '18px',
+      fontFamily: "'Georgia', serif",
+      color: '#555',
+    }}>
+      No reviews available.
+    </p>
+  )}
+</div>
+
     </div>
   );
 } 
