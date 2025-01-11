@@ -94,17 +94,19 @@ const styles = {
     padding: '80px 12px',
     fontSize: '28px', 
     fontWeight: 'bold',
-    color: '#B55335',
+    color: '#d2b9af',
     fontFamily: 'Oregano, serif',
     backgroundColor: 'transparent',
     border: 'none',
     borderRadius: '6px',
     cursor: 'pointer',
     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    
 },
   
 backButtonHover: {
     transform: 'scale(1.1)',
+    
 },
   heroImage: {
     width: '100%',
@@ -592,7 +594,7 @@ const ingredients = recipe && recipe.Ingredients
               if (!e.target.checked) e.target.style.backgroundColor = 'transparent';
             }}
             onClick={(e) => {
-              e.target.style.backgroundColor = e.target.checked ? '#8B4513' : 'transparent';
+              e.target.style.backgroundColor = e.target.checked ? '#d2b9af' : 'transparent';
               e.target.style.transform = 'scale(1.1)';
               setTimeout(() => (e.target.style.transform = 'scale(1)'), 200);
             }}
@@ -614,7 +616,7 @@ const ingredients = recipe && recipe.Ingredients
       }}
       disabled={checkedIngredients.length === 0}
       style={{
-        backgroundColor: checkedIngredients.length > 0 ? '#B55335' : '#ccc',
+        backgroundColor: checkedIngredients.length > 0 ? '#d2b9af' : '#ccc',
         color: '#fff',
         padding: '12px 20px',
         border: 'none',
@@ -705,7 +707,7 @@ const ingredients = recipe && recipe.Ingredients
       toast.success(isFavorite ? 'Recipe removed from favorites!' : 'Recipe added to favorites!');
     }}
     style={{
-      backgroundColor: '#B55335',
+      backgroundColor: '#d2b9af',
       color: '#fff',
       padding: '12px 15px',
       border: 'none',
@@ -714,8 +716,8 @@ const ingredients = recipe && recipe.Ingredients
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
       transition: 'transform 0.2s ease, background-color 0.3s ease',
     }}
-    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#A0522D')}
-    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#B55335')}
+    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#d2b9af')}
+    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#d2b9af')}
   >
     {/* Toggle between filled and outline icon */}
     {isFavorite ? <BsBookmarkFill size={24} style={{ color: '#fff' }} /> : <BsBookmark size={24} style={{ color: '#fff' }} />}

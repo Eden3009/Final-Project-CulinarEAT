@@ -195,6 +195,7 @@ const styles = {
       padding: '8px 12px',
       fontSize: '28px', 
       fontWeight: 'bold',
+      color: '#d2b9af',
       textShadow: `
         3px 3px 0 #B55335,
         6px 6px 0 rgba(0, 0, 0, 0.2)
