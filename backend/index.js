@@ -474,12 +474,11 @@ app.get('/api/ingredients', (req, res) => {
             return res.status(500).json({ message: 'Database error', error: err });
         }
 
-        // Debugging: Log the results
-        console.log('Ingredient query results:', results);
-
-        res.status(200).json({ ingredients: results }); // Ensure consistent format
+        // Return the raw results array directly
+        res.status(200).json(results);
     });
 });
+
 
   
 
