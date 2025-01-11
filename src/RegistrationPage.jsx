@@ -46,7 +46,7 @@ const styles = {
   button: {
     width: '100%',
     padding: '12px',
-    backgroundColor: '#d77a65', // Default background color
+    backgroundColor: '#B55335', 
     color: '#fff',
     border: 'none',
     borderRadius: '8px',
@@ -80,7 +80,7 @@ const styles = {
   },
   header: {
     fontSize: '28px',
-    color: '#d77a65',
+    color: '#B55335',
     fontWeight: 'bold',
     marginBottom: '20px',
     fontFamily: "'Merienda', cursive",

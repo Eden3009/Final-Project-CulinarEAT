@@ -26,7 +26,7 @@ const styles = {
   header: {
     fontSize: '32px',
     fontWeight: 'bold',
-    color: '#d77a65',
+    color: '#B55335',
     textAlign: 'center',
     marginBottom: '30px',
   },
@@ -41,8 +41,8 @@ const styles = {
     fontSize: '22px',
     fontWeight: 'bold',
     marginBottom: '15px',
-    color: '#d77a65',
-    borderBottom: '2px solid #D4AF37',
+    color: '#B55335',
+    borderBottom: '2px solid #bd988a',
     paddingBottom: '5px',
   },
   userDetails: {
@@ -117,7 +117,7 @@ const styles = {
     marginTop: '10px',
   },
   saveButton: {
-    backgroundColor: '#d77a65',
+    backgroundColor: '#B55335',
     color: '#FFF',
     fontWeight: 'bold',
     border: 'none',
@@ -157,7 +157,7 @@ recipeDetails: {
 recipeTitle: {
     fontSize: '18px',
     fontWeight: 'bold',
-    color: '#d77a65',
+    color: '#B55335',
 },
 recipeDescription: {
     fontSize: '14px',
@@ -171,7 +171,7 @@ recipeRating: {
     marginBottom: '10px',
 },
 viewButton: {
-    backgroundColor: '#d77a65',
+    backgroundColor: '#B55335',
     color: '#fff',
     border: 'none',
     borderRadius: '5px',

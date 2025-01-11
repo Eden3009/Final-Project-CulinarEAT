@@ -8,13 +8,13 @@ import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
 
 const styles = {
   navbar: {
-    backgroundColor: '#D6C0B3',
+    backgroundColor: '#d2b9af',
     display: 'flex',
     alignItems: 'center',
     padding: '15px 20px',
     width: '100%',
     fontFamily: "'Poppins', sans-serif",
-    borderBottom: '2px solid #D4AF37',
+    borderBottom: '2px solid #bd988a',
     boxSizing: 'border-box',
   },
   navbarLogo: {

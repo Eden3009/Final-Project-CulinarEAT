@@ -30,7 +30,7 @@ const styles = {
   header: {
     fontSize: '32px',
     fontWeight: 'bold',
-    color: '#d77a65', // Updated to match ProfilePage headline color
+    color: '#B55335', 
     fontFamily: "'Merienda', cursive", // Matching font
     textAlign: 'center',
     marginBottom: '30px',
@@ -56,7 +56,7 @@ const styles = {
     flex: 1,
   },
   addButton: {
-    backgroundColor: '#d77a65', // Updated button color
+    backgroundColor: '#B55335', // Updated button color
     color: '#fff',
     height: '56px',
     borderRadius: '8px',
@@ -102,7 +102,7 @@ const styles = {
   },
   
 exportButton: {
-  backgroundColor: '#d77a65',
+  backgroundColor: '#B55335',
   color: '#FFF',
   fontWeight: 'bold',
   padding: '8px 16px', // Reduced padding to make the button more compact
@@ -400,7 +400,7 @@ const addItem = () => {
         fontFamily: '"Source Sans Pro", sans-serif',
         fontWeight: 'bold',
         fontSize: '16px',
-        color: filterType === 'Alphabetical' ? '#d77a65' : '#555',
+        color: filterType === 'Alphabetical' ? '#B55335' : '#555',
         borderRadius: '8px 0 0 8px',
         backgroundColor: filterType === 'Alphabetical' ? '#d3d3d3' : 'transparent', // Darker gray when selected
       }}
@@ -413,7 +413,7 @@ const addItem = () => {
         fontFamily: '"Source Sans Pro", sans-serif',
         fontWeight: 'bold',
         fontSize: '16px',
-        color: filterType === 'Label' ? '#d77a65' : '#555',
+        color: filterType === 'Label' ? '#B55335' : '#555',
         borderRadius: '0 8px 8px 0',
         backgroundColor: filterType === 'Label' ? '#d3d3d3' : 'transparent', // Darker gray when selected
       }}

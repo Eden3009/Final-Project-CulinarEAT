@@ -58,7 +58,7 @@ const styles = {
   },
   
   heroOverlay: {
-    color: '#d77a65',
+    color: '#B55335', //#ce6140
     fontSize: '48px',
     textAlign: 'center',
     fontFamily: 'Oregano, serif', // Headline Font
@@ -83,12 +83,25 @@ const styles = {
     width: '75px',
     height: '75px',
     borderRadius: '50%',
-    border: '3px solid #D4AF37',
-    backgroundColor: '#fff',
+    background: 'white', // Keep background of the image white or transparent
     objectFit: 'contain',
     padding: '5px',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    position: 'relative',
   },
+  
+  // Create a container for the gradient border
+  circleGradient: {
+    width: '85px',
+    height: '85px',
+    borderRadius: '50%',
+    background: 'conic-gradient(from 0deg,#ce6140,rgba(215, 122, 101, 0.77), #d77a65, #B55335)', // Earthy pink-brown tones
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '2px',
+  },
+  
+  
   circleLabel: {
     marginTop: '10px',
     fontSize: '0.9rem',
@@ -97,7 +110,7 @@ const styles = {
   },
   gridSection: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
+    gridTemplateColumns: 'repeat(5, 1fr)',
     gap: '35px',
     padding: '20px',
   },
@@ -242,7 +255,7 @@ const styles = {
     right: '10px',
     top: '50%',
     transform: 'translateY(-50%)',
-    backgroundColor: '#D4AF37',
+    backgroundColor: '#B55335',
     color: '#fff',
     border: 'none',
     padding: '0 20px',
@@ -398,25 +411,28 @@ const handleSearch = () => {
         </div>
       </div>
 
-      {/* Circles Section */}
-      <div style={styles.circlesSection}>
-        {tips.map((tip, index) => (
-          <div
-            style={{
-              ...styles.circleItem,
-              ...(hoverIndex === `circle-${index}` ? { transform: 'scale(1.1)' } : {}),
-            }}
-            key={`circle-${index}`}
-            onMouseEnter={() => setHoverIndex(`circle-${index}`)}
-            onMouseLeave={() => setHoverIndex(null)}
-          >
-            <img src={tip.img} alt={tip.label} style={styles.circleImage} />
-            <span style={styles.circleLabel}>{tip.label}</span>
-          </div>
-        ))}
+    {/* Circles Section */}
+<div style={styles.circlesSection}>
+  {tips.map((tip, index) => (
+    <div
+      style={{
+        ...styles.circleItem,
+        ...(hoverIndex === `circle-${index}` ? { transform: 'scale(1.1)' } : {}),
+      }}
+      key={`circle-${index}`}
+      onMouseEnter={() => setHoverIndex(`circle-${index}`)}
+      onMouseLeave={() => setHoverIndex(null)}
+    >
+      {/* Gradient border container */}
+      <div style={styles.circleGradient}>
+        <img src={tip.img} alt={tip.label} style={styles.circleImage} />
       </div>
+      <span style={styles.circleLabel}>{tip.label}</span>
+    </div>
+  ))}
+</div>
 
-  {/* Search Bar */}
+
 {/* Search Bar */}  
 <div style={{ width: '100%', margin: '30px auto', maxWidth: '600px', position: 'relative' }}>
   <div
@@ -462,14 +478,11 @@ const handleSearch = () => {
           fontSize: '28px', // Adjust the size if needed
           transition: 'color 0.3s ease',
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = '#B55335')} // Darker pink on hover
-        onMouseLeave={(e) => (e.currentTarget.style.color = '#D77A65')}
+        onMouseEnter={(e) => (e.currentTarget.style.color = '#ce6140')} // Darker pink on hover
+        onMouseLeave={(e) => (e.currentTarget.style.color = '#ce6140')}
       />
     </button>
   </div>
-
-
-
 
 
     {/* Search Tabs */}
@@ -482,9 +495,9 @@ const handleSearch = () => {
         padding: '10px 20px',
         margin: '0 10px',
         borderRadius: '40px',
-        border: searchType === type ? '2px solid #D77A65' : '2px solid #ccc',
-        backgroundColor: searchType === type ? '#D77A65': '#fff',
-        color: searchType === type ? '#fff' : '#D77A65',
+        border: searchType === type ? '2px solid #B55335' : '2px solid #ccc',
+        backgroundColor: searchType === type ? '#B55335': '#fff',
+        color: searchType === type ? '#fff' : '#B55335',
         fontSize: '16px',
         cursor: 'pointer',
         boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
@@ -495,8 +508,6 @@ const handleSearch = () => {
     </button>
   ))}
 </div>
-
-
 
 
 {/* Selected Ingredients */}
@@ -534,7 +545,6 @@ const handleSearch = () => {
     </div>
   ))}
 </div>
-
 
 {/* Suggestions Dropdown */}
 {searchType === 'ingredient' && suggestedIngredients.length > 0 && (
@@ -648,6 +658,5 @@ const handleSearch = () => {
     </div>
   );
 }
-
 
 export default HomePage;

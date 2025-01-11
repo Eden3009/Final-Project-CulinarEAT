@@ -94,7 +94,7 @@ const styles = {
     padding: '80px 12px',
     fontSize: '28px', 
     fontWeight: 'bold',
-    color: '#d77a65',
+    color: '#B55335',
     fontFamily: 'Oregano, serif',
     backgroundColor: 'transparent',
     border: 'none',
@@ -386,7 +386,7 @@ const ingredients = recipe && recipe.Ingredients
     fontSize: '40px',
     fontFamily: "'Merienda', cursive",
     fontWeight: 'bold',
-    color: '#d77a65',  // Dark chocolate color
+    color: '#B55335',  // Dark chocolate color
     marginBottom: '5px',
   }}>
     {recipe.RecipeTitle || 'Untitled Recipe'}
@@ -549,7 +549,7 @@ const ingredients = recipe && recipe.Ingredients
     fontSize: '26px',
     fontWeight: 'bold',
     fontFamily: "'Merienda', cursive",
-    color: '#d77a65',
+    color: '#B55335',
     marginBottom: '15px',
   }}>
     Ingredients
@@ -578,7 +578,7 @@ const ingredients = recipe && recipe.Ingredients
               width: '22px',
               height: '22px',
               borderRadius: '50%',
-              border: '1px solid #d77a65',
+              border: '1px solid #B55335',
               backgroundColor: 'transparent',
               cursor: 'pointer',
               outline: 'none',
@@ -614,7 +614,7 @@ const ingredients = recipe && recipe.Ingredients
       }}
       disabled={checkedIngredients.length === 0}
       style={{
-        backgroundColor: checkedIngredients.length > 0 ? '#d77a65' : '#ccc',
+        backgroundColor: checkedIngredients.length > 0 ? '#B55335' : '#ccc',
         color: '#fff',
         padding: '12px 20px',
         border: 'none',
@@ -641,11 +641,11 @@ const ingredients = recipe && recipe.Ingredients
     style={{
       width: '120px',
       padding: '10px',
-      border: '2px solid #d77a65',
+      border: '2px solid #B55335',
       borderRight: 'none', // Remove right border to merge with EU button
       borderRadius: '8px 0 0 8px',
-      backgroundColor: measurementSystem === 'US' ? '#d77a65' : 'transparent',
-      color: measurementSystem === 'US' ? '#fff' : '#d77a65',
+      backgroundColor: measurementSystem === 'US' ? '#B55335' : 'transparent',
+      color: measurementSystem === 'US' ? '#fff' : '#B55335',
       fontFamily: "'Merienda', cursive",
       fontWeight: 'bold',
       cursor: 'pointer',
@@ -660,10 +660,10 @@ const ingredients = recipe && recipe.Ingredients
     style={{
       width: '120px',
       padding: '10px',
-      border: '2px solid #d77a65',
+      border: '2px solid #B55335',
       borderRadius: '0 8px 8px 0',
-      backgroundColor: measurementSystem === 'EU' ? '#d77a65' : 'transparent',
-      color: measurementSystem === 'EU' ? '#fff' : '#d77a65',
+      backgroundColor: measurementSystem === 'EU' ? '#B55335' : 'transparent',
+      color: measurementSystem === 'EU' ? '#fff' : '#B55335',
       fontFamily: "'Merienda', cursive",
       fontWeight: 'bold',
       cursor: 'pointer',
@@ -705,7 +705,7 @@ const ingredients = recipe && recipe.Ingredients
       toast.success(isFavorite ? 'Recipe removed from favorites!' : 'Recipe added to favorites!');
     }}
     style={{
-      backgroundColor: '#d77a65',
+      backgroundColor: '#B55335',
       color: '#fff',
       padding: '12px 15px',
       border: 'none',
@@ -715,7 +715,7 @@ const ingredients = recipe && recipe.Ingredients
       transition: 'transform 0.2s ease, background-color 0.3s ease',
     }}
     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#A0522D')}
-    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#d77a65')}
+    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#B55335')}
   >
     {/* Toggle between filled and outline icon */}
     {isFavorite ? <BsBookmarkFill size={24} style={{ color: '#fff' }} /> : <BsBookmark size={24} style={{ color: '#fff' }} />}
@@ -731,7 +731,7 @@ const ingredients = recipe && recipe.Ingredients
       fontSize: '26px',  // Same size as "Ingredients" headline
       fontWeight: 'bold',
       fontFamily: "'Merienda', cursive",
-      color: '#d77a65',
+      color: '#B55335',
       textAlign: 'left',  // Align same as "Ingredients"
       marginBottom: '20px',
     }}>
@@ -755,7 +755,7 @@ const ingredients = recipe && recipe.Ingredients
             fontSize: '26px',
             fontWeight: 'bold',
             fontFamily: "'Merienda', cursive",
-            color: '#d77a65',
+            color: '#B55335',
             minWidth: '30px',
             textAlign: 'center',
           }}>
@@ -788,7 +788,7 @@ const ingredients = recipe && recipe.Ingredients
     fontSize: '24px',  // Same size as other headlines
     fontWeight: 'bold',
     fontFamily: "'Merienda', cursive",  
-    color: '#d77a65',  
+    color: '#B55335',  
     marginBottom: '12px',
   }}>
    Categories
@@ -867,7 +867,7 @@ const ingredients = recipe && recipe.Ingredients
           transition: 'all 0.3s ease',
         }}
         onMouseOver={(e) => {
-          e.currentTarget.style.borderBottom = '2px solid #d77a65'; // Underline on hover
+          e.currentTarget.style.borderBottom = '2px solid #bd988a'; // Underline on hover
         }}
         onMouseOut={(e) => {
           e.currentTarget.style.borderBottom = '2px solid transparent'; // Remove underline
@@ -886,7 +886,7 @@ const ingredients = recipe && recipe.Ingredients
     fontSize: '24px',
     fontWeight: 'bold',
     fontFamily: "'Merienda', cursive",
-    color: '#d77a65',
+    color: '#B55335',
     marginBottom: '-5px',
   }}>
     Reviews
@@ -973,7 +973,7 @@ const ingredients = recipe && recipe.Ingredients
   fontSize: '20px',  
   fontWeight: 'bold',
   fontFamily: "'Merienda', cursive",
-  color: '#d77a65',
+  color: '#B55335',
   marginBottom: '-5px',  
 }}>
   Add Your Review
@@ -1039,7 +1039,7 @@ const ingredients = recipe && recipe.Ingredients
   <button
     type="submit"
     style={{
-      backgroundColor: '#d77a65',
+      backgroundColor: '#B55335',
       color: '#fff',
       padding: '12px 20px',
       border: 'none',

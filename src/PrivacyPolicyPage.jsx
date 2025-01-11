@@ -16,7 +16,7 @@ const styles = {
   title: {
     fontSize: '36px',
     fontWeight: 'bold',
-    color: '#d77a65',
+    color: '#B55335',
     marginBottom: '20px',
     fontFamily: "'Merienda', cursive",
     textAlign: 'center',
@@ -109,7 +109,7 @@ const PrivacyPage = () => {
           </ul>
           <p style={styles.paragraph}>
             To exercise these rights, please contact our support team at{' '}
-            <a href="mailto:support@culinareat.com" style={{ color: '#d77a65', textDecoration: 'none' }}>
+            <a href="mailto:support@culinareat.com" style={{ color: '#B55335', textDecoration: 'none' }}>
               support@culinareat.com
             </a>
             .
@@ -125,7 +125,7 @@ const PrivacyPage = () => {
           <h2 style={styles.subtitle}>Contact Us</h2>
           <p style={styles.paragraph}>
             If you have any questions, concerns, or feedback regarding this Privacy Policy, feel free to contact us at{' '}
-            <a href="mailto:support@culinareat.com" style={{ color: '#d77a65', textDecoration: 'none' }}>
+            <a href="mailto:support@culinareat.com" style={{ color: '#B55335', textDecoration: 'none' }}>
               support@culinareat.com
             </a>
             .

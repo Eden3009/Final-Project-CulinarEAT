@@ -40,7 +40,7 @@ const Title = styled.h2`
   text-align: center;
   margin-bottom: 30px;
   font-family: 'Merienda', cursive; 
-  color: #d77a65;
+  color: #B55335;
   font-size: 32px;
   font-weight: bold;
 `;
@@ -239,8 +239,6 @@ const SubstituteButton = styled(Button)`
   width: auto;
 `;
 
-
-
 const CameraButton = styled.div`
   width: 80px;
   height: 80px;
@@ -265,7 +263,7 @@ const HiddenFileInput = styled.input`
 `;
 
 const SubmitButton = styled(Button)`
-  background-color: #d77a65;
+  background-color: #B55335;
   &:hover {
     background-color: #b25949;
   }

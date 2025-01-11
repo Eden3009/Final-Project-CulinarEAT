@@ -12,7 +12,7 @@ const styles = {
     margin: "20px auto",
     display: "flex",
     alignItems: "center",
-    border: "2px solid #D4AF37",
+    border: "2px solid #bd988a",
     borderRadius: "30px",
     height: "42px",
     overflow: "hidden",
@@ -27,7 +27,7 @@ const styles = {
     height: "100%",
   },
   searchButton: {
-    backgroundColor: "#D4AF37",
+    backgroundColor: "#B55335",
     color: "#fff",
     border: "none",
     padding: "0 20px",
@@ -112,7 +112,7 @@ const styles = {
       fontWeight: 'bold',
       color: '#fff',
       textShadow: `
-        3px 3px 0 #d77a65,
+        3px 3px 0 #B55335,
         6px 6px 0 rgba(0, 0, 0, 0.2)
       `,
       padding: '20px',
@@ -136,7 +136,7 @@ const styles = {
       fontSize: '32px',
       fontWeight: 'bold',
       margin: '20px 0',
-      color: '#d77a65',
+      color: '#B55335',
       fontFamily: "'Merienda', cursive", // Set font to Merienda
   },
 
@@ -195,9 +195,8 @@ const styles = {
       padding: '8px 12px',
       fontSize: '28px', 
       fontWeight: 'bold',
-      color: '#fff',
       textShadow: `
-        3px 3px 0 #d77a65,
+        3px 3px 0 #B55335,
         6px 6px 0 rgba(0, 0, 0, 0.2)
       `,
       fontFamily: 'Oregano, serif',
@@ -214,7 +213,7 @@ const styles = {
   paginationButton: {
     width: '100px', // Fixed width for consistent size
     padding: '12px',
-    backgroundColor: '#d77a65', // Default background color
+    backgroundColor: '#B55335', // Default background color
     color: '#fff',
     border: 'none',
     borderRadius: '8px', // Rounded corners
@@ -496,9 +495,9 @@ const filterByRecipeName = (searchTerm) => {
         padding: '10px 20px',
         margin: '0 10px',
         borderRadius: '40px',
-        border: searchType === type ? '2px solid #D77A65' : '2px solid #ccc',
-        backgroundColor: searchType === type ? '#D77A65': '#fff',
-        color: searchType === type ? '#fff' : '#D77A65',
+        border: searchType === type ? '2px solid #B55335' : '2px solid #ccc',
+        backgroundColor: searchType === type ? '#B55335': '#fff',
+        color: searchType === type ? '#fff' : '#B55335',
         fontSize: '16px',
         cursor: 'pointer',
         boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
@@ -567,12 +566,12 @@ const filterByRecipeName = (searchTerm) => {
     onClick={() => paginate(currentPage - 1)}
     style={{
       ...styles.paginationButton,
-      backgroundColor: currentPage === 1 ? '#f0f0f0' : '#d77a65',
+      backgroundColor: currentPage === 1 ? '#f0f0f0' : '#B55335',
       color: currentPage === 1 ? '#ccc' : '#fff',
       cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
     }}
     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b35c4e')}
-    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#d77a65')}
+    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#B55335')}
   >
     Previous
   </button>
@@ -581,12 +580,12 @@ const filterByRecipeName = (searchTerm) => {
     onClick={() => paginate(currentPage + 1)}
     style={{
       ...styles.paginationButton,
-      backgroundColor: currentPage === totalPages ? '#fff' : '#d77a65',
+      backgroundColor: currentPage === totalPages ? '#fff' : '#B55335',
       color: currentPage === totalPages ? '#ccc' : '#fff',
       cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
     }}
     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b35c4e')}
-    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#d77a65')}
+    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#B55335')}
   >
     Next
   </button>
