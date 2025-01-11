@@ -372,7 +372,7 @@ const AddRecipePage = () => {
   const [productAmount, setProductAmount] = useState("");
   const [skillLevel, setSkillLevel] = useState("");
   const [preparationTime, setPreparationTime] = useState("");
-const [totalTime, setTotalTime] = useState("");
+  const [totalTime, setTotalTime] = useState("");
   const { user } = useContext(UserContext);
 
 
