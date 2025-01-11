@@ -9,6 +9,14 @@ import { FaTag } from 'react-icons/fa'; // FontAwesome Tag icon
 import { MdLabelOutline } from 'react-icons/md'; // Import Material Design Label Outline Icon
 import { AiOutlineTag } from 'react-icons/ai'; // Import gray outline tag icon
 import { AiOutlineUser, AiOutlineFieldNumber, AiOutlineClockCircle } from 'react-icons/ai';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { BsCartPlus } from 'react-icons/bs'; // Import a simple cart icon
+import { BsBookmark, BsBookmarkFill } from 'react-icons/bs';
+
+
+
+
 
 const styles = {
   page: {
@@ -86,11 +94,7 @@ const styles = {
     padding: '80px 12px',
     fontSize: '28px', 
     fontWeight: 'bold',
-    color: '#fff',
-    textShadow: `
-      3px 3px 0 #d77a65,
-      6px 6px 0 rgba(0, 0, 0, 0.2)
-    `,
+    color: '#d77a65',
     fontFamily: 'Oregano, serif',
     backgroundColor: 'transparent',
     border: 'none',
@@ -212,6 +216,37 @@ function RecipeViewPage() {
   const [recipe, setRecipe] = useState(null);
   const navigate = useNavigate();
   const [checkedIngredients, setCheckedIngredients] = useState([]);
+  const [rating, setRating] = useState(0);
+  const [reviewData, setReviewData] = useState({ name: '', comment: '' });
+  const [hoverRating, setHoverRating] = useState(0);  // User's hover state
+  const [isFavorite, setIsFavorite] = useState(false); // Track whether the recipe is in favorites
+  const [measurementSystem, setMeasurementSystem] = useState('US'); // Default to US
+
+
+  const handleReviewSubmit = (e) => {
+    e.preventDefault(); // Prevent page refresh
+  
+    // Validation
+    if (!reviewData.name || !reviewData.comment || rating === 0) {
+      alert('Please fill out all fields and select a rating!');
+      return;
+    }
+  
+    const newReview = {
+      User: reviewData.name,
+      Comment: reviewData.comment,
+      Rating: rating,
+      Timestamp: new Date().toLocaleString(),
+    };
+  
+    setRecipe((prevRecipe) => ({
+      ...prevRecipe,
+      Reviews: [...prevRecipe.Reviews, newReview],
+    }));
+  
+    setReviewData({ name: '', comment: '' }); // Reset fields
+    setRating(0); // Reset rating
+  };
   
   const handleCheckboxChange = (event, ingredient) => {
     if (event.target.checked) {
@@ -225,18 +260,20 @@ function RecipeViewPage() {
   
   useEffect(() => {
     if (RecipeID) {
-      console.log('RecipeID from params:', RecipeID);  // Add this to check the ID
+      console.log('RecipeID from params:', RecipeID);  // Check the RecipeID
       fetch(`http://localhost:5001/api/recipe/${RecipeID}`)
         .then((response) => response.json())
         .then((data) => {
-          console.log('Fetched Recipe Data:', data);  // Log the fetched data
+          console.log('Fetched Recipe Data:', data);  // Log the full fetched data
           setRecipe(data.recipe);
+          console.log('Recipe ImageURL:', data.recipe?.ImageURL);  // Log the ImageURL
         })
         .catch((error) => console.error('Error fetching recipe:', error));
     } else {
       console.error('Invalid RecipeID. Cannot fetch recipe.');
     }
   }, [RecipeID]);
+  
   
 
   // Parse and format ingredients
@@ -260,7 +297,8 @@ function RecipeViewPage() {
     for (const fraction of fractions) {
       if (Math.abs(fractionalPart - fraction.value) < 0.01) {
         if (wholePart > 0) {
-          return `${wholePart}${fraction.display}`; // Combine whole part and fraction (e.g., "3½")
+          return `${wholePart}${fraction.display}`;  // Combined string of whole part + fraction
+
         }
         return fraction.display; // Return only the fraction (e.g., "½")
       }
@@ -282,10 +320,11 @@ const ingredients = recipe && recipe.Ingredients
         const measure = rest.join(' '); // Combine remaining parts as the measure
 
         return `${formattedQuantity} ${measure ? measure : ''} ${ingredientName}`.trim();
+
       }
       return item.trim();
     })
-  : [];  // If `recipe.Ingredients` is null, return an empty list
+  : [];  // If recipe.Ingredients is null, return an empty list
   if (!recipe) {
     return <p>Loading recipe...</p>;  // Return a loading message until the data is fetched
   }
@@ -329,23 +368,25 @@ const ingredients = recipe && recipe.Ingredients
      
  {/* Hero Section */}
 <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-  <img
-    src={recipe.ImageURL ? require(`./images/${recipe.ImageURL}.jpg`) : lunchImage}
-    alt={recipe.RecipeTitle || 'Recipe Image'}
-    style={{
-      width: '100%',
-      maxWidth: '600px',  // Match size in the example
-      height: 'auto',
-      borderRadius: '12px',
-      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',  // Softer shadow
-      marginBottom: '10px',
-    }}
-  />
+<img
+  src={recipe.ImageURL ? require(`./images/${recipe.ImageURL}.jpg`) : lunchImage}
+  alt={recipe.RecipeTitle || 'Recipe Image'}
+  style={{
+    width: '100%',
+    maxWidth: '600px',
+    height: 'auto',
+    borderRadius: '12px',
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+    marginBottom: '10px',
+  }}
+  onError={(e) => e.currentTarget.src = lunchImage} // Fallback if image not found
+/>
+
   <h1 style={{
     fontSize: '40px',
     fontFamily: "'Merienda', cursive",
     fontWeight: 'bold',
-    color: '#4E342E',  // Dark chocolate color
+    color: '#d77a65',  // Dark chocolate color
     marginBottom: '5px',
   }}>
     {recipe.RecipeTitle || 'Untitled Recipe'}
@@ -366,9 +407,10 @@ const ingredients = recipe && recipe.Ingredients
       />
     ))}
   </div>
-  <p style={{ fontSize: '14px', marginTop: '5px', color: '#555' }}>
-    {recipe.AverageRating ? `${recipe.AverageRating}/5` : 'Not Rated Yet'}
-  </p>
+  <p style={{ fontSize: '14px' }}>
+  {recipe.AverageRating ? `${recipe.AverageRating}/5` : 'Not Rated Yet'}
+</p>
+
 
   {/* Description Section */}
   {recipe.RecipeDescription && (
@@ -495,20 +537,19 @@ const ingredients = recipe && recipe.Ingredients
   alignItems: 'flex-start',
   padding: '20px 0',
 }}>
-
-  {/* Ingredients Section */}
+{/* Ingredients Section */}
 <div style={{
   flex: '1',
   textAlign: 'left',
   paddingRight: '40px',
-  paddingLeft: '40px',  // Added left padding to move it away from the edge
-  borderRight: '2px solid #E0E0E0',  // Single vertical line for separation
+  paddingLeft: '40px',
+  borderRight: '2px solid #E0E0E0',
 }}>
   <h2 style={{
     fontSize: '26px',
     fontWeight: 'bold',
-    fontFamily: "'Georgia', serif",
-    color: '#4E342E',
+    fontFamily: "'Merienda', cursive",
+    color: '#d77a65',
     marginBottom: '15px',
   }}>
     Ingredients
@@ -529,16 +570,15 @@ const ingredients = recipe && recipe.Ingredients
         alignItems: 'center',
         gap: '10px',
       }}>
-        {/* Custom Checkbox */}
         <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
           <input
             type="checkbox"
             style={{
-              appearance: 'none',  // Hide default checkbox
+              appearance: 'none',
               width: '22px',
               height: '22px',
               borderRadius: '50%',
-              border: '1px solid #8B4513',
+              border: '1px solid #d77a65',
               backgroundColor: 'transparent',
               cursor: 'pointer',
               outline: 'none',
@@ -546,23 +586,140 @@ const ingredients = recipe && recipe.Ingredients
             }}
             onChange={(e) => handleCheckboxChange(e, ingredient)}
             onMouseEnter={(e) => {
-              if (!e.target.checked) e.target.style.backgroundColor = '#F5F5DC';  // Beige hover effect
+              if (!e.target.checked) e.target.style.backgroundColor = '#F5F5DC';
             }}
             onMouseLeave={(e) => {
-              if (!e.target.checked) e.target.style.backgroundColor = 'transparent';  // Reset hover
+              if (!e.target.checked) e.target.style.backgroundColor = 'transparent';
             }}
             onClick={(e) => {
               e.target.style.backgroundColor = e.target.checked ? '#8B4513' : 'transparent';
               e.target.style.transform = 'scale(1.1)';
-              setTimeout(() => (e.target.style.transform = 'scale(1)'), 200);  // Reset scale
+              setTimeout(() => (e.target.style.transform = 'scale(1)'), 200);
             }}
           />
-          {/* Ingredient Text */}
           <span style={{ marginLeft: '10px' }}>{ingredient}</span>
         </label>
       </li>
     ))}
   </ul>
+
+  {/* Buttons Section */}
+  <div style={{ marginTop: '20px', textAlign: 'left' }}>
+    <button
+      onClick={() => {
+        toast.success('The items were added successfully to your shopping list!', {
+          position: "top-center",
+          className: "custom-toast",
+        });
+      }}
+      disabled={checkedIngredients.length === 0}
+      style={{
+        backgroundColor: checkedIngredients.length > 0 ? '#d77a65' : '#ccc',
+        color: '#fff',
+        padding: '12px 20px',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: checkedIngredients.length > 0 ? 'pointer' : 'not-allowed',
+        fontFamily: "'Merienda', cursive",
+        fontSize: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '10px',
+        transition: 'background-color 0.3s ease',
+        marginBottom: '10px',  // Add spacing between the shopping list button and toggle
+      }}
+    >
+      Add to Shopping List
+      <BsCartPlus style={{ fontSize: '20px', color: '#fff' }} />
+    </button>
+
+    {/* Toggle Button for US/EU Conversion */}
+    <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+  <button
+    onClick={() => setMeasurementSystem('US')}
+    style={{
+      width: '120px',
+      padding: '10px',
+      border: '2px solid #d77a65',
+      borderRight: 'none', // Remove right border to merge with EU button
+      borderRadius: '8px 0 0 8px',
+      backgroundColor: measurementSystem === 'US' ? '#d77a65' : 'transparent',
+      color: measurementSystem === 'US' ? '#fff' : '#d77a65',
+      fontFamily: "'Merienda', cursive",
+      fontWeight: 'bold',
+      cursor: 'pointer',
+      textAlign: 'center',
+      margin: 0, // No margin to remove the gap
+    }}
+  >
+    US
+  </button>
+  <button
+    onClick={() => setMeasurementSystem('EU')}
+    style={{
+      width: '120px',
+      padding: '10px',
+      border: '2px solid #d77a65',
+      borderRadius: '0 8px 8px 0',
+      backgroundColor: measurementSystem === 'EU' ? '#d77a65' : 'transparent',
+      color: measurementSystem === 'EU' ? '#fff' : '#d77a65',
+      fontFamily: "'Merienda', cursive",
+      fontWeight: 'bold',
+      cursor: 'pointer',
+      textAlign: 'center',
+      margin: 0, // No margin to remove the gap
+    }}
+  >
+    EU
+  </button>
+</div>
+  </div>
+
+
+</div>
+
+
+{/* Toast Container with Custom Styles */}
+<ToastContainer
+  autoClose={1800}
+  hideProgressBar={true}
+  closeOnClick
+  pauseOnFocusLoss={false}
+  pauseOnHover={false}
+  style={{
+    width: 'fit-content',
+    margin: '0 auto',
+  }}
+/>
+{/* Floating Save to Favorites Button */}
+<div style={{
+  position: 'fixed',
+  top: '120px',  // Adjust this value for positioning
+  right: '30px',
+  zIndex: 1000,
+}}>
+  <button
+    onClick={() => {
+      setIsFavorite(!isFavorite); // Toggle favorite state
+      toast.success(isFavorite ? 'Recipe removed from favorites!' : 'Recipe added to favorites!');
+    }}
+    style={{
+      backgroundColor: '#d77a65',
+      color: '#fff',
+      padding: '12px 15px',
+      border: 'none',
+      borderRadius: '50%',
+      cursor: 'pointer',
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+      transition: 'transform 0.2s ease, background-color 0.3s ease',
+    }}
+    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#A0522D')}
+    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#d77a65')}
+  >
+    {/* Toggle between filled and outline icon */}
+    {isFavorite ? <BsBookmarkFill size={24} style={{ color: '#fff' }} /> : <BsBookmark size={24} style={{ color: '#fff' }} />}
+  </button>
 </div>
 
   {/* Instructions Section */}
@@ -573,8 +730,8 @@ const ingredients = recipe && recipe.Ingredients
     <h2 style={{
       fontSize: '26px',  // Same size as "Ingredients" headline
       fontWeight: 'bold',
-      fontFamily: "'Georgia', serif",
-      color: '#4E342E',
+      fontFamily: "'Merienda', cursive",
+      color: '#d77a65',
       textAlign: 'left',  // Align same as "Ingredients"
       marginBottom: '20px',
     }}>
@@ -595,9 +752,10 @@ const ingredients = recipe && recipe.Ingredients
         }}>
           {/* Number without circle */}
           <div style={{
-            fontSize: '22px',
+            fontSize: '26px',
             fontWeight: 'bold',
-            color: '#8B4513',
+            fontFamily: "'Merienda', cursive",
+            color: '#d77a65',
             minWidth: '30px',
             textAlign: 'center',
           }}>
@@ -620,7 +778,6 @@ const ingredients = recipe && recipe.Ingredients
 
 </div>
 
-
 </div>
   
    {/* Themes and Labels Section */}
@@ -630,11 +787,11 @@ const ingredients = recipe && recipe.Ingredients
   <h2 style={{
     fontSize: '24px',  // Same size as other headlines
     fontWeight: 'bold',
-    fontFamily: "'Georgia', serif",  // Same font as Ingredients/Directions
-    color: '#4E342E',  // Consistent dark brown color
+    fontFamily: "'Merienda', cursive",  
+    color: '#d77a65',  
     marginBottom: '12px',
   }}>
-    Recipe Themes
+   Categories
   </h2>
   <div style={{
     display: 'flex',
@@ -677,10 +834,7 @@ const ingredients = recipe && recipe.Ingredients
   </div>
 </div>
 
-
-
-
-{/* Labels Section with Elegant Gray Tag Icon */} 
+{/* Labels Section */} 
 <div style={{
   display: 'flex',
   justifyContent: 'center',
@@ -704,7 +858,7 @@ const ingredients = recipe && recipe.Ingredients
       <span
         key={index}
         style={{
-          fontSize: '20px',
+          fontSize: '18px',
           fontFamily: "'Georgia', serif",
           fontWeight: '500',
           color: '#4E342E',
@@ -713,7 +867,7 @@ const ingredients = recipe && recipe.Ingredients
           transition: 'all 0.3s ease',
         }}
         onMouseOver={(e) => {
-          e.currentTarget.style.borderBottom = '2px solid #8B4513'; // Underline on hover
+          e.currentTarget.style.borderBottom = '2px solid #d77a65'; // Underline on hover
         }}
         onMouseOut={(e) => {
           e.currentTarget.style.borderBottom = '2px solid transparent'; // Remove underline
@@ -724,22 +878,16 @@ const ingredients = recipe && recipe.Ingredients
     ))}
   </div>
 </div>
-
-
-
 </div>
-
-  
-      
 
 {/* Reviews Section */}
 <div style={{ marginTop: '40px', textAlign: 'center' }}>
   <h2 style={{
-    fontSize: '26px',
+    fontSize: '24px',
     fontWeight: 'bold',
-    fontFamily: "'Georgia', serif",
-    color: '#4E342E',
-    marginBottom: '20px',
+    fontFamily: "'Merienda', cursive",
+    color: '#d77a65',
+    marginBottom: '-5px',
   }}>
     Reviews
   </h2>
@@ -754,7 +902,7 @@ const ingredients = recipe && recipe.Ingredients
     }}>
       {recipe.Reviews.map((review, index) => (
         <div key={index} style={{
-          backgroundColor: '#F9F7F4',  // Subtle beige background
+          backgroundColor: '#F9F7F4',
           border: '1px solid #E0E0E0',
           borderRadius: '12px',
           padding: '20px',
@@ -776,17 +924,16 @@ const ingredients = recipe && recipe.Ingredients
 
           <div style={{
             display: 'flex',
-            justifyContent: 'flex-start',
+            justifyContent: 'center',  // Center the hats
             gap: '5px',
             marginBottom: '10px',
           }}>
-            {/* Chef Hat Icons for Rating */}
             {Array.from({ length: 5 }).map((_, i) => (
               <GiChefToque
                 key={i}
                 style={{
                   fontSize: '24px',
-                  color: i < review.Rating ? '#FFD700' : '#ccc', // Gold for filled hats, gray for empty
+                  color: i < review.Rating ? '#FFD700' : '#ccc',
                 }}
               />
             ))}
@@ -806,16 +953,115 @@ const ingredients = recipe && recipe.Ingredients
     </div>
   ) : (
     <p style={{
-      fontSize: '18px',
-      fontFamily: "'Georgia', serif",
-      color: '#555',
+      fontSize: '18px',  // Matches the font size of ingredients
+      fontFamily: "'Georgia', serif",  // Same font family
+      color: '#333',  // Darker gray for readability
+      margin: '20px 0',  // Adds spacing around the text
     }}>
-      No reviews available.
+      No reviews yet.
     </p>
+    
   )}
+
+  {/* Add Review Form */}
+  <form onSubmit={handleReviewSubmit} style={{
+    maxWidth: '700px',
+    margin: '0 auto',
+    padding: '20px 0',
+  }}>
+   <h3 style={{
+  fontSize: '20px',  
+  fontWeight: 'bold',
+  fontFamily: "'Merienda', cursive",
+  color: '#d77a65',
+  marginBottom: '-5px',  
+}}>
+  Add Your Review
+</h3>
+
+<form onSubmit={handleReviewSubmit} style={{
+  marginTop: '30px',
+  maxWidth: '700px',  // Wider container for the whole form
+  margin: '0 auto',  // Center horizontally
+  padding: '20px 0',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',  // Ensure everything is centered
+}}>
+
+  {/* Comment Input */}
+  <textarea
+  placeholder="Write your review here..."
+  value={reviewData.comment}
+  onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
+  style={{
+    width: '700px',  // Fixed width for the textarea
+    height: '100px',  // Default height
+    padding: '15px',
+    marginBottom: '15px',
+    border: '1px solid #DDD',
+    borderRadius: '12px',
+    fontFamily: "'Georgia', serif",
+    fontSize: '16px',
+    boxShadow: 'inset 0 2px 5px rgba(0, 0, 0, 0.05)',
+    transition: 'border-color 0.3s ease',
+  }}
+  onFocus={(e) => e.target.style.borderColor = '#8B4513'}
+  onBlur={(e) => e.target.style.borderColor = '#DDD'}
+/>
+
+
+  {/* Chef Hat Icons for Rating */} 
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '15px',  // Adds more spacing between chef hats
+    marginBottom: '20px',  // Gap between chef hats and the button
+  }}>
+    {Array.from({ length: 5 }).map((_, i) => (
+      <GiChefToque
+        key={i}
+        style={{
+          fontSize: '30px',
+          cursor: 'pointer',
+          color: i < (hoverRating || rating) ? '#FFD700' : '#ccc',
+          transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)',
+          transition: 'transform 0.2s ease, color 0.3s ease',
+        }}
+        onMouseEnter={() => setHoverRating(i + 1)}
+        onMouseLeave={() => setHoverRating(0)}
+        onClick={() => setRating(i + 1)}
+      />
+    ))}
+  </div>
+
+  {/* Submit Button */} 
+  <button
+    type="submit"
+    style={{
+      backgroundColor: '#d77a65',
+      color: '#fff',
+      padding: '12px 20px',
+      border: 'none',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontFamily: "'Merienda', cursive",
+      fontSize: '16px',
+      transition: 'background-color 0.3s ease',
+      marginTop: '10px',  // Slight gap above the button
+    }}
+    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#A0522D')}
+    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#8B4513')}
+  >
+    Submit Review
+  </button>
+</form>
+
+  </form>
 </div>
 
-    </div>
+  </div>
+
   );
 } 
 
