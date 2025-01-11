@@ -891,7 +891,7 @@ const categories = [
     setIsAdding(true);  // Prevent duplicate submissions
   
     try {
-      const response = await axios.post('http://localhost:5001/api/ingredients', { ingredientName: newIngredientName });
+      const response = await axios.post('http://localhost:5001/api/addingredients', { ingredientName: newIngredientName });
       if (response.status === 201 && response.data?.ingredientID) {
         alert(`"${newIngredientName}" added successfully to the database!`);
         setSuggestions((prevSuggestions) => [

@@ -51,6 +51,23 @@ db.connect((err) => {
     console.log('Connected to MySQL database');
 });
 
+const session = require('express-session');
+
+app.use(
+  session({
+    secret: 'your-secret-key', // Replace with a secure secret
+    resave: false, // Prevent session resave if not modified
+    saveUninitialized: false, // Do not save uninitialized sessions
+    cookie: {
+      httpOnly: true, // Helps prevent XSS attacks
+      secure: false, // Use `true` for HTTPS
+      sameSite: 'lax', // Adjust based on your CORS setup
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    },
+  })
+);
+
+
 // API Route to Register a User
 app.post('/register', (req, res) => {
     const { FName, LName, Email, UserName, Password, Role, Area } = req.body;
@@ -102,12 +119,19 @@ app.post('/login', (req, res) => {
         // Check if the password matches
         if (user.Password !== Password) {
             return res.status(401).json({ message: 'Invalid password' });
+
         }
+// Set session data
+    req.session.user = {
+      UserID: user.UserID,
+      UserName: user.UserName,
+    };
 
         // Successful login: set a session token (username for simplicity in testing)
         res.cookie('session_token', user.UserName, {
             httpOnly: true,
             secure: false, // Use `true` if using HTTPS
+            sameSite: 'lax', // Use 'none' if frontend/backend are on different origins with HTTPS
             maxAge: 24 * 60 * 60 * 1000, // 1 day
         });
 
@@ -197,7 +221,60 @@ app.post('/logout', (req, res) => {
     res.status(200).json({ message: 'Logout successful' });
 });
 
+app.post('/api/shopping-lists', (req, res) => {
+    console.log('Received request:', req.body);
+    console.log('Session data in /api/shopping-lists:', req.session);
 
+    const { shoppingList, userId } = req.body; // Extract userId from the request body
+
+    if (!userId) {
+        console.error('No userId provided');
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    if (!shoppingList || shoppingList.length === 0) {
+        console.error('Empty shopping list provided');
+        return res.status(400).json({ message: 'Shopping list is empty' });
+    }
+
+    const insertShoppingListSQL = `
+        INSERT INTO ShoppingList (UserID, CreatedDate)
+        VALUES (?, NOW())
+    `;
+
+    db.query(insertShoppingListSQL, [userId], (err, result) => {
+        if (err) {
+            console.error('Error creating shopping list:', err);
+            return res.status(500).json({ message: 'Database error', error: err.message });
+        }
+
+        const shoppingListId = result.insertId;
+
+        const insertListIngredientsSQL = `
+            INSERT INTO ListIngredient (ShoppingListID, IngredientID, Quantity, MeasureID)
+            VALUES ?
+        `;
+
+        // Map shopping list items into the required format
+        const ingredientValues = shoppingList.map((item) => [
+            shoppingListId,
+            item.ingredientId, // Ensure this matches IngredientID in the database
+            item.quantity,
+            item.measureId,
+        ]);
+
+        db.query(insertListIngredientsSQL, [ingredientValues], (err) => {
+            if (err) {
+                console.error('Error inserting ingredients:', err);
+                return res.status(500).json({ message: 'Database error', error: err.message });
+            }
+            res.status(201).json({ message: 'Shopping list saved successfully.' });
+        });
+    });
+});
+
+
+  
 // API Route to Fetch All Measures
 app.get('/api/measures', (req, res) => {
     const fetchMeasuresSQL = `SELECT MeasureID, MeasureName FROM Measure`;
@@ -352,7 +429,7 @@ app.get('/api/substitute-ingredients', (req, res) => {
 });
 
 // Add New Ingredient to the Database
-app.post('/api/ingredients', (req, res) => {
+app.post('/api/addingredients', (req, res) => {
    const { ingredientName } = req.body;
 
     if (!ingredientName || ingredientName.trim() === '') {
@@ -378,27 +455,32 @@ app.post('/api/ingredients', (req, res) => {
 
 app.get('/api/ingredients', (req, res) => {
     const { query } = req.query;
-  
+
     if (!query || query.trim() === '') {
-      return res.status(400).json({ message: 'Query parameter is required.' });
+        return res.status(400).json({ message: 'Query parameter is required.' });
     }
-  
+
     const sql = `
-    SELECT IngredientID, IngredientName
-    FROM Ingredient
-    WHERE IngredientName LIKE ?
-    ORDER BY IngredientName = ? ASC, IngredientName ASC
-    LIMIT 10
-`;
-  
-    db.query(sql, [`%${query}%`], (err, results) => {
-      if (err) {
-        console.error('Error fetching ingredient suggestions:', err);
-        return res.status(500).json({ message: 'Database error', error: err });
-      }
-      res.status(200).json(results);
+        SELECT IngredientID, IngredientName
+        FROM Ingredient
+        WHERE IngredientName LIKE ?
+        ORDER BY IngredientName = ? ASC, IngredientName ASC
+        LIMIT 10
+    `;
+
+    db.query(sql, [`%${query}%`, query], (err, results) => {
+        if (err) {
+            console.error('Error fetching ingredient suggestions:', err);
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        // Debugging: Log the results
+        console.log('Ingredient query results:', results);
+
+        res.status(200).json({ ingredients: results }); // Ensure consistent format
     });
-  });
+});
+
   
 
 // Handle preflight requests for all routes
@@ -638,9 +720,10 @@ app.get('/api/search', (req, res) => {
         } else if (action === 'autocomplete') {
             // Case 2: Auto-complete suggestions for ingredients (typing)
             sql = `
-                SELECT DISTINCT i.IngredientName
-                FROM Ingredient i
-                WHERE i.IngredientName LIKE ?
+                SELECT i.IngredientID, i.IngredientName
+FROM Ingredient i
+WHERE i.IngredientName LIKE ?
+
             `;
             params = [`%${query}%`];
         } else {

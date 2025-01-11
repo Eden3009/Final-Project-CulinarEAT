@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   TextField,
   Button,
@@ -13,6 +13,7 @@ import { ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { toast, ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import { UserContext } from './UserContext'; // Adjust path as needed
 
 
 
@@ -154,35 +155,153 @@ saveButton: {
 };
 
 function ShoppingListPage() {
+  const { user } = React.useContext(UserContext); // Access `UserContext` at the top level
   const [shoppingList, setShoppingList] = useState([]);
   const [selectedIngredient, setSelectedIngredient] = useState('');
   const [filterType, setFilterType] = useState('Label');
   const [errorMessageVisible, setErrorMessageVisible] = useState(false);
   const [inputError, setInputError] = useState(false);
-  const navigate = useNavigate(); // Add the `useNavigate` hook for navigation
+  const navigate = useNavigate();
+  const [measures, setMeasures] = useState([]);
+  const [quantity, setQuantity] = useState(1);
+  const [measure, setMeasure] = useState('');
+  const [suggestedIngredients, setSuggestedIngredients] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+const searchType = 'ingredient'; // Hardcoded to 'ingredient' since we're only handling ingredient suggestions
+
+useEffect(() => {
+  fetch('/api/session', { credentials: 'include' })
+    .then((res) => res.json())
+    .then((data) => console.log('Session data:', data))
+    .catch((err) => console.error('Error fetching session:', err));
+}, []);
 
 
-  const addItem = () => {
-    if (!selectedIngredient.trim()) {
-      setInputError(true);
-      setTimeout(() => setInputError(false), 3000); // Hide the error bubble after 3 seconds
+// Fetch suggestions dynamically
+// Fetch suggestions dynamically
+ useEffect(() => {
+    if (searchType === 'ingredient' && searchTerm.length > 0) {
+        // Fetch suggestions for autocomplete
+        fetch(`http://localhost:5001/api/search?query=${searchTerm}&type=ingredient&action=autocomplete`)
+            .then((res) => res.json())
+            .then((data) => setSuggestedIngredients(data.ingredients || []))
+            .catch((error) => console.error('Error fetching ingredient suggestions:', error));
+    }  else {
+        setSuggestedIngredients([]);
+        setSuggestions([]);
+    }
+}, [searchTerm, searchType]);
+
+
+
+  // Fetch measures from the backend
+  useEffect(() => {
+    const fetchMeasures = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/api/measures');
+        const data = await response.json();
+        setMeasures(data); // Assuming API returns an array of { MeasureID, MeasureName }
+      } catch (error) {
+        console.error('Error fetching measures:', error);
+      }
+    };
+  
+    fetchMeasures();
+  }, []);
+
+  const saveToProfile = async () => {
+    console.log('Shopping List Data:', shoppingList); // Log for debugging
+  
+    if (shoppingList.length === 0) {
+      setErrorMessageVisible(true);
+      setTimeout(() => setErrorMessageVisible(false), 3000);
       return;
     }
   
-    if (
-      !shoppingList.some(
-        (item) => item.label.toLowerCase() === selectedIngredient.toLowerCase()
-      )
-    ) {
-      setShoppingList([
-        ...shoppingList,
-        { label: selectedIngredient, quantity: 1, unit: 'unit', category: 'Uncategorized', isEditing: false },
-      ]);
-      
-      setSelectedIngredient('');
-      setInputError(false); // Clear error when an ingredient is added
+    const invalidItems = shoppingList.filter(item => !item.ingredientId);
+    if (invalidItems.length > 0) {
+      console.error('Invalid items in shopping list:', invalidItems);
+      toast.error('Some items are missing valid ingredients. Please fix them.');
+      return;
+    }
+  
+    if (!user?.UserID) {
+      toast.error('User not logged in. Cannot save shopping list.');
+      return;
+    }
+  
+    try {
+      const response = await fetch('http://localhost:5001/api/shopping-lists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shoppingList,
+          userId: user.UserID,
+        }),
+        credentials: 'include',
+      });
+  
+      if (response.ok) {
+        toast.success('Shopping list saved successfully!');
+        setTimeout(() => navigate('/profile'), 2000);
+      } else {
+        const error = await response.json();
+        console.error('Error saving shopping list:', error);
+        toast.error('Failed to save shopping list.');
+      }
+    } catch (error) {
+      console.error('Error saving shopping list:', error);
+      toast.error('Failed to save shopping list.');
     }
   };
+  
+
+  
+const addItem = () => {
+  if (!searchTerm.trim()) {
+    toast.error('Ingredient is required!');
+    return;
+  }
+  if (!measure) {
+    toast.error('Please select a measure!');
+    return;
+  }
+  if (!selectedIngredient?.IngredientID) {
+    toast.error('Please select a valid ingredient from the suggestions!');
+    return;
+  }
+
+  const exists = shoppingList.some(
+    (item) => item.label.toLowerCase() === searchTerm.toLowerCase()
+  );
+
+  if (exists) {
+    toast.error('Ingredient already added!');
+    return;
+  }
+
+  setShoppingList((prev) => [
+    ...prev,
+    {
+      label: searchTerm,
+      ingredientId: selectedIngredient.IngredientID, // Ensure this is valid
+      quantity,
+      measureId: measure,
+      measureName: measures.find((m) => m.MeasureID === measure)?.MeasureName || '',
+    },
+  ]);
+
+  // Reset fields
+  setSearchTerm('');
+  setQuantity(1);
+  setMeasure('');
+  setSelectedIngredient(null);
+};
+
+  
+  
+  
   
   
 
@@ -225,27 +344,10 @@ function ShoppingListPage() {
     acc[item.category].push(item);
     return acc;
   }, {});
-  const saveToProfile = () => {
-    if (shoppingList.length === 0) {
-      // Show the regular error message
-      setErrorMessageVisible(true);
+
+ 
   
-      // Hide the error message after 3 seconds, regardless of what happens
-      setTimeout(() => {
-        setErrorMessageVisible(false);
-      }, 3000); // 3 seconds
-    } else {
-      setErrorMessageVisible(false); // Hide regular error message if it was showing
-      toast.success('Shopping list saved successfully!', {
-        position: "top-center",
-        autoClose: 2000, // Closes after 2 seconds
-        transition: Slide,
-      });
-      setTimeout(() => {
-        navigate('/profile'); // Redirect to the profile page
-      }, 2000); // Redirect after the toast disappears
-    }
-  };
+  
   
   
   
@@ -323,38 +425,89 @@ function ShoppingListPage() {
 
 
 
-      {/* Add Ingredient Section */}
-      <div style={styles.addIngredientContainer}>
-      <div style={{ position: 'relative', width: '100%' }}>
-  {inputError && (
-    <div style={styles.errorBubble}>
-      <span></span> Please enter an ingredient!
-    </div>
-  )}
+ {/* Add Ingredient Section */}
+<div style={styles.addIngredientContainer}>
+  {/* Quantity Input */}
+  <TextField
+    type="number"
+    label="Quantity"
+    value={quantity}
+    onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
+    style={{ width: '80px' }}
+  />
+
+  {/* Measure Dropdown */}
+  <FormControl style={{ width: '120px' }}>
+    <Select
+      value={measure}
+      onChange={(e) => setMeasure(e.target.value)}
+      displayEmpty
+    >
+      <MenuItem value="" disabled>Select Measure</MenuItem>
+      {measures.map((m) => (
+        <MenuItem key={m.MeasureID} value={m.MeasureID}>
+          {m.MeasureName}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+
+{/* Ingredient Autocomplete */}
+<div style={{ position: 'relative', width: '100%' }}>
   <TextField
     variant="outlined"
-    label="Add Ingredient"
-    value={selectedIngredient}
-    onChange={(e) => setSelectedIngredient(e.target.value)}
+    label="Ingredient"
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)} // Update searchTerm dynamically
     fullWidth
   />
+  {suggestedIngredients.length > 0 && (
+    <ul style={{ 
+      position: 'absolute', 
+      background: '#fff', 
+      border: '1px solid #ddd', 
+      listStyle: 'none', 
+      margin: 0, 
+      padding: '10px', 
+      zIndex: 1000, 
+      width: '100%' 
+    }}>
+      {suggestedIngredients.map((ingredient) => (
+       <li
+       key={ingredient.IngredientID}
+       onClick={() => {
+         console.log('Selected Ingredient:', ingredient.ingredientId); // Debug log
+         if (ingredient?.IngredientID) {
+          console.log(ingredient.ingredientId)
+           setSearchTerm(ingredient.IngredientName); // Set search term
+           setSelectedIngredient(ingredient); // Set full ingredient object
+           setSuggestedIngredients([]); // Clear suggestions
+         } else {
+           toast.error('Invalid ingredient selected!');
+         }
+       }}
+       style={{ padding: '5px 10px', cursor: 'pointer' }}
+     >
+       {ingredient.IngredientName}
+     </li>
+     
+     
+      
+      ))}
+    </ul>
+  )}
 </div>
+
 
   <Button
     variant="contained"
     style={styles.addButton}
-    onClick={() => {
-      if (!selectedIngredient.trim()) {
-        setInputError(true);
-        setTimeout(() => setInputError(false), 3000); // Remove the error bubble after 3 seconds
-      } else {
-        addItem();
-      }
-    }}
+    onClick={addItem}
   >
     Add
   </Button>
 </div>
+
 
 
       {/* Shopping List Section */}
@@ -375,7 +528,10 @@ function ShoppingListPage() {
                       autoFocus
                     />
                   ) : (
-                    <Typography>{item.label}</Typography>
+                    <Typography>
+  {item.label} - {item.quantity} {measures.find(m => m.MeasureID === item.measureId)?.MeasureName || ''}
+</Typography>
+
                   )}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <Button
