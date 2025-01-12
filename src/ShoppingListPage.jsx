@@ -553,163 +553,163 @@ const handleExportListToWhatsApp = (list) => {
 </div>
 
 
-{/* Add Ingredient Section */}
-<div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-  {/* Quantity Input */}
-  <TextField
-    type="text"
-    label="Quantity"
-    value={quantity}
-    onChange={(e) => {
-      const value = e.target.value;
-      if (/^[0-9./]*$/.test(value)) {
-        setQuantity(value);
-      }
-    }}
-    style={{
-      width: '200px', // Consistent width
-      height: '48px',
-      borderRadius: '12px',
-      backgroundColor: 'transparent', // No white background
-    }}
-    InputProps={{
-      style: { borderRadius: '12px' },
-    }}
-    InputLabelProps={{
-      shrink: true,
-    }}
-  />
+{/* Form Container for Consistent Width */}
+<div style={{ maxWidth: '600px', margin: '0 auto' }}>
+
+  {/* Add Ingredient Section */}
+  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', width: '100%' }}>
+    {/* Quantity Input */}
+    <TextField
+      label="Quantity"
+      value={quantity}
+      onChange={(e) => {
+        const value = e.target.value;
+        if (/^[0-9./]*$/.test(value)) {
+          setQuantity(value);
+        }
+      }}
+      style={{
+        flex: 1,
+        height: '48px',
+        borderRadius: '12px',
+        backgroundColor: 'transparent',
+      }}
+      InputProps={{
+        style: { borderRadius: '12px' },
+      }}
+      InputLabelProps={{
+        shrink: true,
+      }}
+    />
 
     {/* Measure Dropdown */}
     <TextField
-    select
-    label="Select Measure"
-    value={measure}
-    onChange={(e) => setMeasure(e.target.value)}
-    style={{
-      width: '200px',
-      height: '48px',
-      borderRadius: '6px',
-      backgroundColor: 'transparent', // No white background
-    }}
-    InputProps={{
-      style: {
-        borderRadius: '6px',
-      },
-    }}
-    InputLabelProps={{
-      shrink: true, // Float the label
-    }}
-  >
-    <MenuItem value="" disabled>
-      Select Measure
-    </MenuItem>
-    {measures.map((m) => (
-      <MenuItem key={m.MeasureID} value={m.MeasureID}>
-        {m.MeasureName}
-      </MenuItem>
-    ))}
-  </TextField>
-
-
- {/* Search Input */ }
-<div style={{ position: 'relative', width: '200px', marginLeft: '10px' }}>
-  <TextField
-    variant="outlined"
-    label="Search for ingredient"
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    style={{
-      width: '100%',
-      height: '48px',
-      borderRadius: '12px',
-      backgroundColor: 'transparent', // No white background
-    }}
-    InputProps={{
-      style: { borderRadius: '12px' },
-    }}
-    InputLabelProps={{
-      shrink: true,
-    }}
-  />
-
-  {/* Autocomplete Section */}
-  {suggestedIngredients.length > 0 ? (
-    <ul
+      select
+      label="Select Measure"
+      value={measure}
+      onChange={(e) => setMeasure(e.target.value)}
       style={{
-        position: 'absolute',
-        top: '52px', // Position below input
-        background: '#fff',
-        border: '1px solid #ddd',
-        listStyle: 'none',
-        margin: 0,
-        padding: '5px 0',
-        zIndex: 1000,
-        width: '100%',
-        borderRadius: '8px',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        flex: 1,
+        height: '48px',
+        borderRadius: '12px',
+        backgroundColor: 'transparent',
+      }}
+      InputProps={{
+        style: { borderRadius: '12px' },
+      }}
+      InputLabelProps={{
+        shrink: true,
       }}
     >
-      {suggestedIngredients.map((ingredient) => (
-        <li
-          key={ingredient.IngredientID}
-          onClick={() => {
-            setSearchTerm(ingredient.IngredientName);
-            setSelectedIngredient(ingredient);
-            setSuggestedIngredients([]);
-          }}
+      <MenuItem value="" disabled>
+        Select Measure
+      </MenuItem>
+      {measures.map((m) => (
+        <MenuItem key={m.MeasureID} value={m.MeasureID}>
+          {m.MeasureName}
+        </MenuItem>
+      ))}
+    </TextField>
+
+    {/* Search Input */}
+    <div style={{ flex: 2, position: 'relative' }}>
+      <TextField
+        label="Search for ingredient"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{
+          width: '100%',
+          height: '48px',
+          borderRadius: '12px',
+          backgroundColor: 'transparent',
+        }}
+        InputProps={{
+          style: { borderRadius: '12px' },
+        }}
+        InputLabelProps={{
+          shrink: true,
+        }}
+      />
+
+      {/* Autocomplete Section */}
+      {suggestedIngredients.length > 0 ? (
+        <ul
           style={{
-            padding: '8px 12px',
-            cursor: 'pointer',
-            fontFamily: "'Poppins', sans-serif",
-            fontSize: '14px',
-            borderBottom: '1px solid #eee',
+            position: 'absolute',
+            top: '52px',
+            background: '#fff',
+            border: '1px solid #ddd',
+            listStyle: 'none',
+            margin: 0,
+            padding: '5px 0',
+            zIndex: 1000,
+            width: '100%',
+            borderRadius: '8px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
           }}
         >
-          {ingredient.IngredientName}
-        </li>
-      ))}
-    </ul>
-  ) : (
-    searchTerm && (
-      <div
-        style={{
-          position: 'absolute',
-          top: '60px', // Lowered the position
-          left: '0',
-          width: '100%',
-          textAlign: 'center',
-          color: 'red',
-          fontSize: '16px', // Match the size in the screenshot
-          fontWeight: 'bold',
-          fontFamily: "'Raleway', sans-serif",
-        }}
-        onClick={() => handleAddNewIngredient(searchTerm)}
-      >
-        {`Item not found, to add it — click on me!`}
-      </div>
-    )
-  )}
+          {suggestedIngredients.map((ingredient) => (
+            <li
+              key={ingredient.IngredientID}
+              onClick={() => {
+                setSearchTerm(ingredient.IngredientName);
+                setSelectedIngredient(ingredient);
+                setSuggestedIngredients([]);
+              }}
+              style={{
+                padding: '8px 12px',
+                cursor: 'pointer',
+                fontFamily: "'Poppins', sans-serif",
+                fontSize: '14px',
+                borderBottom: '1px solid #eee',
+              }}
+            >
+              {ingredient.IngredientName}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        searchTerm && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '60px',
+              left: 0,
+              width: '100%',
+              textAlign: 'center',
+              color: 'red',
+              fontSize: '16px',
+              fontFamily: "'Raleway', sans-serif",
+              fontWeight: 'bold',
+            }}
+            onClick={() => handleAddNewIngredient(searchTerm)}
+          >
+            Item not found, to add it — click on me!
+          </div>
+        )
+      )}
+    </div>
+
+    {/* Add Button */}
+    <Button
+      variant="contained"
+      style={{
+        backgroundColor: '#B55335',
+        color: '#fff',
+        borderRadius: '12px',
+        height: '48px',
+        width: '100px',
+        fontFamily: "'Merienda', cursive",
+        fontWeight: 'bold',
+        fontSize: '16px',
+      }}
+      onClick={addItem}
+    >
+      Add
+    </Button>
+  </div>
 </div>
 
-  {/* Add Button */}
-  <Button
-    variant="contained"
-    style={{
-      backgroundColor: '#B55335',
-      color: '#fff',
-      borderRadius: '12px',
-      height: '48px',
-      width: '100px',
-      fontFamily: "'Merienda', cursive",
-      fontWeight: 'bold',
-      fontSize: '16px',
-    }}
-    onClick={addItem}
-  >
-    Add
-  </Button>
-</div>
 
 
      {/* Shopping List Section */}
@@ -912,8 +912,7 @@ const handleExportListToWhatsApp = (list) => {
 <div style={{ marginTop: '30px', width: '100%', maxWidth: '800px' }}>
 
 
-
-<div style={styles.exportContainer}>
+<div style={{ maxWidth: '800px', margin: '0 auto' }}> {/* Increased width to 800px */}
   <h2 style={{ fontSize: '24px', fontFamily: "'Merienda', cursive", fontWeight: 'bold', color: '#B55335', textAlign: 'center' }}>
     Your Saved Lists
   </h2>
@@ -924,22 +923,23 @@ const handleExportListToWhatsApp = (list) => {
       style={{
         border: '1px solid #ddd',
         borderRadius: '12px',
-        padding: '10px',
-        marginBottom: '10px',
+        padding: '20px', // Increased padding for better spacing
+        marginBottom: '20px', // Added extra margin for separation
         backgroundColor: '#fff',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        textAlign: 'center', // Center-align content
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
         <div>
-          <h3 style={{ margin: '0' }}>{list.listName}</h3>
-          <p style={{ margin: '0', fontSize: '14px', color: '#777' }}>
+          <h3 style={{ margin: '0', fontSize: '20px', fontWeight: 'bold' }}>{list.listName}</h3>
+          <p style={{ margin: '5px 0', fontSize: '14px', color: '#777' }}>
             Created on: {list.creationDate}
           </p>
         </div>
 
         {/* Buttons Section */}
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginTop: '10px' }}>
           {/* Toggle Show Items */}
           <Button
             onClick={() => {
@@ -948,9 +948,9 @@ const handleExportListToWhatsApp = (list) => {
               setSavedLists(updatedLists);
             }}
             style={{
-              minWidth: '36px',
-              height: '36px',
-              padding: '4px',
+              minWidth: '40px',
+              height: '40px',
+              padding: '6px',
               borderRadius: '50%',
               backgroundColor: list.showItems ? '#d3d3d3' : '#fff',
             }}
@@ -964,9 +964,9 @@ const handleExportListToWhatsApp = (list) => {
             size="small"
             onClick={() => handleEditList(index)}
             style={{
-              minWidth: '36px',
-              height: '36px',
-              padding: '4px',
+              minWidth: '40px',
+              height: '40px',
+              padding: '6px',
               borderRadius: '50%',
             }}
           >
@@ -977,11 +977,11 @@ const handleExportListToWhatsApp = (list) => {
           <Button
             variant="text"
             size="small"
-            onClick={() => confirmDeleteList(index)} // `index` is defined within `.map()`
+            onClick={() => confirmDeleteList(index)}
             style={{
-              minWidth: '36px',
-              height: '36px',
-              padding: '4px',
+              minWidth: '40px',
+              height: '40px',
+              padding: '6px',
               borderRadius: '50%',
             }}
           >
@@ -994,9 +994,9 @@ const handleExportListToWhatsApp = (list) => {
             size="small"
             onClick={() => handleExportListToWhatsApp(list)}
             style={{
-              minWidth: '36px',
-              height: '36px',
-              padding: '4px',
+              minWidth: '40px',
+              height: '40px',
+              padding: '6px',
               borderRadius: '50%',
             }}
           >
@@ -1007,9 +1007,9 @@ const handleExportListToWhatsApp = (list) => {
 
       {/* Show List Items */}
       {list.showItems && (
-        <ul style={{ marginTop: '10px' }}>
+        <ul style={{ marginTop: '20px', textAlign: 'left' }}> {/* Left-aligned list items */}
           {list.items.map((item, idx) => (
-            <li key={idx}>
+            <li key={idx} style={{ fontSize: '16px', marginBottom: '8px' }}>
               {item.label} - {item.quantity} {item.measureName || ''}
             </li>
           ))}
