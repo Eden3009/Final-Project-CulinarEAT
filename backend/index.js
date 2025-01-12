@@ -775,6 +775,123 @@ WHERE i.IngredientName LIKE ?
 
 
 
+// POST API for submitting comments/ratings review
+app.post('/api/recipes/:RecipeID/reviews', (req, res) => {
+    const { RecipeID } = req.params;
+    const { UserID, Rating, Comment } = req.body;
+
+    console.log('Incoming review payload:', { RecipeID, UserID, Rating, Comment });
+
+
+    // Validate inputs
+    if (!UserID || !RecipeID || (!Rating && !Comment)) {
+        return res.status(400).json({ message: 'Invalid input. UserID, RecipeID, and at least one of Rating or Comment are required.' });
+    }
+
+    // Check for existing rating for the same recipe by the same user
+    const checkExistingRating = `
+        SELECT ReviewID FROM Review
+        WHERE UserID = ? AND RecipeID = ? AND Rating IS NOT NULL
+    `;
+    db.query(checkExistingRating, [UserID, RecipeID], (err, results) => {
+        if (err) {
+            console.error('Error checking existing rating:', err);
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        const hasExistingRating = results.length > 0;
+
+        // If the user already submitted a rating, prevent a duplicate rating
+        if (Rating && hasExistingRating) {
+            return res.status(400).json({ message: 'You have already rated this recipe.' });
+        }
+
+        // Insert the review into the database
+        const insertReview = `
+            INSERT INTO Review (UserID, RecipeID, Rating, Comment, Date)
+            VALUES (?, ?, ?, ?, NOW())
+        `;
+        db.query(insertReview, [UserID, RecipeID, Rating || null, Comment || null], (err, result) => {
+            if (err) {
+                console.error('Error inserting review:', err);
+                return res.status(500).json({ message: 'Database error', error: err });
+            }
+
+            // If a rating was submitted, update the average rating
+            if (Rating) {
+                const updateAverageRating = `
+                    UPDATE Recipe
+                    SET AverageRating = (
+                        SELECT AVG(Rating)
+                        FROM Review
+                        WHERE RecipeID = ?
+                    )
+                    WHERE RecipeID = ?
+                `;
+                db.query(updateAverageRating, [RecipeID, RecipeID], (err) => {
+                    if (err) {
+                        console.error('Error updating average rating:', err);
+                        return res.status(500).json({ message: 'Database error', error: err });
+                    }
+                    res.status(201).json({ message: 'Review added successfully.' });
+                });
+            } else {
+                res.status(201).json({ message: 'Comment added successfully.' });
+            }
+        });
+    });
+});
+
+
+
+
+// GET API for fetching comments and ratings
+app.get('/api/recipes/:RecipeID/reviews', (req, res) => {
+    const { RecipeID } = req.params;
+
+    // Validate RecipeID
+    if (!RecipeID) {
+        return res.status(400).json({ message: 'RecipeID is required.' });
+    }
+
+    // Query to fetch reviews for the recipe
+    const fetchReviewsQuery = `
+        SELECT r.ReviewID, r.UserID, u.UserName, r.Rating, r.Comment, r.Date
+        FROM Review r
+        JOIN User u ON r.UserID = u.UserID
+        WHERE r.RecipeID = ?
+        ORDER BY r.Date DESC
+    `;
+
+    // Query to fetch average rating
+    const fetchAverageRatingQuery = `
+        SELECT AverageRating
+        FROM Recipe
+        WHERE RecipeID = ?
+    `;
+
+    // Fetch reviews and average rating concurrently
+    db.query(fetchReviewsQuery, [RecipeID], (err, reviews) => {
+        if (err) {
+            console.error('Error fetching reviews:', err);
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        db.query(fetchAverageRatingQuery, [RecipeID], (err, ratingResult) => {
+            if (err) {
+                console.error('Error fetching average rating:', err);
+                return res.status(500).json({ message: 'Database error', error: err });
+            }
+
+            const averageRating = ratingResult[0]?.AverageRating || 0;
+
+            res.status(200).json({
+                reviews,
+                averageRating,
+            });
+        });
+    });
+});
 
 
 

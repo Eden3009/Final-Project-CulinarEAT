@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
 import lunchImage from './images/lunch.png'; // Default image for recipes
@@ -13,6 +13,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BsCartPlus } from 'react-icons/bs'; // Import a simple cart icon
 import { BsBookmark, BsBookmarkFill } from 'react-icons/bs';
+import { UserContext } from './UserContext'; // Adjust path as needed
 
 
 
@@ -215,7 +216,6 @@ backButtonHover: {
 
 function RecipeViewPage() {
   const { RecipeID } = useParams();
-  const [recipe, setRecipe] = useState(null);
   const navigate = useNavigate();
   const [checkedIngredients, setCheckedIngredients] = useState([]);
   const [rating, setRating] = useState(0);
@@ -223,32 +223,79 @@ function RecipeViewPage() {
   const [hoverRating, setHoverRating] = useState(0);  // User's hover state
   const [isFavorite, setIsFavorite] = useState(false); // Track whether the recipe is in favorites
   const [measurementSystem, setMeasurementSystem] = useState('US'); // Default to US
+    const { user } = React.useContext(UserContext); // Access `UserContext` at the top level
+  
+    const [recipe, setRecipe] = useState({
+      Reviews: [], // Default empty array
+      AverageRating: 0,
+    });
+    
 
 
-  const handleReviewSubmit = (e) => {
-    e.preventDefault(); // Prevent page refresh
-  
-    // Validation
-    if (!reviewData.name || !reviewData.comment || rating === 0) {
-      alert('Please fill out all fields and select a rating!');
-      return;
-    }
-  
-    const newReview = {
-      User: reviewData.name,
-      Comment: reviewData.comment,
-      Rating: rating,
-      Timestamp: new Date().toLocaleString(),
+
+
+    const handleReviewSubmit = async (e) => {
+      e.preventDefault();
+    
+      console.log('Submitting review:', {
+        UserID: user?.UserID,
+        Rating: rating,
+        Comment: reviewData.comment,
+      });
+    
+      if (!reviewData.comment.trim() && rating === 0) {
+        toast.error('Please provide a comment or a rating!');
+        return;
+      }
+    
+      const newReview = {
+        UserID: user?.UserID || null,
+        UserName: user?.UserName || 'Anonymous',
+        Rating: rating,
+        Comment: reviewData.comment,
+      };
+    
+      try {
+        const response = await fetch(`http://localhost:5001/api/recipes/${RecipeID}/reviews`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            UserID: user?.UserID,
+            Rating: rating || null,
+            Comment: reviewData.comment || null,
+          }),
+        });
+    
+        if (response.ok) {
+          const { newReview, averageRating } = await response.json();
+      
+            window.location.reload();
+   
+          // Safely update state
+          setTimeout(() => {
+            setRecipe((prevRecipe) => ({
+              ...prevRecipe,
+              Reviews: Array.isArray(prevRecipe.Reviews)
+                ? [newReview, ...prevRecipe.Reviews]
+                : [newReview],
+              AverageRating: averageRating,
+            }));
+          }, 1); // Small delay to ensure UI updates correctly
+    
+          setReviewData({ comment: '' });
+          setRating(0);
+          toast.success('Review added successfully!');
+        } else {
+          const errorData = await response.json();
+          toast.error(errorData.message || 'Failed to add review.');
+        }
+      } catch (error) {
+        console.error('Error submitting review:', error);
+        toast.error('An error occurred. Please try again.');
+      }
     };
+    
   
-    setRecipe((prevRecipe) => ({
-      ...prevRecipe,
-      Reviews: [...prevRecipe.Reviews, newReview],
-    }));
-  
-    setReviewData({ name: '', comment: '' }); // Reset fields
-    setRating(0); // Reset rating
-  };
   
   const handleCheckboxChange = (event, ingredient) => {
     if (event.target.checked) {
@@ -260,17 +307,46 @@ function RecipeViewPage() {
     }
   };
   
+
+  const cleanReviews = (reviews) => {
+    if (!Array.isArray(reviews)) return [];
+    // Remove empty or invalid reviews
+    const filteredReviews = reviews.filter(review => review?.UserName && review?.Rating);
+    // Remove duplicates based on ReviewID
+    const uniqueReviews = Array.from(new Map(filteredReviews.map(review => [review.ReviewID, review])).values());
+    return uniqueReviews;
+};
+ 
+
+  
   useEffect(() => {
     if (RecipeID) {
-      console.log('RecipeID from params:', RecipeID);  // Check the RecipeID
+      console.log('RecipeID from params:', RecipeID);
+  
+      // Fetch recipe details
       fetch(`http://localhost:5001/api/recipe/${RecipeID}`)
         .then((response) => response.json())
         .then((data) => {
-          console.log('Fetched Recipe Data:', data);  // Log the full fetched data
-          setRecipe(data.recipe);
-          console.log('Recipe ImageURL:', data.recipe?.ImageURL);  // Log the ImageURL
+          console.log('Fetched Recipe Data:', data);
+          setRecipe((prevRecipe) => ({
+            ...prevRecipe,
+            ...data.recipe, // Merge fetched recipe data
+          }));
         })
         .catch((error) => console.error('Error fetching recipe:', error));
+  
+      // Fetch reviews and ratings
+      fetch(`http://localhost:5001/api/recipes/${RecipeID}/reviews`)
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Fetched Reviews Data:', data);
+                setRecipe(prevRecipe => ({
+                    ...prevRecipe,
+                    Reviews: cleanReviews(data.reviews), // Clean and set reviews
+                    AverageRating: data.averageRating,
+                }));
+            })
+        .catch((error) => console.error('Error fetching reviews:', error));
     } else {
       console.error('Invalid RecipeID. Cannot fetch recipe.');
     }
@@ -894,175 +970,163 @@ const ingredients = recipe && recipe.Ingredients
     Reviews
   </h2>
 
-  {recipe.Reviews && recipe.Reviews.length > 0 ? (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '20px',
-      maxWidth: '700px',
-      margin: '0 auto',
-    }}>
-      {recipe.Reviews.map((review, index) => (
-        <div key={index} style={{
-          backgroundColor: '#F9F7F4',
-          border: '1px solid #E0E0E0',
-          borderRadius: '12px',
-          padding: '20px',
-          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <strong style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              fontFamily: "'Georgia', serif",
-              color: '#4E342E',
+  {recipe.Reviews && Array.isArray(recipe.Reviews) && recipe.Reviews.length > 0 ? (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '700px', margin: '0 auto' }}>
+        {recipe.Reviews.map((review, index) => (
+            <div key={review.ReviewID || `anonymous-${index}`} style={{
+                backgroundColor: '#F9F7F4',
+                border: '1px solid #E0E0E0',
+                borderRadius: '12px',
+                padding: '20px',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
             }}>
-              {review.User || 'Anonymous'}
-            </strong>
-            <span style={{ fontSize: '14px', color: '#777' }}>
-              {review.Timestamp || 'No Date'}
-            </span>
-          </div>
-
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',  // Center the hats
-            gap: '5px',
-            marginBottom: '10px',
-          }}>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <GiChefToque
-                key={i}
-                style={{
-                  fontSize: '24px',
-                  color: i < review.Rating ? '#FFD700' : '#ccc',
-                }}
-              />
-            ))}
-          </div>
-
-          <p style={{
-            fontSize: '18px',
-            fontFamily: "'Georgia', serif",
-            color: '#333',
-            lineHeight: '1.6',
-            margin: 0,
-          }}>
-            {review.Comment || 'No comment provided.'}
-          </p>
-        </div>
-      ))}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <strong style={{
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        fontFamily: "'Georgia', serif",
+                        color: '#4E342E',
+                    }}>
+                        {review.UserName || 'Anonymous'}
+                    </strong>
+                    <span style={{ fontSize: '14px', color: '#777' }}>
+                        {review.Date || 'No Date'}
+                    </span>
+                </div>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '5px',
+                    marginBottom: '10px',
+                }}>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <GiChefToque
+                            key={i}
+                            style={{
+                                fontSize: '24px',
+                                color: i < review.Rating ? '#FFD700' : '#ccc',
+                            }}
+                        />
+                    ))}
+                </div>
+                <p style={{
+                    fontSize: '18px',
+                    fontFamily: "'Georgia', serif",
+                    color: '#333',
+                    lineHeight: '1.6',
+                    margin: 0,
+                }}>
+                    {review.Comment || 'No comment provided.'}
+                </p>
+            </div>
+        ))}
     </div>
-  ) : (
+) : (
     <p style={{
-      fontSize: '18px',  // Matches the font size of ingredients
-      fontFamily: "'Georgia', serif",  // Same font family
-      color: '#333',  // Darker gray for readability
-      margin: '20px 0',  // Adds spacing around the text
+        fontSize: '18px',
+        fontFamily: "'Georgia', serif",
+        color: '#333',
+        margin: '20px 0',
     }}>
-      No reviews yet.
+        {recipe.Reviews && recipe.Reviews.length === 0 ? 'No reviews yet.' : 'Loading reviews...'}
     </p>
-    
-  )}
+)}
+
+
+
+  
+
+
+
 
   {/* Add Review Form */}
-  <form onSubmit={handleReviewSubmit} style={{
-    maxWidth: '700px',
-    margin: '0 auto',
-    padding: '20px 0',
-  }}>
-   <h3 style={{
-  fontSize: '20px',  
-  fontWeight: 'bold',
-  fontFamily: "'Merienda', cursive",
-  color: '#B55335',
-  marginBottom: '-5px',  
-}}>
-  Add Your Review
-</h3>
-
-<form onSubmit={handleReviewSubmit} style={{
-  marginTop: '30px',
-  maxWidth: '700px',  // Wider container for the whole form
-  margin: '0 auto',  // Center horizontally
-  padding: '20px 0',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',  // Ensure everything is centered
-}}>
-
-  {/* Comment Input */}
-  <textarea
-  placeholder="Write your review here..."
-  value={reviewData.comment}
-  onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
-  style={{
-    width: '700px',  // Fixed width for the textarea
-    height: '100px',  // Default height
-    padding: '15px',
-    marginBottom: '15px',
-    border: '1px solid #DDD',
-    borderRadius: '12px',
-    fontFamily: "'Georgia', serif",
-    fontSize: '16px',
-    boxShadow: 'inset 0 2px 5px rgba(0, 0, 0, 0.05)',
-    transition: 'border-color 0.3s ease',
-  }}
-  onFocus={(e) => e.target.style.borderColor = '#8B4513'}
-  onBlur={(e) => e.target.style.borderColor = '#DDD'}
-/>
-
-
-  {/* Chef Hat Icons for Rating */} 
-  <div style={{
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '15px',  // Adds more spacing between chef hats
-    marginBottom: '20px',  // Gap between chef hats and the button
-  }}>
-    {Array.from({ length: 5 }).map((_, i) => (
-      <GiChefToque
-        key={i}
-        style={{
-          fontSize: '30px',
-          cursor: 'pointer',
-          color: i < (hoverRating || rating) ? '#FFD700' : '#ccc',
-          transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)',
-          transition: 'transform 0.2s ease, color 0.3s ease',
-        }}
-        onMouseEnter={() => setHoverRating(i + 1)}
-        onMouseLeave={() => setHoverRating(0)}
-        onClick={() => setRating(i + 1)}
-      />
-    ))}
-  </div>
-
-  {/* Submit Button */} 
-  <button
-    type="submit"
+  <form
+    onSubmit={handleReviewSubmit}
     style={{
-      backgroundColor: '#B55335',
-      color: '#fff',
-      padding: '12px 20px',
-      border: 'none',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      fontFamily: "'Merienda', cursive",
-      fontSize: '16px',
-      transition: 'background-color 0.3s ease',
-      marginTop: '10px',  // Slight gap above the button
+      maxWidth: '700px',
+      margin: '0 auto',
+      padding: '20px 0',
     }}
-    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#A0522D')}
-    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#8B4513')}
   >
-    Submit Review
-  </button>
-</form>
+    <h3 style={{
+      fontSize: '20px',
+      fontWeight: 'bold',
+      fontFamily: "'Merienda', cursive",
+      color: '#B55335',
+      marginBottom: '-5px',
+    }}>
+      Add Your Review
+    </h3>
 
+    {/* Comment Input */}
+    <textarea
+      placeholder="Write your review here..."
+      value={reviewData.comment}
+      onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
+      style={{
+        width: '700px',
+        height: '100px',
+        padding: '15px',
+        marginBottom: '15px',
+        border: '1px solid #DDD',
+        borderRadius: '12px',
+        fontFamily: "'Georgia', serif",
+        fontSize: '16px',
+        boxShadow: 'inset 0 2px 5px rgba(0, 0, 0, 0.05)',
+        transition: 'border-color 0.3s ease',
+      }}
+      onFocus={(e) => e.target.style.borderColor = '#8B4513'}
+      onBlur={(e) => e.target.style.borderColor = '#DDD'}
+    />
+
+    {/* Chef Hat Icons for Rating */}
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '15px',
+      marginBottom: '20px',
+    }}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <GiChefToque
+          key={i}
+          style={{
+            fontSize: '30px',
+            cursor: 'pointer',
+            color: i < (hoverRating || rating) ? '#FFD700' : '#ccc',
+            transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)',
+            transition: 'transform 0.2s ease, color 0.3s ease',
+          }}
+          onMouseEnter={() => setHoverRating(i + 1)}
+          onMouseLeave={() => setHoverRating(0)}
+          onClick={() => setRating(i + 1)}
+        />
+      ))}
+    </div>
+
+    {/* Submit Button */}
+    <button
+      type="submit"
+      style={{
+        backgroundColor: '#B55335',
+        color: '#fff',
+        padding: '12px 20px',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        fontFamily: "'Merienda', cursive",
+        fontSize: '16px',
+        transition: 'background-color 0.3s ease',
+        marginTop: '10px',
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#A0522D')}
+      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#8B4513')}
+    >
+      Submit Review
+    </button>
   </form>
 </div>
+</div>
 
-  </div>
 
   );
 } 
