@@ -179,6 +179,9 @@ function ShoppingListPage() {
  const [listName, setListName] = useState('');
  const [savedLists, setSavedLists] = useState([]);
  const [isAdding, setIsAdding] = useState(false);
+ const [isEditing, setIsEditing] = useState(false);
+const [editingListId, setEditingListId] = useState(null); // To track which list is being edited
+
 
 
 
@@ -188,6 +191,16 @@ useEffect(() => {
    .then((data) => console.log('Session data:', data))
    .catch((err) => console.error('Error fetching session:', err));
 }, []);
+
+
+useEffect(() => {
+  if (user?.UserID) {
+      fetch(`http://localhost:5001/api/get-shopping-lists/${user.UserID}`)
+          .then((res) => res.json())
+          .then((data) => setSavedLists(data))
+          .catch((error) => console.error('Error fetching shopping lists:', error));
+  }
+}, [user]);
 
 
 
@@ -228,26 +241,82 @@ useEffect(() => {
     toast.error('Please enter a list name!');
     return;
   }
+
   if (shoppingList.length === 0) {
     toast.error('The shopping list is empty!');
     return;
   }
 
-  // Create a new saved list
-  const newList = {
+  const isEdit = shoppingList.some((item) => item.IngredientID); // Check if editing
+  const apiUrl = isEdit
+    ? `http://localhost:5001/api/update-shopping-list/${shoppingList[0].ShoppingListID}`
+    : 'http://localhost:5001/api/shopping-lists';
+
+  const method = isEdit ? 'PUT' : 'POST';
+
+  const payload = {
     listName,
-    creationDate: new Date().toLocaleDateString(),
-    items: [...shoppingList],
+    shoppingList: shoppingList.map((item) => ({
+      IngredientID: item.IngredientID,
+      MeasureID: item.MeasureID,
+      Quantity: item.quantity || item.Quantity, // Ensure correct property is used
+    })),
+    userId: user?.UserID,
   };
 
-  // Add the new list to the saved lists
-  setSavedLists((prev) => [...prev, newList]);
+  fetch(apiUrl, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+    .then((res) => {
+      if (res.ok) {
+        return res.json();
+      }
+      return res.json().then((err) => Promise.reject(err));
+    })
+    .then((data) => {
+      console.log('List saved:', data);
 
-  // Reset form fields after saving
-  setListName('');
-  setShoppingList([]);
-  toast.success('List saved successfully!');
+      if (isEdit) {
+        // Update the existing list in the UI
+        setSavedLists((prev) =>
+          prev.map((list) =>
+            list.ShoppingListID === data.ShoppingListID
+              ? {
+                  ...list,
+                  ListName: listName,
+                  items: [...shoppingList],
+                }
+              : list
+          )
+        );
+        toast.success('List updated successfully!');
+      } else {
+        // Add the new list to the UI
+        setSavedLists((prev) => [
+          ...prev,
+          {
+            ShoppingListID: data.ShoppingListID,
+            ListName: listName,
+            CreatedDate: new Date().toLocaleDateString(),
+            items: [...shoppingList],
+          },
+        ]);
+        toast.success('List saved successfully!');
+      }
+
+      // Reset form fields after saving
+      setListName('');
+      setShoppingList([]);
+    })
+    .catch((error) => {
+      console.error('Error saving list:', error);
+      toast.error('Failed to save the list. Please try again.');
+    });
 };
+
+
 
 
 
@@ -297,21 +366,124 @@ useEffect(() => {
 };
 
 
-const handleEditList = (index) => {
-  const selectedList = savedLists[index];
-  setListName(selectedList.listName);
-  setShoppingList(selectedList.items);
-  setSavedLists((prev) => prev.filter((_, i) => i !== index));
-  toast.info('Editing list. Make your changes and save again.');
+const handleEditList = (list) => {
+  if (!list || !Array.isArray(list.items)) {
+    console.error('Invalid list format or items missing:', list);
+    toast.error('Cannot edit this list. Please try again.');
+    return;
+  }
+
+  setIsEditing(true); // Enable editing mode
+  setEditingListId(list.ShoppingListID); // Track which list is being edited
+  setListName(list.ListName || ''); // Populate the list name
+  setShoppingList(
+    list.items.map((item) => ({
+      IngredientID: item.IngredientID || null,
+      MeasureID: item.MeasureID || null,
+      Quantity: item.Quantity || 1,
+      IngredientName: item.IngredientName || 'Unknown Ingredient',
+    }))
+  );
+  toast.info('You can now edit this list. Don’t forget to save your changes!');
 };
+
+
+const saveEditedList = () => {
+  if (!listName.trim()) {
+    toast.error('Please enter a list name!');
+    return;
+  }
+
+  if (shoppingList.length === 0) {
+    toast.error('The shopping list is empty!');
+    return;
+  }
+
+  const invalidItem = shoppingList.find(
+    (item) => !item.IngredientID || !item.MeasureID || !item.Quantity
+  );
+  if (invalidItem) {
+    console.error('Invalid item detected:', invalidItem);
+    toast.error('One or more items in the list are invalid. Please check and try again.');
+    return;
+  }
+
+  const payload = {
+    listName,
+    shoppingList: shoppingList.map((item) => ({
+      IngredientID: item.IngredientID,
+      MeasureID: item.MeasureID,
+      Quantity: item.Quantity,
+    })),
+    userId: user?.UserID,
+  };
+
+  fetch(`http://localhost:5001/api/update-shopping-list/${editingListId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+    .then((res) => {
+      if (res.ok) {
+        return res.json();
+      }
+      return res.json().then((err) => Promise.reject(err));
+    })
+    .then((data) => {
+      console.log('List updated successfully:', data);
+
+
+
+
+
+      // Update the saved lists in the UI
+      setSavedLists((prev) =>
+        prev.map((list) =>
+          list.ShoppingListID === editingListId
+            ? {
+                ...list,
+                ListName: listName,
+                items: [...shoppingList],
+              }
+            : list
+        )
+      );
+
+      toast.success('List updated successfully!');
+      setIsEditing(false); // Exit editing mode
+      setEditingListId(null);
+      setListName('');
+      setShoppingList([]);
+    })
+    .catch((error) => {
+      console.error('Error saving edited list:', error);
+      toast.error('Failed to save the list. Please try again.');
+    });
+};
+
+
+
 
 
 // Only declare `handleDeleteList` once:
-const handleDeleteList = (index) => {
-  const updatedLists = savedLists.filter((_, i) => i !== index);
-  setSavedLists(updatedLists);
-  toast.success('List deleted successfully!');
+const handleDeleteList = (listId, index) => {
+  fetch(`http://localhost:5001/api/delete-shopping-list/${listId}`, {
+      method: 'DELETE',
+  })
+      .then((res) => {
+          if (res.ok) {
+              setSavedLists((prev) => prev.filter((_, i) => i !== index));
+              toast.success('List deleted successfully!');
+          } else {
+              return res.json().then((err) => Promise.reject(err));
+          }
+      })
+      .catch((error) => {
+          console.error('Error deleting shopping list:', error);
+          toast.error('Failed to delete the list. Please try again.');
+      });
 };
+
 
 // Updated `confirmDeleteList` to use `handleDeleteList`:
 const confirmDeleteList = (index) => {
@@ -382,11 +554,14 @@ const handleExportListToWhatsApp = (list) => {
 
 
  const toggleEditing = (index) => {
-   const updatedList = shoppingList.map((item, i) =>
-     i === index ? { ...item, isEditing: !item.isEditing } : item
-   );
-   setShoppingList(updatedList);
- };
+  const updatedList = shoppingList.map((item, i) =>
+    i === index
+      ? { ...item, isEditing: !item.isEditing }
+      : item
+  );
+  setShoppingList(updatedList);
+};
+
 
 
  const updateIngredientName = (index, newLabel) => {
@@ -842,6 +1017,24 @@ const handleExportListToWhatsApp = (list) => {
  <div style={styles.buttonRow}>
 {/* Buttons Row */}
 <div style={styles.buttonRow}>
+{isEditing ? (
+  <Button
+    variant="contained"
+    style={{
+      backgroundColor: '#4caf50',
+      color: '#FFF',
+      fontWeight: 'bold',
+      padding: '8px 16px',
+      fontSize: '12px',
+      borderRadius: '12px',
+      fontFamily: "'Merienda', cursive",
+    }}
+    onClick={saveEditedList} // New function for saving edited lists
+  >
+    Save Changes
+  </Button>
+  
+) : (
   <Button
     variant="contained"
     style={{
@@ -862,6 +1055,8 @@ const handleExportListToWhatsApp = (list) => {
   >
     Save the list
   </Button>
+)}
+
 
   <Button
     variant="contained"
@@ -919,104 +1114,58 @@ const handleExportListToWhatsApp = (list) => {
 
   {savedLists.map((list, index) => (
     <div
-      key={index}
-      style={{
-        border: '1px solid #ddd',
-        borderRadius: '12px',
-        padding: '20px', // Increased padding for better spacing
-        marginBottom: '20px', // Added extra margin for separation
-        backgroundColor: '#fff',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        textAlign: 'center', // Center-align content
-      }}
+        key={list.ShoppingListID || index} // Use ShoppingListID if available
+        style={{
+            border: '1px solid #ddd',
+            borderRadius: '12px',
+            padding: '20px',
+            marginBottom: '20px',
+            backgroundColor: '#fff',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+            textAlign: 'center',
+        }}
     >
-      <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
-        <div>
-          <h3 style={{ margin: '0', fontSize: '20px', fontWeight: 'bold' }}>{list.listName}</h3>
-          <p style={{ margin: '5px 0', fontSize: '14px', color: '#777' }}>
-            Created on: {list.creationDate}
-          </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: '0', fontSize: '20px', fontWeight: 'bold' }}>
+                {list.ListName || 'Unnamed List'}
+            </h3>
+            <p style={{ margin: '5px 0', fontSize: '14px', color: '#777' }}>
+                Created on: {list.CreatedDate || 'N/A'}
+            </p>
         </div>
 
         {/* Buttons Section */}
-        <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginTop: '10px' }}>
-          {/* Toggle Show Items */}
-          <Button
-            onClick={() => {
-              const updatedLists = [...savedLists];
-              updatedLists[index].showItems = !updatedLists[index].showItems;
-              setSavedLists(updatedLists);
-            }}
-            style={{
-              minWidth: '40px',
-              height: '40px',
-              padding: '6px',
-              borderRadius: '50%',
-              backgroundColor: list.showItems ? '#d3d3d3' : '#fff',
-            }}
-          >
-            {list.showItems ? '-' : '+'}
-          </Button>
-
-          {/* Edit Button */}
-          <Button
-            variant="text"
-            size="small"
-            onClick={() => handleEditList(index)}
-            style={{
-              minWidth: '40px',
-              height: '40px',
-              padding: '6px',
-              borderRadius: '50%',
-            }}
-          >
-            <Edit style={{ color: '#B55335' }} />
-          </Button>
-
-          {/* Delete Button */}
-          <Button
-            variant="text"
-            size="small"
-            onClick={() => confirmDeleteList(index)}
-            style={{
-              minWidth: '40px',
-              height: '40px',
-              padding: '6px',
-              borderRadius: '50%',
-            }}
-          >
-            <Delete style={{ color: 'red' }} />
-          </Button>
-
-          {/* Export to WhatsApp */}
-          <Button
-            variant="text"
-            size="small"
-            onClick={() => handleExportListToWhatsApp(list)}
-            style={{
-              minWidth: '40px',
-              height: '40px',
-              padding: '6px',
-              borderRadius: '50%',
-            }}
-          >
-            <WhatsApp style={{ color: '#4caf50' }} />
-          </Button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+            <Button
+                variant="text"
+                size="small"
+                onClick={() => handleEditList(savedLists[index])}
+                style={{ color: '#B55335' }}
+            >
+                <Edit />
+            </Button>
+            <Button
+                variant="text"
+                size="small"
+                onClick={() => confirmDeleteList(index)}
+                style={{ color: 'red' }}
+            >
+                <Delete />
+            </Button>
         </div>
-      </div>
 
-      {/* Show List Items */}
-      {list.showItems && (
-        <ul style={{ marginTop: '20px', textAlign: 'left' }}> {/* Left-aligned list items */}
-          {list.items.map((item, idx) => (
-            <li key={idx} style={{ fontSize: '16px', marginBottom: '8px' }}>
-              {item.label} - {item.quantity} {item.measureName || ''}
-            </li>
-          ))}
-        </ul>
-      )}
+        {/* Items in the List */}
+        <ul style={{ marginTop: '20px', padding: '0', listStyle: 'none', textAlign: 'left' }}>
+    {list.items.map((item, idx) => (
+        <li key={idx} style={{ marginBottom: '8px', fontSize: '16px' }}>
+            {item.IngredientName} - {item.Quantity} {item.MeasureName || ''}
+        </li>
+    ))}
+</ul>
+
     </div>
-  ))}
+))}
+
 </div>
 
 

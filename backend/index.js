@@ -221,11 +221,13 @@ app.post('/logout', (req, res) => {
     res.status(200).json({ message: 'Logout successful' });
 });
 
+
+
 app.post('/api/shopping-lists', (req, res) => {
     console.log('Received request:', req.body);
     console.log('Session data in /api/shopping-lists:', req.session);
 
-    const { shoppingList, userId } = req.body; // Extract userId from the request body
+    const { shoppingList, userId, listName } = req.body; // Extract listName
 
     if (!userId) {
         console.error('No userId provided');
@@ -238,11 +240,12 @@ app.post('/api/shopping-lists', (req, res) => {
     }
 
     const insertShoppingListSQL = `
-        INSERT INTO ShoppingList (UserID, CreatedDate)
-        VALUES (?, NOW())
-    `;
+    INSERT INTO ShoppingList (UserID, ListName, CreatedDate)
+    VALUES (?, ?, NOW())
+`;
 
-    db.query(insertShoppingListSQL, [userId], (err, result) => {
+db.query(insertShoppingListSQL, [userId, req.body.listName], (err, result) => {
+
         if (err) {
             console.error('Error creating shopping list:', err);
             return res.status(500).json({ message: 'Database error', error: err.message });
@@ -272,6 +275,129 @@ app.post('/api/shopping-lists', (req, res) => {
         });
     });
 });
+
+
+
+//fetch shopping list 
+app.get('/api/get-shopping-lists/:userId', (req, res) => {
+    const userId = req.params.userId;
+
+    const query = `
+        SELECT 
+            sl.ShoppingListID, 
+            sl.ListName, 
+            sl.CreatedDate, 
+            li.Quantity, 
+            i.IngredientName, 
+            m.MeasureName
+        FROM ShoppingList sl
+        JOIN ListIngredient li ON sl.ShoppingListID = li.ShoppingListID
+        JOIN Ingredient i ON li.IngredientID = i.IngredientID
+        JOIN Measure m ON li.MeasureID = m.MeasureID
+        WHERE sl.UserID = ?
+    `;
+
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching shopping lists:', err);
+            return res.status(500).json({ message: 'Database error', error: err.message });
+        }
+
+        // Format results into grouped lists
+        const groupedLists = results.reduce((acc, row) => {
+            const listId = row.ShoppingListID;
+            if (!acc[listId]) {
+                acc[listId] = {
+                    ShoppingListID: listId,
+                    ListName: row.ListName,
+                    CreatedDate: row.CreatedDate,
+                    items: [],
+                };
+            }
+
+            acc[listId].items.push({
+                IngredientName: row.IngredientName,
+                Quantity: row.Quantity,
+                MeasureName: row.MeasureName,
+            });
+
+            return acc;
+        }, {});
+
+        res.json(Object.values(groupedLists));
+    });
+});
+
+app.delete('/api/delete-shopping-list/:listId', (req, res) => {
+    const listId = req.params.listId;
+
+    const deleteIngredientsQuery = `DELETE FROM ListIngredient WHERE ShoppingListID = ?`;
+    const deleteListQuery = `DELETE FROM ShoppingList WHERE ShoppingListID = ?`;
+
+    db.query(deleteIngredientsQuery, [listId], (err) => {
+        if (err) {
+            console.error('Error deleting list ingredients:', err);
+            return res.status(500).json({ message: 'Failed to delete list ingredients' });
+        }
+
+        db.query(deleteListQuery, [listId], (err) => {
+            if (err) {
+                console.error('Error deleting shopping list:', err);
+                return res.status(500).json({ message: 'Failed to delete shopping list' });
+            }
+
+            res.status(200).json({ message: 'Shopping list deleted successfully' });
+        });
+    });
+});
+
+
+
+// Update Shopping List API
+app.put('/api/update-shopping-list/:listId', (req, res) => {
+    const listId = req.params.listId;
+    const { listName, items } = req.body;
+
+    const updateListNameQuery = `UPDATE ShoppingList SET ListName = ? WHERE ShoppingListID = ?`;
+    const deleteOldItemsQuery = `DELETE FROM ListIngredient WHERE ShoppingListID = ?`;
+    const insertNewItemsQuery = `
+        INSERT INTO ListIngredient (ShoppingListID, IngredientID, MeasureID, Quantity)
+        VALUES ?`;
+
+    // Update list name
+    db.query(updateListNameQuery, [listName, listId], (err) => {
+        if (err) {
+            console.error('Error updating list name:', err);
+            return res.status(500).json({ message: 'Failed to update list name.' });
+        }
+
+        // Delete old items
+        db.query(deleteOldItemsQuery, [listId], (err) => {
+            if (err) {
+                console.error('Error deleting old items:', err);
+                return res.status(500).json({ message: 'Failed to delete old items.' });
+            }
+
+            // Insert new items
+            const itemsData = items.map((item) => [
+                listId,
+                item.IngredientID,
+                item.MeasureID,
+                item.Quantity,
+            ]);
+
+            db.query(insertNewItemsQuery, [itemsData], (err) => {
+                if (err) {
+                    console.error('Error inserting new items:', err);
+                    return res.status(500).json({ message: 'Failed to insert new items.' });
+                }
+
+                res.status(200).json({ message: 'Shopping list updated successfully.' });
+            });
+        });
+    });
+});
+
 
 
   
