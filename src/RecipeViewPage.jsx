@@ -1157,13 +1157,14 @@ const ingredients = recipe && recipe.Ingredients
       key={i}
       style={{
         fontSize: '30px',
-        cursor: 'pointer',
-        color: i < hoverRating ? '#FFD700' : '#ccc', // Yellow (#FFD700) for hover, gray for others
+        cursor: 'pointer', // Allow clicking
+        color: i < (hoverRating || rating) ? '#FFD700' : '#ccc', // Yellow when hovered or selected, gray otherwise
+        transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)',
         transition: 'transform 0.2s ease, color 0.3s ease',
       }}
-      onMouseEnter={() => setHoverRating(i + 1)} // Set hoverRating to highlight hats up to this index
-      onMouseLeave={() => setHoverRating(0)} // Reset hoverRating when mouse leaves
-      onClick={() => setRating(i + 1)} // Set rating on click
+      onMouseEnter={() => setHoverRating(i + 1)} // Highlight hats up to this index on hover
+      onMouseLeave={() => setHoverRating(0)} // Reset highlight when mouse leaves
+      onClick={() => setRating(i + 1)} // Set the rating when clicked
     />
   ))}
 </div>
