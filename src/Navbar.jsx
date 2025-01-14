@@ -1,10 +1,11 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { UserContext } from './UserContext';
-import { FaPowerOff } from 'react-icons/fa'; // Import a power-off icon
+import { FiPlusCircle, FiUser, FiShoppingCart, FiHeart, FiHome, FiLogOut, FiUserPlus } from 'react-icons/fi'; // Import icons
+import { HiOutlineUserCircle } from 'react-icons/hi'; // User circle login icon
 import logo from './logo.png';
-import { ToastContainer, toast } from 'react-toastify'; // Import Toastify
-import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const styles = {
   navbar: {
@@ -27,58 +28,44 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    gap: '10px',
+    gap: '20px',
+    marginRight: '15px',
   },
   navbarLink: {
     textDecoration: 'none',
-    color: '#F9F5F0',
-    fontSize: '1rem',
-    padding: '10px 15px',
+    color: '#7A7673', // Soft muted gray
+    backgroundColor: 'transparent',
+    border: 'none',
+    padding: '10px 12px',
+    fontSize: '1.4rem',
     borderRadius: '5px',
-  },
-  logoutButton: {
     display: 'flex',
     alignItems: 'center',
-    backgroundColor: '#FF6B6B',
-    color: '#FFF',
-    border: 'none',
-    padding: '10px 20px',
-    borderRadius: '20px',
+    gap: '6px',
     cursor: 'pointer',
-    fontSize: '1rem',
-    gap: '8px',
+    transition: 'color 0.3s ease',
   },
-  toastButtons: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginTop: '10px',
+  navbarLinkHover: {
+    color: '#5C5C5C', // Slightly darker gray on hover
   },
-  confirmButton: {
-    backgroundColor: '#FF6B6B',
-    color: '#FFF',
-    padding: '5px 10px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    border: 'none',
+  loginButton: {
+    fontSize: '1.6rem', // Larger login button
+    padding: '12px 14px',
   },
-  cancelButton: {
-    backgroundColor: '#D3D3D3',
-    color: '#333',
-    padding: '5px 10px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    border: 'none',
+  logoutButton: {
+    fontSize: '1.2rem', // Smaller logout button to match other icons
+    padding: '8px 10px',
+    marginLeft: '10px', // Optional margin for spacing
   },
 };
 
 function Navbar() {
   const { user, setUser } = useContext(UserContext);
 
-  // Check if the user is logged in
   const isLoggedIn = !!user;
 
   const handleLogout = async () => {
-    toast.dismiss(); // Dismiss the confirmation toast immediately
+    toast.dismiss();
     try {
       const response = await fetch('http://localhost:5001/logout', {
         method: 'POST',
@@ -90,7 +77,7 @@ function Navbar() {
           position: 'top-center',
           autoClose: 3000,
         });
-        setUser(null); // Clear user context after logout
+        setUser(null);
       } else {
         toast.error('Failed to log out. Please try again.', {
           position: 'top-center',
@@ -103,30 +90,6 @@ function Navbar() {
     }
   };
 
-  const confirmLogout = () => {
-    toast.info(
-      <div>
-        <p>Are you sure you want to log out?</p>
-        <div style={styles.toastButtons}>
-          <button style={styles.confirmButton} onClick={handleLogout}>
-            Yes
-          </button>
-          <button
-            style={styles.cancelButton}
-            onClick={() => toast.dismiss()}
-          >
-            No
-          </button>
-        </div>
-      </div>,
-      {
-        position: 'top-center',
-        autoClose: false, // Keep the toast open until the user selects an option
-        closeButton: false, // Remove default close button
-      }
-    );
-  };
-
   return (
     <nav style={styles.navbar}>
       <div style={styles.navbarLogo}>
@@ -136,37 +99,94 @@ function Navbar() {
       </div>
 
       <div style={styles.navbarContent}>
+        <Link
+          to="/"
+          style={styles.navbarLink}
+          title="Home"
+          onMouseEnter={(e) => (e.target.style.color = styles.navbarLinkHover.color)}
+          onMouseLeave={(e) => (e.target.style.color = styles.navbarLink.color)}
+        >
+          <FiHome />
+        </Link>
+
         {!isLoggedIn ? (
           <>
-            <Link to="/register" style={styles.navbarLink}>
-              Register
+            {/* Register Icon */}
+            <Link
+              to="/register"
+              style={styles.navbarLink}
+              title="Register"
+              onMouseEnter={(e) => (e.target.style.color = styles.navbarLinkHover.color)}
+              onMouseLeave={(e) => (e.target.style.color = styles.navbarLink.color)}
+            >
+              <FiUserPlus />
             </Link>
-            <Link to="/login" style={styles.navbarLink}>
-              Login
+
+            {/* Login Icon */}
+            <Link
+              to="/login"
+              style={{ ...styles.navbarLink, ...styles.loginButton }}
+              title="Login"
+              onMouseEnter={(e) => (e.target.style.color = styles.navbarLinkHover.color)}
+              onMouseLeave={(e) => (e.target.style.color = styles.navbarLink.color)}
+            >
+              <HiOutlineUserCircle />
             </Link>
           </>
         ) : (
           <>
-            <Link to="/add-recipe" style={styles.navbarLink}>
-              Add Recipe
-            </Link>
-            <Link to="/profile" style={styles.navbarLink}>
-              Profile ({user?.UserName || 'User'})
-            </Link>
-            <Link to="/shopping-list" style={styles.navbarLink}>
-              Shopping List
-            </Link>
-            <Link to="/favorites" style={styles.navbarLink}>
-              Favorites
-            </Link>
-            <Link to="/chatbot" style={styles.navbarLink}>
-              Chatbot
-            </Link>
-            <button
-              onClick={confirmLogout}
-              style={styles.logoutButton}
+            {/* Add Recipe Icon */}
+            <Link
+              to="/add-recipe"
+              style={styles.navbarLink}
+              title="Add Recipe"
+              onMouseEnter={(e) => (e.target.style.color = styles.navbarLinkHover.color)}
+              onMouseLeave={(e) => (e.target.style.color = styles.navbarLink.color)}
             >
-              <FaPowerOff /> Logout
+              <FiPlusCircle />
+            </Link>
+
+            {/* Profile Icon */}
+            <Link
+              to="/profile"
+              style={styles.navbarLink}
+              title="Profile"
+              onMouseEnter={(e) => (e.target.style.color = styles.navbarLinkHover.color)}
+              onMouseLeave={(e) => (e.target.style.color = styles.navbarLink.color)}
+            >
+              <FiUser />
+            </Link>
+
+            {/* Shopping Cart Icon */}
+            <Link
+              to="/shopping-list"
+              style={styles.navbarLink}
+              title="Shopping List"
+              onMouseEnter={(e) => (e.target.style.color = styles.navbarLinkHover.color)}
+              onMouseLeave={(e) => (e.target.style.color = styles.navbarLink.color)}
+            >
+              <FiShoppingCart />
+            </Link>
+
+            {/* Favorites Icon */}
+            <Link
+              to="/favorites"
+              style={styles.navbarLink}
+              title="Favorites"
+              onMouseEnter={(e) => (e.target.style.color = styles.navbarLinkHover.color)}
+              onMouseLeave={(e) => (e.target.style.color = styles.navbarLink.color)}
+            >
+              <FiHeart />
+            </Link>
+
+            {/* Smaller Logout Button */}
+            <button
+              onClick={handleLogout}
+              style={{ ...styles.navbarLink, ...styles.logoutButton }}
+              onMouseEnter={(e) => (e.target.style.color = styles.navbarLinkHover.color)}
+              onMouseLeave={(e) => (e.target.style.color = styles.navbarLink.color)}
+            >
+              <FiLogOut /> Log out
             </button>
           </>
         )}

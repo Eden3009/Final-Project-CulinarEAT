@@ -14,6 +14,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import { BsCartPlus } from 'react-icons/bs'; // Import a simple cart icon
 import { BsBookmark, BsBookmarkFill } from 'react-icons/bs';
 import { UserContext } from './UserContext'; // Adjust path as needed
+import { MdEdit } from 'react-icons/md';  // Importing the correct pencil icon
+import { FaTrash } from 'react-icons/fa'; // Trash icon for delete
+import { confirmAlert } from 'react-confirm-alert'; // Import confirmation dialog
 
 
 
@@ -223,7 +226,15 @@ function RecipeViewPage() {
   const [hoverRating, setHoverRating] = useState(0);  // User's hover state
   const [isFavorite, setIsFavorite] = useState(false); // Track whether the recipe is in favorites
   const [measurementSystem, setMeasurementSystem] = useState('US'); // Default to US
-    const { user } = React.useContext(UserContext); // Access `UserContext` at the top level
+  const { user } = React.useContext(UserContext); // Access `UserContext` at the top level
+  const [isEditing, setIsEditing] = useState(false); // To toggle edit modal
+  const [editReview, setEditReview] = useState({ ReviewID: null, Comment: '', Rating: 0 }); // Store the review to be edited
+  const [editReviewId, setEditReviewId] = useState(null);  // Track which review is being edited
+  const [editComment, setEditComment] = useState('');      // Store the review comment during editing
+  const [editRating, setEditRating] = useState(0);         // Store the review rating during editing
+
+
+
   
     const [recipe, setRecipe] = useState({
       Reviews: [], // Default empty array
@@ -232,8 +243,133 @@ function RecipeViewPage() {
     
 
 
+    const handleDeleteReview = (reviewID) => {
+      toast.info(
+        ({ closeToast }) => (
+          <div>
+            <p style={{ marginBottom: '10px', fontSize: '16px', fontWeight: 'bold', color: '#333' }}>
+              Are you sure you want to delete this review?
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+              {/* Yes Button - Green */}
+              <button
+                style={{
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  padding: '8px 12px',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                }}
+                onClick={async () => {
+                  try {
+                    console.log(`Attempting to delete review with ID: ${reviewID}`);
+                    const response = await fetch(`http://localhost:5001/api/reviews/${reviewID}`, {
+                      method: 'DELETE',
+                      headers: { 'Content-Type': 'application/json' },
+                    });
+    
+                    if (response.ok) {
+                      toast.success('Review deleted successfully!');
+                      setRecipe((prevRecipe) => ({
+                        ...prevRecipe,
+                        Reviews: prevRecipe.Reviews.map((review) =>
+                          review.ReviewID === reviewID ? { ...review, Comment: editComment, Rating: editRating } : review
+                        ),
+                      }));
+                      
+                      closeToast(); // Close the confirmation toast
+                    } else {
+                      const errorData = await response.json();
+                      console.error('Error Response:', errorData);
+                      toast.error(errorData.message || 'Failed to delete the review.');
+                    }
+                  } catch (error) {
+                    console.error('Error deleting review:', error);
+                    toast.error('An error occurred. Please try again.');
+                    closeToast();
+                  }
+                }}
+              >
+                Yes
+              </button>
+              {/* No Button - Red */}
+              <button
+                style={{
+                  backgroundColor: '#dc3545',
+                  color: 'white',
+                  padding: '8px 12px',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                }}
+                onClick={() => closeToast()} // Close toast on "No"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        ),
+        { autoClose: false, closeOnClick: false, position: 'top-center' }
+      );
+    };
+    
+    const handleEditClick = (review) => {
+      console.log('Editing review:', review);
+      setEditReviewId(review.ReviewID);  // Set the review ID being edited
+      setEditComment(review.Comment);    // Set the current comment
+      setEditRating(review.Rating);      // Set the current rating
+    };
+    
+    
+    
 
-
+    
+    
+    const handleSaveChanges = async (reviewID) => {
+      try {
+        const response = await fetch(`http://localhost:5001/api/reviews/${reviewID}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ Comment: editComment, Rating: editRating }),
+        });
+    
+        if (response.ok) {
+          const updatedReview = await response.json(); // Fetch updated review from server
+    
+          setRecipe((prevRecipe) => ({
+            ...prevRecipe,
+            Reviews: prevRecipe.Reviews.map((review) =>
+              review.ReviewID === updatedReview.ReviewID ? updatedReview : review
+            ),
+          }));
+    
+          toast.success('Review updated successfully!');
+          setEditReviewId(null); // Exit editing mode
+        } else {
+          toast.error('Failed to update review.');
+        }
+      } catch (error) {
+        console.error('Error updating review:', error);
+        toast.error('An error occurred. Please try again.');
+      }
+    };
+    
+    
+    
+    
+    
+    
+    
+    const handleCancelEdit = () => {
+      setEditReviewId(null);
+      setEditComment('');
+      setEditRating(0);
+    };
+    
+    
     const handleReviewSubmit = async (e) => {
       e.preventDefault();
     
@@ -416,26 +552,31 @@ const ingredients = recipe && recipe.Ingredients
   const themes = recipe.Themes ? recipe.Themes.split(',') : [];
   const labels = recipe.Labels ? recipe.Labels.split(',') : [];
 
-  const renderChefHats = (rating) => {
-    const maxHats = 5; // Maximum number of hats
-    const hats = Math.round(rating); // Round to nearest integer
+ const renderChefHats = (rating, isEditable = false, reviewID = null) => {
+  const maxHats = 5; // Maximum number of hats
+
+  return (
+    <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
+      {Array.from({ length: maxHats }, (_, index) => (
+        <GiChefToque
+          key={index}
+          style={{
+            fontSize: '30px',
+            cursor: isEditable ? 'pointer' : 'default', // Allow clicking only if editable
+            color: index < rating ? '#FFD700' : '#ccc', // Gold for filled, gray for empty
+            transform: isEditable && index < rating ? 'scale(1.2)' : 'scale(1)',
+            transition: 'transform 0.2s ease, color 0.3s ease',
+          }}
+          onClick={() => {
+            if (isEditable) setEditRating(index + 1); // Only allow changing rating when editing
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
   
-    return (
-      <div style={{ display: 'flex', gap: '5px' }}>
-        {Array.from({ length: maxHats }, (_, index) => (
-          <span
-            key={index}
-            style={{
-              fontSize: '20px',
-              color: index < hats ? '#FFD700' : '#ccc', // Gold for filled, grey for empty
-            }}
-          >
-            🍳 {/* Chef hat emoji */}
-          </span>
-        ))}
-      </div>
-    );
-  };
   
   return (
     <div style={styles.page}>
@@ -958,89 +1099,8 @@ const ingredients = recipe && recipe.Ingredients
 </div>
 </div>
 
-{/* Reviews Section */}
-<div style={{ marginTop: '40px', textAlign: 'center' }}>
-  <h2 style={{
-    fontSize: '24px',
-    fontWeight: 'bold',
-    fontFamily: "'Merienda', cursive",
-    color: '#B55335',
-    marginBottom: '-5px',
-  }}>
-    Reviews
-  </h2>
-
-  {recipe.Reviews && Array.isArray(recipe.Reviews) && recipe.Reviews.length > 0 ? (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '700px', margin: '0 auto' }}>
-        {recipe.Reviews.map((review, index) => (
-            <div key={review.ReviewID || `anonymous-${index}`} style={{
-                backgroundColor: '#F9F7F4',
-                border: '1px solid #E0E0E0',
-                borderRadius: '12px',
-                padding: '20px',
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-            }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <strong style={{
-                        fontSize: '18px',
-                        fontWeight: '600',
-                        fontFamily: "'Georgia', serif",
-                        color: '#4E342E',
-                    }}>
-                        {review.UserName || 'Anonymous'}
-                    </strong>
-                    <span style={{ fontSize: '14px', color: '#777' }}>
-                        {review.Date || 'No Date'}
-                    </span>
-                </div>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    gap: '5px',
-                    marginBottom: '10px',
-                }}>
-                    {Array.from({ length: 5 }).map((_, i) => (
-                        <GiChefToque
-                            key={i}
-                            style={{
-                                fontSize: '24px',
-                                color: i < review.Rating ? '#FFD700' : '#ccc',
-                            }}
-                        />
-                    ))}
-                </div>
-                <p style={{
-                    fontSize: '18px',
-                    fontFamily: "'Georgia', serif",
-                    color: '#333',
-                    lineHeight: '1.6',
-                    margin: 0,
-                }}>
-                    {review.Comment || 'No comment provided.'}
-                </p>
-            </div>
-        ))}
-    </div>
-) : (
-    <p style={{
-        fontSize: '18px',
-        fontFamily: "'Georgia', serif",
-        color: '#333',
-        margin: '20px 0',
-    }}>
-        {recipe.Reviews && recipe.Reviews.length === 0 ? 'No reviews yet.' : 'Loading reviews...'}
-    </p>
-)}
-
-
-
-  
-
-
-
-
-  {/* Add Review Form */}
-  <form
+ {/* Add Review Form */}
+ <form
     onSubmit={handleReviewSubmit}
     style={{
       maxWidth: '700px',
@@ -1053,7 +1113,7 @@ const ingredients = recipe && recipe.Ingredients
       fontWeight: 'bold',
       fontFamily: "'Merienda', cursive",
       color: '#B55335',
-      marginBottom: '-5px',
+      marginBottom: '10px',
     }}>
       Add Your Review
     </h3>
@@ -1078,30 +1138,31 @@ const ingredients = recipe && recipe.Ingredients
       onFocus={(e) => e.target.style.borderColor = '#8B4513'}
       onBlur={(e) => e.target.style.borderColor = '#DDD'}
     />
+{/* Editable Chef Hat Icons for Rating */}
+<div style={{
+  display: 'flex',
+  justifyContent: 'center',
+  gap: '15px',
+  marginBottom: '20px',
+}}>
+  {Array.from({ length: 5 }).map((_, i) => (
+    <GiChefToque
+      key={i}
+      style={{
+        fontSize: '30px',
+        cursor: 'pointer',
+        color: i < editRating ? '#FFD700' : '#ccc', // Use editRating
+        transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)', // Add hover effect
+        transition: 'transform 0.2s ease, color 0.3s ease',
+      }}
+      onMouseEnter={() => setHoverRating(i + 1)}
+      onMouseLeave={() => setHoverRating(0)}
+      onClick={() => setEditRating(i + 1)} // Set new rating on click
+    />
+  ))}
+</div>
 
-    {/* Chef Hat Icons for Rating */}
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      gap: '15px',
-      marginBottom: '20px',
-    }}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <GiChefToque
-          key={i}
-          style={{
-            fontSize: '30px',
-            cursor: 'pointer',
-            color: i < (hoverRating || rating) ? '#FFD700' : '#ccc',
-            transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)',
-            transition: 'transform 0.2s ease, color 0.3s ease',
-          }}
-          onMouseEnter={() => setHoverRating(i + 1)}
-          onMouseLeave={() => setHoverRating(0)}
-          onClick={() => setRating(i + 1)}
-        />
-      ))}
-    </div>
+
 
     {/* Submit Button */}
     <button
@@ -1124,7 +1185,136 @@ const ingredients = recipe && recipe.Ingredients
       Submit Review
     </button>
   </form>
+
+{/* Reviews Section */}
+<div style={{ marginTop: '40px', textAlign: 'center' }}>
+  <h2 style={{
+    fontSize: '24px',
+    fontWeight: 'bold',
+    fontFamily: "'Merienda', cursive",
+    color: '#B55335',
+    marginBottom: '20px',
+  }}>
+    Reviews
+  </h2>
+
+  {recipe.Reviews && Array.isArray(recipe.Reviews) && recipe.Reviews.length > 0 ? (
+    <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+{recipe.Reviews.map((review) => (
+  <div
+    key={review.ReviewID}
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center', // Center align everything
+      marginBottom: '20px',
+    }}
+  >
+    <strong style={{ fontSize: '18px', color: '#4E342E', marginBottom: '10px' }}>
+      {review.UserName || 'Anonymous'}
+    </strong>
+
+    {editReviewId === review.ReviewID ? (
+  <div style={{ width: '100%', maxWidth: '600px' }}>
+    {/* Editable Chef Hats */}
+    <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '10px' }}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <GiChefToque
+          key={i}
+          style={{
+            fontSize: '30px',
+            cursor: 'pointer',
+            color: i < editRating ? '#FFD700' : '#ccc',
+            transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)',
+            transition: 'transform 0.2s ease, color 0.3s ease',
+          }}
+          onMouseEnter={() => setHoverRating(i + 1)}
+          onMouseLeave={() => setHoverRating(0)}
+          onClick={() => setEditRating(i + 1)}
+        />
+      ))}
+    </div>
+    <textarea
+      value={editComment}
+      onChange={(e) => setEditComment(e.target.value)}
+      style={{
+        width: '100%',
+        padding: '10px',
+        borderRadius: '6px',
+        fontSize: '16px',
+        border: '1px solid #DDD',
+        marginBottom: '10px',
+      }}
+    />
+    <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+      <button
+        onClick={() => handleSaveChanges(review.ReviewID)}
+        style={{
+          backgroundColor: '#28a745',
+          color: 'white',
+          padding: '10px 20px',
+          borderRadius: '6px',
+          border: 'none',
+          cursor: 'pointer',
+        }}
+      >
+        Save
+      </button>
+      <button
+        onClick={handleCancelEdit}
+        style={{
+          backgroundColor: '#dc3545',
+          color: 'white',
+          padding: '10px 20px',
+          borderRadius: '6px',
+          border: 'none',
+          cursor: 'pointer',
+        }}
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+) : (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+    <div style={{ marginBottom: '10px' }}>{renderChefHats(review.Rating || 0)}</div>
+    <p style={{ fontSize: '18px', color: '#333', margin: '0' }}>
+      {review.Comment || 'No comment provided.'}
+    </p>
+    <div style={{ display: 'flex', gap: '15px' }}>
+      <MdEdit
+        style={{ cursor: 'pointer', color: 'blue', fontSize: '20px' }}
+        onClick={() => handleEditClick(review)}
+      />
+      <FaTrash
+        style={{ cursor: 'pointer', color: 'red', fontSize: '20px' }}
+        onClick={() => handleDeleteReview(review.ReviewID)}
+      />
+    </div>
+  </div>
+)}
+
+    <hr style={{ border: 'none', borderTop: '1px solid #ddd', margin: '20px 0' }} />
+  </div>
+))}
+
+
+      
+    </div>
+  ) : (
+    <p style={{
+      fontSize: '18px',
+      fontFamily: "'Georgia', serif",
+      color: '#333',
+      margin: '20px 0',
+    }}>
+      {recipe.Reviews && recipe.Reviews.length === 0 ? 'No reviews yet.' : 'Loading reviews...'}
+    </p>
+  )}
 </div>
+
+
+
 </div>
 
 

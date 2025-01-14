@@ -10,7 +10,16 @@ const app = express();
 const port = 5001;
 
 
+// Test route
+app.get('/api/reviews/test', (req, res) => {
+    res.status(200).json({ message: 'API is working!' });
+  });
 
+  app.get('/api/reviews/test', (req, res) => {
+    console.log('Test endpoint hit!');
+    res.status(200).json({ message: 'API is working!' });
+  });
+  
 // Middleware
 app.use(cors({
     origin: function (origin, callback) {
@@ -1055,3 +1064,65 @@ const addLabelsAndThemes = (recipeID, labels, themes, res) => {
 
     res.status(201).json({ message: 'Recipe added successfully!' });
 };
+
+// DELETE API for deleting a review
+app.delete('/api/reviews/:reviewID', (req, res) => {
+    const { reviewID } = req.params; // Extract review ID from the request URL
+
+    // SQL query to delete the review
+    const deleteReviewQuery = `DELETE FROM Review WHERE ReviewID = ?`;
+
+    db.query(deleteReviewQuery, [reviewID], (err, result) => {
+        if (err) {
+            console.error('Error deleting review:', err);
+            return res.status(500).json({ message: 'Database error', error: err });
+        }
+
+        if (result.affectedRows === 0) {
+            // No review was found to delete
+            return res.status(404).json({ message: 'Review not found' });
+        }
+
+        res.status(200).json({ message: 'Review deleted successfully' });
+    });
+});
+
+
+
+// PUT API for editing a review
+app.put('/api/reviews/:reviewID', (req, res) => {
+    const { reviewID } = req.params; // Extract review ID from the URL
+    const { Rating, Comment } = req.body; // Extract the new rating and comment from the body
+  
+    if (!Rating || !Comment) {
+      return res.status(400).json({ message: 'Both rating and comment are required.' });
+    }
+  
+    const sql = `
+      UPDATE Review
+      SET Rating = ?, Comment = ?, Date = NOW()  -- Update the date automatically
+      WHERE ReviewID = ?
+    `;
+  
+    // Execute the SQL query
+    db.query(sql, [Rating, Comment, reviewID], (err, result) => {
+      if (err) {
+        console.error('Error updating review:', err);
+        return res.status(500).json({ message: 'Database error while updating review.', error: err.message });
+      }
+  
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: `Review with ID ${reviewID} not found.` });
+      }
+  
+      // Fetch the updated review
+      db.query(`SELECT * FROM Review WHERE ReviewID = ?`, [reviewID], (err, rows) => {
+        if (err) {
+          console.error('Error fetching updated review:', err);
+          return res.status(500).json({ message: 'Error fetching updated review.' });
+        }
+        res.status(200).json(rows[0]); // Return the updated review object
+      });
+    });
+  });
+  
