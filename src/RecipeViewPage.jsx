@@ -17,6 +17,10 @@ import { UserContext } from './UserContext'; // Adjust path as needed
 import { MdEdit } from 'react-icons/md';  // Importing the correct pencil icon
 import { FaTrash } from 'react-icons/fa'; // Trash icon for delete
 import { confirmAlert } from 'react-confirm-alert'; // Import confirmation dialog
+import { format } from 'date-fns'; // Import date-fns for formatting
+
+
+
 
 
 
@@ -453,8 +457,12 @@ function RecipeViewPage() {
     return uniqueReviews;
 };
  
+useEffect(() => {
+  window.scrollTo(0, 0);  // Scroll to the top of the page
+}, []); // Empty dependency array ensures it runs only once when the component mounts
 
   
+
   useEffect(() => {
     if (RecipeID) {
       console.log('RecipeID from params:', RecipeID);
@@ -1150,19 +1158,17 @@ const ingredients = recipe && recipe.Ingredients
       key={i}
       style={{
         fontSize: '30px',
-        cursor: 'pointer',
-        color: i < editRating ? '#FFD700' : '#ccc', // Use editRating
-        transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)', // Add hover effect
+        cursor: 'pointer', // Allow clicking
+        color: i < (hoverRating || rating) ? '#FFD700' : '#ccc', // Yellow when hovered or selected, gray otherwise
+        transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)',
         transition: 'transform 0.2s ease, color 0.3s ease',
       }}
-      onMouseEnter={() => setHoverRating(i + 1)}
-      onMouseLeave={() => setHoverRating(0)}
-      onClick={() => setEditRating(i + 1)} // Set new rating on click
+      onMouseEnter={() => setHoverRating(i + 1)} // Highlight hats up to this index on hover
+      onMouseLeave={() => setHoverRating(0)} // Reset highlight when mouse leaves
+      onClick={() => setRating(i + 1)} // Set the rating when clicked
     />
   ))}
 </div>
-
-
 
     {/* Submit Button */}
     <button
@@ -1200,106 +1206,127 @@ const ingredients = recipe && recipe.Ingredients
 
   {recipe.Reviews && Array.isArray(recipe.Reviews) && recipe.Reviews.length > 0 ? (
     <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-{recipe.Reviews.map((review) => (
-  <div
-    key={review.ReviewID}
-    style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center', // Center align everything
-      marginBottom: '20px',
-    }}
-  >
-    <strong style={{ fontSize: '18px', color: '#4E342E', marginBottom: '10px' }}>
-      {review.UserName || 'Anonymous'}
-    </strong>
+      {recipe.Reviews.map((review, index) => (
+        <div key={review.ReviewID}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              marginBottom: '20px',
+            }}
+          >
+            <strong style={{ fontSize: '18px', color: '#4E342E', marginBottom: '10px' }}>
+              {review.UserName || 'Anonymous'}
+            </strong>
 
-    {editReviewId === review.ReviewID ? (
-  <div style={{ width: '100%', maxWidth: '600px' }}>
-    {/* Editable Chef Hats */}
-    <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '10px' }}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <GiChefToque
-          key={i}
-          style={{
-            fontSize: '30px',
-            cursor: 'pointer',
-            color: i < editRating ? '#FFD700' : '#ccc',
-            transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)',
-            transition: 'transform 0.2s ease, color 0.3s ease',
-          }}
-          onMouseEnter={() => setHoverRating(i + 1)}
-          onMouseLeave={() => setHoverRating(0)}
-          onClick={() => setEditRating(i + 1)}
-        />
+            {/* Show review date */}
+            <p style={{
+              fontSize: '14px',
+              fontStyle: 'italic',
+              color: '#777',
+              marginBottom: '10px',
+            }}>
+              {review.Date ? format(new Date(review.Date), 'MMMM dd, yyyy') : 'Date not available'}
+            </p>
+
+            {editReviewId === review.ReviewID ? (
+              <div style={{ width: '100%', maxWidth: '600px' }}>
+                {/* Editable Chef Hats */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '10px' }}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <GiChefToque
+                      key={i}
+                      style={{
+                        fontSize: '30px',
+                        cursor: 'pointer',
+                        color: i < editRating ? '#FFD700' : '#ccc',
+                        transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)',
+                        transition: 'transform 0.2s ease, color 0.3s ease',
+                      }}
+                      onMouseEnter={() => setHoverRating(i + 1)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      onClick={() => setEditRating(i + 1)}
+                    />
+                  ))}
+                </div>
+                <textarea
+                  value={editComment}
+                  onChange={(e) => setEditComment(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    border: '1px solid #DDD',
+                    marginBottom: '10px',
+                  }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                  <button
+                    onClick={() => handleSaveChanges(review.ReviewID)}
+                    style={{
+                      backgroundColor: '#28a745',
+                      color: 'white',
+                      padding: '10px 20px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    style={{
+                      backgroundColor: '#dc3545',
+                      color: 'white',
+                      padding: '10px 20px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                <div style={{ marginBottom: '10px' }}>{renderChefHats(review.Rating || 0)}</div>
+                <p style={{ fontSize: '18px', color: '#333', margin: '0' }}>
+                  {review.Comment || 'No comment provided.'}
+                </p>
+                <div style={{ display: 'flex', gap: '15px' }}>
+                  <MdEdit
+                    style={{ cursor: 'pointer', color: 'blue', fontSize: '20px' }}
+                    onClick={() => handleEditClick(review)}
+                  />
+                  <FaTrash
+                    style={{ cursor: 'pointer', color: 'red', fontSize: '20px' }}
+                    onClick={() => handleDeleteReview(review.ReviewID)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Add a line between reviews except after the last one */}
+          {index !== recipe.Reviews.length - 1 && (
+        <hr style={{
+          width: '90vw',  // 90% of the viewport width
+          height: '2px',
+          backgroundColor: '#E0E0E0',
+          border: 'none',
+          margin: '20px auto',
+          position: 'relative',
+          left: '50%',
+          transform: 'translateX(-50%)',  // Centers the line horizontally
+        }} />
+        
+          )}
+        </div>
       ))}
-    </div>
-    <textarea
-      value={editComment}
-      onChange={(e) => setEditComment(e.target.value)}
-      style={{
-        width: '100%',
-        padding: '10px',
-        borderRadius: '6px',
-        fontSize: '16px',
-        border: '1px solid #DDD',
-        marginBottom: '10px',
-      }}
-    />
-    <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-      <button
-        onClick={() => handleSaveChanges(review.ReviewID)}
-        style={{
-          backgroundColor: '#28a745',
-          color: 'white',
-          padding: '10px 20px',
-          borderRadius: '6px',
-          border: 'none',
-          cursor: 'pointer',
-        }}
-      >
-        Save
-      </button>
-      <button
-        onClick={handleCancelEdit}
-        style={{
-          backgroundColor: '#dc3545',
-          color: 'white',
-          padding: '10px 20px',
-          borderRadius: '6px',
-          border: 'none',
-          cursor: 'pointer',
-        }}
-      >
-        Cancel
-      </button>
-    </div>
-  </div>
-) : (
-  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-    <div style={{ marginBottom: '10px' }}>{renderChefHats(review.Rating || 0)}</div>
-    <p style={{ fontSize: '18px', color: '#333', margin: '0' }}>
-      {review.Comment || 'No comment provided.'}
-    </p>
-    <div style={{ display: 'flex', gap: '15px' }}>
-      <MdEdit
-        style={{ cursor: 'pointer', color: 'blue', fontSize: '20px' }}
-        onClick={() => handleEditClick(review)}
-      />
-      <FaTrash
-        style={{ cursor: 'pointer', color: 'red', fontSize: '20px' }}
-        onClick={() => handleDeleteReview(review.ReviewID)}
-      />
-    </div>
-  </div>
-)}
-
-    <hr style={{ border: 'none', borderTop: '1px solid #ddd', margin: '20px 0' }} />
-  </div>
-))}
-
-
-      
     </div>
   ) : (
     <p style={{
@@ -1312,6 +1339,7 @@ const ingredients = recipe && recipe.Ingredients
     </p>
   )}
 </div>
+
 
 
 
