@@ -22,6 +22,9 @@ import { confirmAlert } from 'react-confirm-alert'; // Import confirmation dialo
 
 
 
+
+
+
 const styles = {
   page: {
     display: 'flex',
@@ -453,8 +456,12 @@ function RecipeViewPage() {
     return uniqueReviews;
 };
  
+useEffect(() => {
+  window.scrollTo(0, 0);  // Scroll to the top of the page
+}, []); // Empty dependency array ensures it runs only once when the component mounts
 
   
+
   useEffect(() => {
     if (RecipeID) {
       console.log('RecipeID from params:', RecipeID);
@@ -1151,16 +1158,16 @@ const ingredients = recipe && recipe.Ingredients
       style={{
         fontSize: '30px',
         cursor: 'pointer',
-        color: i < editRating ? '#FFD700' : '#ccc', // Use editRating
-        transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)', // Add hover effect
+        color: i < hoverRating ? '#FFD700' : '#ccc', // Yellow (#FFD700) for hover, gray for others
         transition: 'transform 0.2s ease, color 0.3s ease',
       }}
-      onMouseEnter={() => setHoverRating(i + 1)}
-      onMouseLeave={() => setHoverRating(0)}
-      onClick={() => setEditRating(i + 1)} // Set new rating on click
+      onMouseEnter={() => setHoverRating(i + 1)} // Set hoverRating to highlight hats up to this index
+      onMouseLeave={() => setHoverRating(0)} // Reset hoverRating when mouse leaves
+      onClick={() => setRating(i + 1)} // Set rating on click
     />
   ))}
 </div>
+
 
 
 
