@@ -270,9 +270,9 @@ db.query(insertShoppingListSQL, [userId, req.body.listName], (err, result) => {
         // Map shopping list items into the required format
         const ingredientValues = shoppingList.map((item) => [
             shoppingListId,
-            item.ingredientId, // Ensure this matches IngredientID in the database
-            item.quantity,
-            item.measureId,
+            item.IngredientID, // Ensure this matches IngredientID in the database
+            item.Quantity,
+            item.MeasureID,
         ]);
 
         db.query(insertListIngredientsSQL, [ingredientValues], (err) => {
@@ -287,7 +287,6 @@ db.query(insertShoppingListSQL, [userId, req.body.listName], (err, result) => {
 
 
 
-//fetch shopping list 
 app.get('/api/get-shopping-lists/:userId', (req, res) => {
     const userId = req.params.userId;
 
@@ -297,6 +296,8 @@ app.get('/api/get-shopping-lists/:userId', (req, res) => {
             sl.ListName, 
             sl.CreatedDate, 
             li.Quantity, 
+            li.IngredientID, 
+            li.MeasureID, 
             i.IngredientName, 
             m.MeasureName
         FROM ShoppingList sl
@@ -325,10 +326,13 @@ app.get('/api/get-shopping-lists/:userId', (req, res) => {
             }
 
             acc[listId].items.push({
+                IngredientID: row.IngredientID,  // Add IngredientID
+                MeasureID: row.MeasureID,        // Add MeasureID
                 IngredientName: row.IngredientName,
-                Quantity: row.Quantity,
                 MeasureName: row.MeasureName,
+                Quantity: row.Quantity,
             });
+            console.log('Results:', results);
 
             return acc;
         }, {});
@@ -336,6 +340,7 @@ app.get('/api/get-shopping-lists/:userId', (req, res) => {
         res.json(Object.values(groupedLists));
     });
 });
+
 
 app.delete('/api/delete-shopping-list/:listId', (req, res) => {
     const listId = req.params.listId;

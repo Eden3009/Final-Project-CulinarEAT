@@ -269,90 +269,101 @@ useEffect(() => {
 
 
 const saveToList = () => {
- if (!listName.trim()) {
-   toast.error('Please enter a list name!');
-   return;
- }
+  console.log('Saving list started...');
+  if (!listName.trim()) {
+    toast.error('Please enter a list name!');
+    console.error('List name is empty');
+    return;
+  }
 
+  console.log('List name is valid:', listName);
 
- if (shoppingList.length === 0) {
-   toast.error('The shopping list is empty!');
-   return;
- }
+  if (shoppingList.length === 0) {
+    toast.error('The shopping list is empty!');
+    console.error('Shopping list is empty');
+    return;
+  }
 
+  console.log('Shopping list is not empty:', shoppingList);
 
- const isEdit = shoppingList.some((item) => item.IngredientID); // Check if editing
- const apiUrl = isEdit
-   ? `http://localhost:5001/api/update-shopping-list/${shoppingList[0].ShoppingListID}`
-   : 'http://localhost:5001/api/shopping-lists';
+  const isEdit = shoppingList.some((item) => item.IngredientID);
+  console.log('Is editing mode:', isEdit);
 
+  const apiUrl = isEdit
+    ? `http://localhost:5001/api/update-shopping-list/${shoppingList[0].ShoppingListID}`
+    : 'http://localhost:5001/api/shopping-lists';
 
- const method = isEdit ? 'PUT' : 'POST';
+  console.log('API URL:', apiUrl);
 
+  const method = isEdit ? 'PUT' : 'POST';
 
- const payload = {
-   listName,
-   shoppingList: shoppingList.map((item) => ({
-     IngredientID: item.IngredientID,
-     MeasureID: item.MeasureID,
-     Quantity: item.quantity || item.Quantity, // Ensure correct property is used
-   })),
-   userId: user?.UserID,
- };
+  const payload = {
+    listName,
+    shoppingList: shoppingList.map((item) => ({
+      IngredientID: item.IngredientId, // Correct casing
+      MeasureID: item.MeasureId,      // Correct casing
+      Quantity: item.quantity || item.Quantity,
+    })),
+    userId: user?.UserID,
+  };
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+  console.log('Payload:', payload);
 
- fetch(apiUrl, {
-   method,
-   headers: { 'Content-Type': 'application/json' },
-   body: JSON.stringify(payload),
- })
-   .then((res) => {
-     if (res.ok) {
-       return res.json();
-     }
-     return res.json().then((err) => Promise.reject(err));
-   })
-   .then((data) => {
-     console.log('List saved:', data);
+  fetch(apiUrl, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+    .then((res) => {
+      if (res.ok) {
+        return res.json();
+      }
+      return res.json().then((err) => Promise.reject(err));
+    })
+    .then((data) => {
+      console.log('List saved:', data);
 
+      if (isEdit) {
+        // Update the existing list in the UI
+        setSavedLists((prev) =>
+          prev.map((list) =>
+            list.ShoppingListID === data.ShoppingListID
+              ? {
+                  ...list,
+                  ListName: listName,
+                  items: [...shoppingList],
+                }
+              : list
+          )
+        );
+        toast.success('List updated successfully!');
+        window.location.reload();
 
-     if (isEdit) {
-       // Update the existing list in the UI
-       setSavedLists((prev) =>
-         prev.map((list) =>
-           list.ShoppingListID === data.ShoppingListID
-             ? {
-                 ...list,
-                 ListName: listName,
-                 items: [...shoppingList],
-               }
-             : list
-         )
-       );
-       toast.success('List updated successfully!');
-     } else {
-       // Add the new list to the UI
-       setSavedLists((prev) => [
-         ...prev,
-         {
-           ShoppingListID: data.ShoppingListID,
-           ListName: listName,
-           CreatedDate: new Date().toLocaleDateString(),
-           items: [...shoppingList],
-         },
-       ]);
-       toast.success('List saved successfully!');
-     }
+      } else {
+        // Add the new list to the UI
+        setSavedLists((prev) => [
+          ...prev,
+          {
+            ShoppingListID: data.ShoppingListID,
+            ListName: listName,
+            CreatedDate: new Date().toLocaleDateString(),
+            items: [...shoppingList],
+          },
+        ]);
+        toast.success('List saved successfully!');
+        window.location.reload();
 
+      }
 
-     // Reset form fields after saving
-     setListName('');
-     setShoppingList([]);
-   })
-   .catch((error) => {
-     console.error('Error saving list:', error);
-     toast.error('Failed to save the list. Please try again.');
-   });
+      // Reset form fields after saving
+      setListName('');
+      setShoppingList([]);
+    })
+    .catch((error) => {
+      console.error('Error saving list:', error);
+      toast.error('Failed to save the list. Please try again.');
+    });
 };
 
 
@@ -379,6 +390,7 @@ if (!selectedIngredient?.IngredientID) {
 }
 
 
+console.log('Adding item:', selectedIngredient);
 
 
 const exists = shoppingList.some(
@@ -395,15 +407,15 @@ if (exists) {
 
 
 
-
+//!!!!?????????!!!!!!
 setShoppingList((prev) => [
   ...prev,
   {
     label: searchTerm,
-    ingredientId: selectedIngredient.IngredientID, // Ensure this is valid
+    IngredientId: selectedIngredient.IngredientID, // Ensure this is valid
     quantity,
-    measureId: measure,
-    measureName: measures.find((m) => m.MeasureID === measure)?.MeasureName || '',
+    MeasureId: measure,
+    MeasureName: measures.find((m) => m.MeasureID === measure)?.MeasureName || '',
   },
 ]);
 
@@ -421,27 +433,29 @@ setSelectedIngredient(null);
 
 
 const handleEditList = (list) => {
- if (!list || !Array.isArray(list.items)) {
-   console.error('Invalid list format or items missing:', list);
-   toast.error('Cannot edit this list. Please try again.');
-   return;
- }
+  if (!list || !Array.isArray(list.items)) {
+    console.error('Invalid list format or items missing:', list);
+    toast.error('Cannot edit this list. Please try again.');
+    return;
+  }
 
+  setIsEditing(true); // Enable editing mode
+  setEditingListId(list.ShoppingListID); // Track which list is being edited
+  setListName(list.ListName || ''); // Populate the list name
+  setShoppingList(
+    list.items.map((item) => ({
+        IngredientID: item.IngredientID,   // Ensure IngredientID matches backend casing
+        MeasureID: item.MeasureID,         // Ensure MeasureID matches backend casing
+        Quantity: item.Quantity || 1,
+        IngredientName: item.IngredientName || 'Unknown Ingredient',
+        MeasureName: item.MeasureName || '',
+    }))
+);
 
- setIsEditing(true); // Enable editing mode
- setEditingListId(list.ShoppingListID); // Track which list is being edited
- setListName(list.ListName || ''); // Populate the list name
- setShoppingList(
-   list.items.map((item) => ({
-     IngredientID: item.IngredientID || null,
-     MeasureID: item.MeasureID || null,
-     Quantity: item.Quantity || 1,
-     IngredientName: item.IngredientName || 'Unknown Ingredient',
-   }))
- );
- toast.info('You can now edit this list. Don’t forget to save your changes!');
+  toast.info('You can now edit this list. Don’t forget to save your changes!');
 };
 
+//!!!!!!!!!!!!!!!!!!!
 
 
 
@@ -473,10 +487,12 @@ const saveEditedList = () => {
    shoppingList: shoppingList.map((item) => ({
      IngredientID: item.IngredientID,
      MeasureID: item.MeasureID,
-     Quantity: item.Quantity,
+     Quantity: item.quantity,
    })),
    userId: user?.UserID,
  };
+
+ console.log('Payload:', payload);
 
 
  fetch(`http://localhost:5001/api/update-shopping-list/${editingListId}`, {
@@ -701,7 +717,7 @@ const handleAddNewIngredient = async (newIngredientName) => {
      alert(`"${newIngredientName}" added successfully to the database!`);
      setSuggestedIngredients((prevSuggestions) => [
        ...prevSuggestions,
-       { IngredientName: newIngredientName, IngredientID: data.ingredientID },
+       { IngredientName: newIngredientName, IngredientID: data.IngredientID },
      ]);
    } else {
      alert("Failed to add new ingredient. Please try again.");
