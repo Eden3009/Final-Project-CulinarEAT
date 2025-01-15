@@ -371,48 +371,63 @@ app.delete('/api/delete-shopping-list/:listId', (req, res) => {
 app.put('/api/update-shopping-list/:listId', (req, res) => {
     const listId = req.params.listId;
     const { listName, items } = req.body;
-
+  
+    // Log the received body to verify its structure
+    console.log("Received body for update:", req.body);
+  
+    // Validation checks
+    if (!listName || !listName.trim()) {
+      console.error('Missing or empty listName:', listName);
+      return res.status(400).json({ message: 'List name is required.' });
+    }
+  
+    if (!items || items.length === 0) {
+      console.error('Missing or empty items:', items);
+      return res.status(400).json({ message: 'Items are required.' });
+    }
+    // Proceed with updating the list if everything is valid
     const updateListNameQuery = `UPDATE ShoppingList SET ListName = ? WHERE ShoppingListID = ?`;
-    const deleteOldItemsQuery = `DELETE FROM ListIngredient WHERE ShoppingListID = ?`;
-    const insertNewItemsQuery = `
-        INSERT INTO ListIngredient (ShoppingListID, IngredientID, MeasureID, Quantity)
-        VALUES ?`;
-
-    // Update list name
+  
     db.query(updateListNameQuery, [listName, listId], (err) => {
+      if (err) {
+        console.error('Error updating list name:', err);
+        return res.status(500).json({ message: 'Failed to update list name.' });
+      }
+  
+      // Step 3: Delete old items from the shopping list
+      const deleteOldItemsQuery = `DELETE FROM ListIngredient WHERE ShoppingListID = ?`;
+  
+      db.query(deleteOldItemsQuery, [listId], (err) => {
         if (err) {
-            console.error('Error updating list name:', err);
-            return res.status(500).json({ message: 'Failed to update list name.' });
+          console.error('Error deleting old items:', err);
+          return res.status(500).json({ message: 'Failed to delete old items.' });
         }
-
-        // Delete old items
-        db.query(deleteOldItemsQuery, [listId], (err) => {
-            if (err) {
-                console.error('Error deleting old items:', err);
-                return res.status(500).json({ message: 'Failed to delete old items.' });
-            }
-
-            // Insert new items
-            const itemsData = items.map((item) => [
-                listId,
-                item.IngredientID,
-                item.MeasureID,
-                item.Quantity,
-            ]);
-
-            db.query(insertNewItemsQuery, [itemsData], (err) => {
-                if (err) {
-                    console.error('Error inserting new items:', err);
-                    return res.status(500).json({ message: 'Failed to insert new items.' });
-                }
-
-                res.status(200).json({ message: 'Shopping list updated successfully.' });
-            });
+  
+        // Step 4: Insert new items into the list
+        const insertNewItemsQuery = `
+          INSERT INTO ListIngredient (ShoppingListID, IngredientID, MeasureID, Quantity)
+          VALUES ?`;
+  
+        const itemsData = items.map((item) => [
+          listId,
+          item.IngredientID,
+          item.MeasureID,
+          item.Quantity,
+        ]);
+  
+        db.query(insertNewItemsQuery, [itemsData], (err) => {
+          if (err) {
+            console.error('Error inserting new items:', err);
+            return res.status(500).json({ message: 'Failed to insert new items.' });
+          }
+  
+          // Step 5: Return success response
+          res.status(200).json({ message: 'Shopping list updated successfully.' });
         });
+      });
     });
-});
-
-
+  });
+  
 
   
 // API Route to Fetch All Measures
@@ -910,9 +925,6 @@ WHERE i.IngredientName LIKE ?
         res.status(200).json({ recipes: results });
     });
 });
-
-
-
 
 
 // POST API for submitting comments/ratings review

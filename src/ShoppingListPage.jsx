@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useContext } from 'react';
 import {
 TextField,
@@ -18,20 +16,6 @@ import { useNavigate } from 'react-router-dom';
 import { UserContext } from './UserContext'; // Adjust path as needed
 //import { WhatsApp } from '@mui/icons-material';
 import { Edit, Delete, WhatsApp } from '@mui/icons-material';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 const styles = {
@@ -142,17 +126,11 @@ width: '150px', // Same width as the export button
 textAlign: 'center',
 },
 
-
-
-
 errorMessage: {
   color: 'red',
   fontSize: '14px',
   fontFamily: 'Georgia, serif',
 },
-
-
-
 
 errorBubble: {
   position: 'absolute',
@@ -198,13 +176,9 @@ const [savedLists, setSavedLists] = useState([]);
 const [isAdding, setIsAdding] = useState(false);
 const [isEditing, setIsEditing] = useState(false);
 const [editingListId, setEditingListId] = useState(null); // To track which list is being edited
-
-
-
-
-
-
-
+const [isEditingItem, setIsEditingItem] = useState(false); // Track if editing an item
+const [editingIndex, setEditingIndex] = useState(null); // Track the index of the item being edited
+const [expandedLists, setExpandedLists] = useState({}); // State to track expanded/collapsed lists
 
 useEffect(() => {
 fetch('/api/session', { credentials: 'include' })
@@ -212,9 +186,6 @@ fetch('/api/session', { credentials: 'include' })
   .then((data) => console.log('Session data:', data))
   .catch((err) => console.error('Error fetching session:', err));
 }, []);
-
-
-
 
 useEffect(() => {
  if (user?.UserID) {
@@ -269,18 +240,33 @@ useEffect(() => {
 
 
 const saveToList = () => {
+  // Check if the listName is valid
   if (!listName.trim()) {
     toast.error('Please enter a list name!');
     return;
   }
 
+  // Check if shoppingList is empty
   if (shoppingList.length === 0) {
     toast.error('The shopping list is empty!');
     return;
   }
 
+  // Log the shoppingList to confirm its structure
+  console.log('Shopping List:', shoppingList);
+
+  // Check if all items in shoppingList are valid
+  const invalidIngredient = shoppingList.find((item) => {
+    return !item.IngredientID || !item.MeasureID || !item.quantity || item.quantity <= 0;
+  });
+
+  if (invalidIngredient) {
+    toast.error('One or more ingredients are invalid. Please check and try again.');
+    return;
+  }
+
   const payload = {
-    listName,
+    listName, // Make sure listName is a non-empty string
     shoppingList: shoppingList.map((item) => ({
       IngredientID: item.IngredientID,
       MeasureID: item.MeasureID,
@@ -289,32 +275,47 @@ const saveToList = () => {
     userId: user?.UserID,
   };
 
-  fetch('http://localhost:5001/api/shopping-lists', {
-    method: 'POST',
+  // Log the payload being sent to backend
+  console.log("Payload being sent to backend:", JSON.stringify(payload));
+
+  // Proceed to make the API call
+  fetch(`http://localhost:5001/api/update-shopping-list/${editingListId}`, {
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   })
-    .then((res) => res.json())
+    .then((res) => {
+      console.log('Response status:', res.status); // Log response status
+      if (!res.ok) {
+        return res.json().then((err) => {
+          console.error('Error response from backend:', err); // Log the error response
+          return Promise.reject(err);
+        });
+      }
+      return res.json();
+    })
     .then((data) => {
-      console.log('List saved:', data);
-      setSavedLists((prev) => [
-        ...prev,
-        {
-          ShoppingListID: data.ShoppingListID,
-          ListName: listName,
-          CreatedDate: new Date().toLocaleDateString(),
-          items: shoppingList, // Ensure the items are saved correctly
-        },
-      ]);
-      toast.success('List saved successfully!');
+      console.log('List updated successfully:', data); // Log the successful response from the backend
+      setSavedLists((prev) =>
+        prev.map((list) =>
+          list.ShoppingListID === editingListId
+            ? { ...list, ListName: listName, items: [...shoppingList] }
+            : list
+        )
+      );
+      toast.success('List updated successfully!');
+      setIsEditing(false); // Exit editing mode
+      setEditingListId(null);
       setListName('');
-      setShoppingList([]);
+      setShoppingList([]); // Clear the list
     })
     .catch((error) => {
-      console.error('Error saving list:', error);
+      console.error('Error saving list:', error); // Log any errors
       toast.error('Failed to save the list. Please try again.');
     });
 };
+
+  
 
 
 const addItem = () => {
@@ -331,60 +332,127 @@ const addItem = () => {
     toast.error('Please select a measure!');
     return;
   }
-  if (!selectedIngredient || !selectedIngredient.IngredientName) {
+  if (!selectedIngredient || !selectedIngredient.IngredientID) {
     toast.error('Please select a valid ingredient from the suggestions!');
     return;
   }
 
-  const exists = shoppingList.some(
-    (item) => item.IngredientID === selectedIngredient.IngredientID
-  );
-
-  if (exists) {
-    toast.error('Ingredient already added!');
+  const parsedQuantity = parseFloat(quantity);
+  if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+    toast.error('Please enter a valid quantity!');
     return;
   }
 
-  setShoppingList((prev) => [
-    ...prev,
-    {
-      IngredientID: selectedIngredient.IngredientID,
-      IngredientName: selectedIngredient.IngredientName,
-      quantity: quantity,
-      MeasureID: measure,
-      MeasureName: measures.find((m) => m.MeasureID === measure)?.MeasureName || '',
-    },
-  ]);
+  if (isEditingItem && editingIndex !== null) {
+    // Update the existing item in the list
+    setShoppingList((prev) => {
+      const updatedList = [...prev];
+      updatedList[editingIndex] = {
+        ...updatedList[editingIndex],
+        IngredientID: selectedIngredient.IngredientID,
+        IngredientName: selectedIngredient.IngredientName,
+        quantity: parsedQuantity,
+        MeasureID: measure,
+        MeasureName: measures.find((m) => m.MeasureID === measure)?.MeasureName || '',
+      };
+      return updatedList;
+    });
 
-  // Reset fields after adding
+    toast.success('Item updated successfully!');
+    setIsEditingItem(false); // Disable editing mode after update
+    setEditingIndex(null);   // Clear the editing index
+  } else {
+    // Add a new ingredient if not editing
+    const exists = shoppingList.some(
+      (item) => item.IngredientID === selectedIngredient.IngredientID
+    );
+
+    if (exists) {
+      toast.error('Ingredient already added!');
+      return;
+    }
+
+    setShoppingList((prev) => [
+      ...prev,
+      {
+        IngredientID: selectedIngredient.IngredientID,
+        IngredientName: selectedIngredient.IngredientName,
+        quantity: parsedQuantity,
+        MeasureID: measure,
+        MeasureName: measures.find((m) => m.MeasureID === measure)?.MeasureName || '',
+      },
+    ]);
+
+    toast.success('Item added to the list!');
+  }
+
+  // Reset input fields after adding or updating
   setSearchTerm('');
   setQuantity(1);
   setMeasure('');
   setSelectedIngredient(null);
+  setIsEditingItem(false); // Ensure editing is disabled for new item addition
+  setEditingIndex(null);
 };
 
 
 
 const handleEditList = (list) => {
+  console.log('handleEditList invoked with list:', list); // Log the input list
+
+  // Check if the list is valid and contains items
   if (!list || !Array.isArray(list.items)) {
     console.error('Invalid list format or items missing:', list);
     toast.error('Cannot edit this list. Please try again.');
     return;
   }
 
-  setIsEditing(true); // Enable editing mode
-  setEditingListId(list.ShoppingListID); // Track which list is being edited
-  setListName(list.ListName || ''); // Populate the list name
-  setShoppingList(
-    list.items.map((item) => ({
+  console.log('List is valid. Preparing to enter editing mode.');
+
+  // Enable editing mode
+  setIsEditing(true);
+  console.log('Editing mode enabled.');
+
+  // Set the editing list ID and log it
+  const listId = list.ShoppingListID || 'TEMP_ID'; // Fallback for missing ID
+  setEditingListId(listId);
+  console.log('Editing List ID set to:', listId);
+
+  // Set the list name and log it
+  const listName = list.ListName || 'Unnamed List';
+  setListName(listName);
+  console.log('List name set to:', listName);
+
+  // Map items to set them in the state, ensuring no item is marked as "editing" initially
+  const mappedItems = list.items.map((item, index) => {
+    console.log(`Mapping item ${index + 1}:`, item);
+    return {
       IngredientID: item.IngredientID || null,
       MeasureID: item.MeasureID || null,
       quantity: item.Quantity || 1,
-      label: `${item.IngredientName} - ${item.Quantity} ${item.MeasureName || ''}`.trim(), // Corrected label format
+      label: `${item.IngredientName || 'Unknown Ingredient'} - ${item.Quantity || 1} ${item.MeasureName || ''}`.trim(),
       IngredientName: item.IngredientName || 'Unknown Ingredient',
       MeasureName: item.MeasureName || '',
-    }))
-  );
+      isEditing: false, // Ensure no items are being edited initially
+    };
+  });
+
+  if (mappedItems.length === 0) {
+    console.warn('Warning: Shopping list has no items.');
+    toast.warn('This list has no items to edit.');
+  }
+
+  // Set the shopping list with mapped items and log the result
+  setShoppingList(mappedItems);
+  console.log('Shopping list items set for editing:', mappedItems);
+
+  // **Clear the input fields when entering list editing mode**
+  setSearchTerm('');
+  setQuantity(1);
+  setMeasure('');
+  setSelectedIngredient(null);
+  console.log('Cleared input fields for editing mode.');
+
   toast.info('You can now edit this list. Don’t forget to save your changes!');
 };
 
@@ -392,101 +460,88 @@ const handleEditList = (list) => {
 
 
 const saveEditedList = () => {
- if (!listName.trim()) {
-   toast.error('Please enter a list name!');
-   return;
- }
+  if (!listName.trim()) {
+    toast.error('Please enter a list name!');
+    return;
+  }
 
+  if (shoppingList.length === 0) {
+    toast.error('The shopping list is empty!');
+    return;
+  }
 
- if (shoppingList.length === 0) {
-   toast.error('The shopping list is empty!');
-   return;
- }
+  const invalidItem = shoppingList.find(
+    (item) => !item.IngredientID || !item.MeasureID || !item.quantity || item.quantity <= 0
+  );
 
+  if (invalidItem) {
+    toast.error('One or more ingredients are invalid. Please check and try again.');
+    return;
+  }
 
- const invalidItem = shoppingList.find(
-  (item) => !item.IngredientID || !item.MeasureID || !item.Quantity || item.Quantity <= 0
-);
+  const payload = {
+    listName,
+    items: shoppingList.map((item) => ({
+      IngredientID: item.IngredientID,
+      MeasureID: item.MeasureID,
+      Quantity: item.quantity, // Make sure to include the quantity here
+    })),
+    userId: user?.UserID,
+  };
 
- if (invalidItem) {
-   console.error('Invalid item detected:', invalidItem);
-   toast.error('One or more items in the list are invalid. Please check and try again.');
-   return;
- }
+  console.log('Payload being sent to backend:', JSON.stringify(payload, null, 2));
 
+  fetch(`http://localhost:5001/api/update-shopping-list/${editingListId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+    .then((res) => {
+      if (!res.ok) {
+        return Promise.reject('Failed to save the list.');
+      }
+      return res.json();
+    })
+    .then((data) => {
+      console.log('List updated successfully:', data);
+      toast.success('List updated successfully!');
 
- const payload = {
-   listName,
-   shoppingList: shoppingList.map((item) => ({
-  IngredientID: item.IngredientID,
-  MeasureID: item.MeasureID,
-  Quantity: item.quantity, // Ensure you use 'quantity'
-})),
-   userId: user?.UserID,
- };
+      // Update the savedLists immediately with the correct quantity
+      setSavedLists((prevLists) =>
+        prevLists.map((list) =>
+          list.ShoppingListID === editingListId
+            ? {
+                ...list,
+                ListName: listName,
+                items: shoppingList.map((item) => ({
+                  ...item,
+                  Quantity: item.quantity, // Ensuring quantity is updated here
+                  IngredientName: item.IngredientName,
+                  MeasureName: measures.find((m) => m.MeasureID === item.MeasureID)?.MeasureName || '',
+                })),
+              }
+            : list
+        )
+      );
 
-
- fetch(`http://localhost:5001/api/update-shopping-list/${editingListId}`, {
-   method: 'PUT',
-   headers: { 'Content-Type': 'application/json' },
-   body: JSON.stringify(payload),
- })
-   .then((res) => {
-     if (res.ok) {
-       return res.json();
-     }
-     return res.json().then((err) => Promise.reject(err));
-   })
-   .then((data) => {
-     console.log('List updated successfully:', data);
-
-
-
-
-
-
-
-
-
-
-     // Update the saved lists in the UI
-     setSavedLists((prev) =>
-       prev.map((list) =>
-         list.ShoppingListID === editingListId
-           ? {
-               ...list,
-               ListName: listName,
-               items: [...shoppingList],
-             }
-           : list
-       )
-     );
-
-
-     toast.success('List updated successfully!');
-     setIsEditing(false); // Exit editing mode
-     setEditingListId(null);
-     setListName('');
-     setShoppingList([]);
-     setIsEditing(false);
-     setEditingListId(null);
-     
-   })
-   .catch((error) => {
-     console.error('Error saving edited list:', error);
-     toast.error('Failed to save the list. Please try again.');
-   });
+      // Clear editing mode
+      setIsEditing(false);
+      setEditingListId(null);
+      setListName('');
+      setShoppingList([]);
+      setSearchTerm('');
+      setQuantity(1);
+      setMeasure('');
+      setSelectedIngredient(null);
+    })
+    .catch((error) => {
+      console.error('Error saving edited list:', error);
+      toast.error('Failed to save the list. Please try again.');
+    });
 };
 
 
-
-
-
-
-
-
-
-
+  
 // Only declare `handleDeleteList` once:
 const handleDeleteList = (listId, index) => {
  fetch(`http://localhost:5001/api/delete-shopping-list/${listId}`, {
@@ -556,6 +611,12 @@ const confirmDeleteList = (index) => {
 
 
 
+const toggleListVisibility = (listId) => {
+  setExpandedLists((prev) => ({
+    ...prev,
+    [listId]: !prev[listId], // Toggle state for the specific list
+  }));
+};
 
 
 const handleExportListToWhatsApp = (list) => {
@@ -571,27 +632,53 @@ const handleExportListToWhatsApp = (list) => {
 
 
 
-const updateQuantity = (index, quantity) => {
-  const updatedList = shoppingList.map((item, i) =>
-    i === index ? { ...item, quantity: Math.max(1, quantity) } : item
-  );
-  setShoppingList(updatedList);
+const updateQuantity = (index, newQuantity) => {
+  setShoppingList((prevList) => {
+    const updatedList = prevList.map((item, i) => {
+      if (i === index) {
+        const updatedItem = {
+          ...item,
+          quantity: Math.max(1, newQuantity), // Ensure the quantity is at least 1
+          label: `${item.IngredientName} - ${Math.max(1, newQuantity)} ${item.MeasureName || ''}` // Update the label
+        };
+        return updatedItem;
+      }
+      return item;
+    });
+    return updatedList;
+  });
 };
-
-
-
 
 
 const toggleEditing = (index) => {
- const updatedList = shoppingList.map((item, i) =>
-   i === index
-     ? { ...item, isEditing: !item.isEditing }
-     : item
- );
- setShoppingList(updatedList);
+  const itemToEdit = shoppingList[index];
+
+  // Separate constants for each value:
+  const ingredientName = itemToEdit.IngredientName || '';
+  const ingredientId = itemToEdit.IngredientID || null;
+  const quantity = itemToEdit.quantity || 1;
+  const measureId = itemToEdit.MeasureID || '';
+
+  // Populate the input fields:
+  setSearchTerm(ingredientName);  // Populate the ingredient field
+  setQuantity(quantity);          // Populate the quantity field
+  setMeasure(measureId);          // Populate the measure dropdown
+  setSelectedIngredient({         // Keep ingredient details
+    IngredientID: ingredientId,
+    IngredientName: ingredientName,
+  });
+
+  setIsEditingItem(true);         // Enable editing mode
+  setEditingIndex(index);         // Track which item is being edited
+
+  // Mark only the current item as "editing":
+  setShoppingList((prev) =>
+    prev.map((item, i) => ({
+      ...item,
+      isEditing: i === index,  // Only the selected item is in editing mode
+    }))
+  );
 };
-
-
 
 
 
@@ -959,229 +1046,152 @@ const exportToWhatsApp = () => {
   </div>
 </div>
 
-
-
-
-
-
-    {/* Shopping List Section */}
-    <div style={styles.listContainer}>
-      {filterType === 'Label' ? (
-        Object.keys(groupedByLabel).map((label) => (
-          <div key={label}>
-            <Typography style={styles.categoryHeading}>{label}</Typography>
-            {groupedByLabel[label].map((item, index) => (
-              <div key={index} style={styles.listItem}>
-                {item.isEditing ? (
-                  <TextField
-                    value={item.label}
-                    onChange={(e) =>
-                      updateIngredientName(index, e.target.value)
-                    }
-                    onBlur={() => toggleEditing(index)} // Save on blur
-                    autoFocus
-                  />
-                ) : (
-                  <Typography>
-                  {item.IngredientName} {item.quantity ? `- ${item.quantity}` : ''} {measures.find(m => m.MeasureID === item.MeasureID)?.MeasureName || ''}
-                </Typography>
-                
-
-
-
-
-                )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Button
-                    variant="text"
-                    onClick={() => updateQuantity(index, item.quantity + 1)}
-                  >
-                    <Add />
-                  </Button>
-                  <Typography>{item.quantity}</Typography>
-                  <Button
-                    variant="text"
-                    onClick={() => updateQuantity(index, item.quantity - 1)}
-                  >
-                    <Remove />
-                  </Button>
-                  <Button
-                    variant="text"
-                    onClick={() => toggleEditing(index)}
-                  >
-                    <Edit />
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={() => removeItem(index)}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              </div>
-            ))}
+{/* Shopping List Section */}
+<div style={styles.listContainer}>
+  {filterType === 'Label' ? (
+    Object.keys(groupedByLabel).map((label) => (
+      <div key={label}>
+        <Typography style={styles.categoryHeading}>{label}</Typography>
+        {groupedByLabel[label].map((item, index) => (
+          <div key={index} style={styles.listItem}>
+            <Typography style={{ flex: 1, fontSize: '16px', fontFamily: "'Poppins', sans-serif" }}>
+              {`${item.IngredientName} - ${item.quantity} ${measures.find(m => m.MeasureID === item.MeasureID)?.MeasureName || ''}`}
+            </Typography>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Button
+                variant="text"
+                onClick={() => toggleEditing(index)}
+                style={{ color: '#007bff', padding: '0', minWidth: 'auto' }}
+              >
+                <Edit />
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => removeItem(index)}
+              >
+                Remove
+              </Button>
+            </div>
           </div>
-        ))
-      ) : (
-        shoppingList
-          .sort((a, b) => a.label.localeCompare(b.label))
-          .map((item, index) => (
-            <div key={index} style={styles.listItem}>
-              {item.isEditing ? (
-                <TextField
-                  value={item.label}
-                  onChange={(e) =>
-                    updateIngredientName(index, e.target.value)
-                  }
-                  onBlur={() => toggleEditing(index)} // Save on blur
-                  autoFocus
-                />
-              ) : (
-                <Typography>
-                {item.IngredientName} {item.quantity ? `- ${item.quantity}` : ''} {item.MeasureName || ''}
-              </Typography>
-              
-              )}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Button
-                  variant="text"
-                  onClick={() => updateQuantity(index, item.quantity + 1)}
-                >
-                  <Add />
-                </Button>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-<Typography>{item.quantity}</Typography>
-<FormControl variant="outlined" size="small" style={{ width: '80px' }}>
-  <Select
-    value={item.unit || 'unit'}
-    onChange={(e) => updateUnit(index, e.target.value)}
-  >
-    <MenuItem value="unit">unit</MenuItem>
-    <MenuItem value="g">g</MenuItem>
-    <MenuItem value="kg">kg</MenuItem>
-    <MenuItem value="ml">ml</MenuItem>
-    <MenuItem value="l">l</MenuItem>
-    <MenuItem value="tsp">tsp</MenuItem>
-    <MenuItem value="tbsp">tbsp</MenuItem>
-    <MenuItem value="cup">cup</MenuItem>
-  </Select>
-</FormControl>
+        ))}
+      </div>
+    ))
+  ) : (
+    shoppingList
+      .sort((a, b) => a.IngredientName.localeCompare(b.IngredientName))
+      .map((item, index) => (
+        <div key={index} style={styles.listItem}>
+          <Typography style={{ flex: 1, fontSize: '16px', fontFamily: "'Poppins', sans-serif" }}>
+            {`${item.IngredientName} - ${item.quantity} ${item.MeasureName || ''}`}
+          </Typography>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Button
+              variant="text"
+              onClick={() => toggleEditing(index)}
+              style={{ color: '#007bff', padding: '0', minWidth: 'auto' }}
+            >
+              <Edit />
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => removeItem(index)}
+            >
+              Remove
+            </Button>
+          </div>
+        </div>
+      ))
+  )}
 </div>
 
 
 
-
-                <Button
-                  variant="text"
-                  onClick={() => updateQuantity(index, item.quantity - 1)}
-                >
-                  <Remove />
-                </Button>
-                <Button
-                  variant="text"
-                  onClick={() => toggleEditing(index)}
-                >
-                  <Edit />
-                </Button>
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={() => removeItem(index)}
-                >
-                  Remove
-                </Button>
-              </div>
-            </div>
-          ))
-      )}
-    </div>
-
-
-
-
-    <div style={styles.exportContainer}>
+<div style={styles.exportContainer}>
 <div style={styles.buttonRow}>
-{/* Buttons Row */}
 <div style={styles.buttonRow}>
-{isEditing ? (
- <Button
-   variant="contained"
-   style={{
-     backgroundColor: '#4caf50',
-     color: '#FFF',
-     fontWeight: 'bold',
-     padding: '8px 16px',
-     fontSize: '12px',
-     borderRadius: '12px',
-     fontFamily: "'Merienda', cursive",
-   }}
-   onClick={saveEditedList} // New function for saving edited lists
- >
-   Save Changes
- </Button>
- ) : (
- <Button
-   variant="contained"
-   style={{
-     backgroundColor: '#B55335', 
-     color: '#fff',
-     fontWeight: 'bold',
-     padding: '8px 16px',
-     fontSize: '12px',
-     borderRadius: '12px',  // More rounded edges
-     cursor: 'pointer',
-     fontFamily: "'Merienda', cursive",
-     transition: 'background-color 0.3s ease',
-     width: '130px',
-     textAlign: 'center',
-     marginTop: '20px',
-   }}
-   onClick={saveToList}
- >
-   Save the list
- </Button>
-)}
+  {isEditing ? (
+    <Button
+      variant="contained"
+      style={{
+        backgroundColor: '#B55335', // Brown color for "Save Changes"
+        color: '#FFF',
+        fontWeight: 'bold',
+        padding: '4px 10px', // Reduced padding
+        fontSize: '12px', // Smaller font size
+        borderRadius: '6px', // Smaller rounded edges
+        fontFamily: "'Merienda', cursive",
+        width: '120px', // Reduced width
+        height: '50px', // Reduced height
+        textAlign: 'center',
+        marginTop: '10px',
+      }}
+      onClick={saveEditedList}
+    >
+      Save Changes
+    </Button>
+  ) : (
+    <Button
+      variant="contained"
+      style={{
+        backgroundColor: '#B55335',
+        color: '#fff',
+        fontWeight: 'bold',
+        padding: '4px 10px',
+        fontSize: '12px',
+        borderRadius: '6px',
+        cursor: 'pointer',
+        fontFamily: "'Merienda', cursive",
+        transition: 'background-color 0.3s ease',
+        width: '120px',
+        height: '50px',
+        textAlign: 'center',
+        marginTop: '10px',
+      }}
+      onClick={saveToList}
+    >
+      Save the List
+    </Button>
+  )}
 
-
-
-
- <Button
-   variant="contained"
-   style={{
-     backgroundColor: '#4caf50',  // Green for WhatsApp export button
-     color: '#fff',
-     fontWeight: 'bold',
-     padding: '8px 16px',
-     fontSize: '12px',
-     borderRadius: '12px',  // More rounded edges
-     cursor: 'pointer',
-     fontFamily: "'Merienda', cursive",
-     transition: 'background-color 0.3s ease',
-     width: '130px',
-     textAlign: 'center',
-     marginTop: '20px',
-   }}
-   onClick={exportToWhatsApp}
-   endIcon={
-     <svg
-       xmlns="http://www.w3.org/2000/svg"
-       viewBox="0 0 24 24"
-       fill="white"
-       width="20px"
-       height="20px"
-     >
-       <path d="M16.7 13.67c-.29-.15-1.72-.86-1.99-.96-.26-.1-.45-.15-.64.15-.2.29-.74.96-.9 1.16-.16.2-.33.22-.62.07-.29-.15-1.21-.45-2.3-1.43-.85-.76-1.42-1.7-1.59-1.98-.16-.29-.02-.45.12-.6.13-.13.29-.33.43-.49.14-.16.19-.27.29-.48.1-.21.05-.37-.03-.52-.08-.15-.64-1.55-.88-2.12-.23-.56-.47-.49-.64-.5-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.79.37-.26.29-1.03 1.01-1.03 2.48 0 1.47 1.06 2.91 1.2 3.11.15.2 2.09 3.2 5.07 4.48.71.31 1.27.5 1.71.64.72.23 1.37.2 1.89.12.58-.09 1.78-.73 2.03-1.43.26-.7.26-1.29.18-1.42-.08-.13-.26-.2-.54-.35Z" />
-       <path
-         fillRule="evenodd"
-         d="M12.004 2.00002C6.49 2.00002 2 6.36002 2 11.65c0 2.01.64 3.87 1.75 5.42L2 22l5.16-1.54c1.47.78 3.08 1.19 4.84 1.19 5.51 0 10-4.36 10-9.72 0-5.29-4.49-9.72-10-9.72Zm0 17.45c-1.55 0-3.02-.38-4.33-1.1l-.31-.17-3.06.92.86-2.94-.2-.31c-1.07-1.45-1.64-3.17-1.64-4.91 0-4.47 3.83-8.11 8.68-8.11 4.77 0 8.68 3.58 8.68 8.11-.01 4.47-3.84 8.11-8.68 8.11Z"
-         clipRule="evenodd"
-       />
-     </svg>
-   }
- >
-   Export to WhatsApp
- </Button>
+  <Button
+    variant="contained"
+    style={{
+      backgroundColor: '#4caf50', // Green color for "Export to WhatsApp"
+      color: '#fff',
+      fontWeight: 'bold',
+      padding: '4px 10px',
+      fontSize: '12px',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontFamily: "'Merienda', cursive",
+      transition: 'background-color 0.3s ease',
+      width: '120px',
+      height: '50px',
+      textAlign: 'center',
+      marginTop: '10px',
+    }}
+    onClick={exportToWhatsApp}
+    endIcon={
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="white"
+        width="16px"
+        height="16px"
+      >
+        <path d="M16.7 13.67c-.29-.15-1.72-.86-1.99-.96-.26-.1-.45-.15-.64.15-.2.29-.74.96-.9 1.16-.16.2-.33.22-.62.07-.29-.15-1.21-.45-2.3-1.43-.85-.76-1.42-1.7-1.59-1.98-.16-.29-.02-.45.12-.6.13-.13.29-.33.43-.49.14-.16.19-.27.29-.48.1-.21.05-.37-.03-.52-.08-.15-.64-1.55-.88-2.12-.23-.56-.47-.49-.64-.5-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.79.37-.26.29-1.03 1.01-1.03 2.48 0 1.47 1.06 2.91 1.2 3.11.15.2 2.09 3.2 5.07 4.48.71.31 1.27.5 1.71.64.72.23 1.37.2 1.89.12.58-.09 1.78-.73 2.03-1.43.26-.7.26-1.29.18-1.42-.08-.13-.26-.2-.54-.35Z" />
+        <path
+          fillRule="evenodd"
+          d="M12.004 2.00002C6.49 2.00002 2 6.36002 2 11.65c0 2.01.64 3.87 1.75 5.42L2 22l5.16-1.54c1.47.78 3.08 1.19 4.84 1.19 5.51 0 10-4.36 10-9.72 0-5.29-4.49-9.72-10-9.72Zm0 17.45c-1.55 0-3.02-.38-4.33-1.1l-.31-.17-3.06.92.86-2.94-.2-.31c-1.07-1.45-1.64-3.17-1.64-4.91 0-4.47 3.83-8.11 8.68-8.11 4.77 0 8.68 3.58 8.68 8.11-.01 4.47-3.84 8.11-8.68 8.11Z"
+          clipRule="evenodd"
+        />
+      </svg>
+    }
+  >
+    Export to WhatsApp
+  </Button>
 </div>
 
 
@@ -1198,14 +1208,22 @@ const exportToWhatsApp = () => {
 
 
 {/* Saved Lists */}
-<div style={{ maxWidth: '800px', margin: '0 auto' }}> {/* Increased width to 800px */}
-  <h2 style={{ fontSize: '24px', fontFamily: "'Merienda', cursive", fontWeight: 'bold', color: '#B55335', textAlign: 'center' }}>
+<div style={{ maxWidth: '800px', margin: '0 auto' }}>
+  <h2
+    style={{
+      fontSize: '24px',
+      fontFamily: "'Merienda', cursive",
+      fontWeight: 'bold',
+      color: '#B55335',
+      textAlign: 'center',
+    }}
+  >
     Your Saved Lists
   </h2>
 
   {savedLists.map((list, index) => (
     <div
-      key={list.ShoppingListID || index} // Use ShoppingListID if available
+      key={list.ShoppingListID || index}
       style={{
         border: '1px solid #ddd',
         borderRadius: '12px',
@@ -1213,7 +1231,7 @@ const exportToWhatsApp = () => {
         marginBottom: '20px',
         backgroundColor: '#fff',
         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        position: 'relative', // Positioning for the edit and delete icons
+        position: 'relative',
       }}
     >
       {/* Date on the top left */}
@@ -1235,24 +1253,34 @@ const exportToWhatsApp = () => {
           margin: '0',
           fontSize: '20px',
           fontWeight: 'bold',
-          textAlign: 'center', // Centering the list name
+          textAlign: 'center',
           fontFamily: "'Merienda', cursive",
         }}
       >
         {list.ListName || 'Unnamed List'}
       </h3>
 
-      {/* List Items in the middle */}
-      <ul style={{ marginTop: '20px', padding: '0', listStyle: 'none', textAlign: 'center' }}>
-        {list.items.map((item, idx) => (
-          <li key={idx} style={{ marginBottom: '8px', fontSize: '16px' }}>
-            {item.IngredientName} - {item.Quantity} {item.MeasureName || ''}
-          </li>
-        ))}
-      </ul>
+      {/* Toggle Button */}
+      <Button
+        variant="text"
+        size="small"
+        onClick={() => toggleListVisibility(list.ShoppingListID || index)}
+        style={{
+          position: 'absolute',
+          top: '10px',
+          right: '40px',
+          color: '#B55335',
+          padding: '0',
+          minWidth: 'auto',
+          fontSize: '20px',
+          fontWeight: 'bold',
+        }}
+      >
+        {expandedLists[list.ShoppingListID || index] ? '−' : '+'}
+      </Button>
 
-     {/* Edit and Delete Icons on the top right */}
-<div
+      {/* Edit and Delete Icons */}
+      <div
   style={{
     position: 'absolute',
     top: '10px',
@@ -1266,7 +1294,7 @@ const exportToWhatsApp = () => {
     variant="text"
     size="small"
     onClick={() => handleEditList(savedLists[index])}
-    style={{ color: '#B55335', padding: '0', minWidth: 'auto' }} // Removed unnecessary spacing
+    style={{ color: '#B55335', padding: '0', minWidth: 'auto' }}
   >
     <Edit />
   </Button>
@@ -1274,14 +1302,47 @@ const exportToWhatsApp = () => {
     variant="text"
     size="small"
     onClick={() => confirmDeleteList(index)}
-    style={{ color: 'red', padding: '0', minWidth: 'auto' }} // Removed unnecessary spacing
+    style={{ color: 'red', padding: '0', minWidth: 'auto' }}
   >
     <Delete />
   </Button>
+  <Button
+    variant="text"
+    size="small"
+    onClick={() => toggleListVisibility(list.ShoppingListID || index)}
+    style={{
+      color: '#B55335',
+      padding: '0',
+      minWidth: 'auto',
+      fontSize: '20px',
+      fontWeight: 'bold',
+    }}
+  >
+    {expandedLists[list.ShoppingListID || index] ? '−' : '+'}
+  </Button>
 </div>
+
+      {/* Expand/Collapse List Items */}
+      {expandedLists[list.ShoppingListID || index] && (
+        <ul
+          style={{
+            marginTop: '20px',
+            padding: '0',
+            listStyle: 'none',
+            textAlign: 'center',
+          }}
+        >
+          {list.items.map((item, idx) => (
+            <li key={idx} style={{ marginBottom: '8px', fontSize: '16px' }}>
+              {item.IngredientName} - {item.Quantity} {item.MeasureName || ''}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   ))}
 </div>
+
 </div>
 
    </div>
