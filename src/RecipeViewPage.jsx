@@ -19,13 +19,6 @@ import { FaTrash } from 'react-icons/fa'; // Trash icon for delete
 import { confirmAlert } from 'react-confirm-alert'; // Import confirmation dialog
 import { format } from 'date-fns'; // Import date-fns for formatting
 
-
-
-
-
-
-
-
 const styles = {
   page: {
     display: 'flex',
@@ -327,45 +320,45 @@ function RecipeViewPage() {
       setEditRating(review.Rating);      // Set the current rating
     };
     
+// Helper function to calculate the average rating
+const calculateAverageRating = (reviews) => {
+  if (!reviews || reviews.length === 0) return 0;  // Return 0 if no reviews
+  const totalRating = reviews.reduce((sum, review) => sum + (review.Rating || 0), 0);
+  return (totalRating / reviews.length).toFixed(1);  // Return average rating to 1 decimal place
+};
     
-    
+const handleSaveChanges = async (reviewID) => {
+  try {
+    const response = await fetch(`http://localhost:5001/api/reviews/${reviewID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ Comment: editComment, Rating: editRating }),
+    });
 
-    
-    
-    const handleSaveChanges = async (reviewID) => {
-      try {
-        const response = await fetch(`http://localhost:5001/api/reviews/${reviewID}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ Comment: editComment, Rating: editRating }),
-        });
-    
-        if (response.ok) {
-          const updatedReview = await response.json(); // Fetch updated review from server
-    
-          setRecipe((prevRecipe) => ({
-            ...prevRecipe,
-            Reviews: prevRecipe.Reviews.map((review) =>
-              review.ReviewID === updatedReview.ReviewID ? updatedReview : review
-            ),
-          }));
-    
-          toast.success('Review updated successfully!');
-          setEditReviewId(null); // Exit editing mode
-        } else {
-          toast.error('Failed to update review.');
-        }
-      } catch (error) {
-        console.error('Error updating review:', error);
-        toast.error('An error occurred. Please try again.');
-      }
-    };
-    
-    
-    
-    
-    
-    
+    if (response.ok) {
+      const updatedReview = await response.json();
+
+      setRecipe((prevRecipe) => {
+        const updatedReviews = prevRecipe.Reviews.map((review) =>
+          review.ReviewID === updatedReview.ReviewID ? updatedReview : review
+        );
+        const updatedAverageRating = calculateAverageRating(updatedReviews);  // Recalculate
+
+        return {
+          ...prevRecipe,
+          Reviews: updatedReviews,
+          AverageRating: updatedAverageRating,
+        };
+      });
+
+      toast.success('Review updated successfully!');
+      setEditReviewId(null);
+    }
+  } catch (error) {
+    toast.error('Failed to update review.');
+  }
+};
+
     
     const handleCancelEdit = () => {
       setEditReviewId(null);
@@ -373,21 +366,32 @@ function RecipeViewPage() {
       setEditRating(0);
     };
     
+
+
+    const fetchRecipe = async () => {
+      try {
+        const response = await fetch(`http://localhost:5001/api/recipe/${RecipeID}`, {
+          headers: {
+            'Cache-Control': 'no-cache', // Prevent cached response
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setRecipe(data.recipe); // Set the updated recipe in state
+        } else {
+          console.error('Failed to fetch recipe:', await response.text());
+        }
+      } catch (error) {
+        console.error('Error fetching recipe:', error);
+      }
+    };
+    
+    
+    
+
     
     const handleReviewSubmit = async (e) => {
       e.preventDefault();
-    
-      console.log('Submitting review:', {
-        UserID: user?.UserID,
-        Rating: rating,
-        Comment: reviewData.comment,
-      });
-    
-      if (!reviewData.comment.trim() && rating === 0) {
-        toast.error('Please provide a comment or a rating!');
-        return;
-      }
-    
       const newReview = {
         UserID: user?.UserID || null,
         UserName: user?.UserName || 'Anonymous',
@@ -399,35 +403,19 @@ function RecipeViewPage() {
         const response = await fetch(`http://localhost:5001/api/recipes/${RecipeID}/reviews`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            UserID: user?.UserID,
-            Rating: rating || null,
-            Comment: reviewData.comment || null,
-          }),
+          body: JSON.stringify(newReview),
         });
     
         if (response.ok) {
-          const { newReview, averageRating } = await response.json();
-      
-            window.location.reload();
-   
-          // Safely update state
-          setTimeout(() => {
-            setRecipe((prevRecipe) => ({
-              ...prevRecipe,
-              Reviews: Array.isArray(prevRecipe.Reviews)
-                ? [newReview, ...prevRecipe.Reviews]
-                : [newReview],
-              AverageRating: averageRating,
-            }));
-          }, 1); // Small delay to ensure UI updates correctly
-    
+          toast.success('Review added successfully!');
           setReviewData({ comment: '' });
           setRating(0);
-          toast.success('Review added successfully!');
+    
+          // Fetch updated recipe data to show the updated average rating and reviews
+          fetchRecipe();
         } else {
-          const errorData = await response.json();
-          toast.error(errorData.message || 'Failed to add review.');
+          console.error('Failed to submit review:', await response.text());
+          toast.error('Failed to submit review');
         }
       } catch (error) {
         console.error('Error submitting review:', error);
@@ -435,8 +423,7 @@ function RecipeViewPage() {
       }
     };
     
-  
-  
+    
   const handleCheckboxChange = (event, ingredient) => {
     if (event.target.checked) {
       setCheckedIngredients((prev) => [...prev, ingredient]);
@@ -463,38 +450,47 @@ useEffect(() => {
 
   
 
-  useEffect(() => {
-    if (RecipeID) {
-      console.log('RecipeID from params:', RecipeID);
-  
-      // Fetch recipe details
-      fetch(`http://localhost:5001/api/recipe/${RecipeID}`)
-        .then((response) => response.json())
-        .then((data) => {
-          console.log('Fetched Recipe Data:', data);
-          setRecipe((prevRecipe) => ({
-            ...prevRecipe,
-            ...data.recipe, // Merge fetched recipe data
-          }));
-        })
-        .catch((error) => console.error('Error fetching recipe:', error));
-  
-      // Fetch reviews and ratings
-      fetch(`http://localhost:5001/api/recipes/${RecipeID}/reviews`)
-            .then((response) => response.json())
-            .then((data) => {
-                console.log('Fetched Reviews Data:', data);
-                setRecipe(prevRecipe => ({
-                    ...prevRecipe,
-                    Reviews: cleanReviews(data.reviews), // Clean and set reviews
-                    AverageRating: data.averageRating,
-                }));
-            })
-        .catch((error) => console.error('Error fetching reviews:', error));
-    } else {
-      console.error('Invalid RecipeID. Cannot fetch recipe.');
-    }
-  }, [RecipeID]);
+useEffect(() => {
+  if (RecipeID) {
+    console.log('RecipeID from params:', RecipeID);
+
+    // Fetch recipe details with no-cache
+    fetch(`http://localhost:5001/api/recipe/${RecipeID}`, {
+      headers: {
+        'Cache-Control': 'no-cache',  // Prevent cached response
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Fetched Recipe Data:', data);
+        setRecipe((prevRecipe) => ({
+          ...prevRecipe,
+          ...data.recipe, // Merge fetched recipe data
+        }));
+      })
+      .catch((error) => console.error('Error fetching recipe:', error));
+
+    // Fetch reviews and ratings with no-cache
+    fetch(`http://localhost:5001/api/recipes/${RecipeID}/reviews`, {
+      headers: {
+        'Cache-Control': 'no-cache',  // Prevent cached response
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Fetched Reviews Data:', data);
+        setRecipe((prevRecipe) => ({
+          ...prevRecipe,
+          Reviews: cleanReviews(data.reviews), // Clean and set reviews
+          AverageRating: data.averageRating,
+        }));
+      })
+      .catch((error) => console.error('Error fetching reviews:', error));
+  } else {
+    console.error('Invalid RecipeID. Cannot fetch recipe.');
+  }
+}, [RecipeID]);
+
   
   
 

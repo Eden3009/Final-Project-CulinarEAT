@@ -269,94 +269,44 @@ useEffect(() => {
 
 
 const saveToList = () => {
-  console.log('Saving list started...');
   if (!listName.trim()) {
     toast.error('Please enter a list name!');
-    console.error('List name is empty');
     return;
   }
-
-  console.log('List name is valid:', listName);
 
   if (shoppingList.length === 0) {
     toast.error('The shopping list is empty!');
-    console.error('Shopping list is empty');
     return;
   }
-
-  console.log('Shopping list is not empty:', shoppingList);
-
-  const isEdit = shoppingList.some((item) => item.IngredientID);
-  console.log('Is editing mode:', isEdit);
-
-  const apiUrl = isEdit
-    ? `http://localhost:5001/api/update-shopping-list/${shoppingList[0].ShoppingListID}`
-    : 'http://localhost:5001/api/shopping-lists';
-
-  console.log('API URL:', apiUrl);
-
-  const method = isEdit ? 'PUT' : 'POST';
 
   const payload = {
     listName,
     shoppingList: shoppingList.map((item) => ({
-      IngredientID: item.IngredientId, // Correct casing
-      MeasureID: item.MeasureId,      // Correct casing
-      Quantity: item.quantity || item.Quantity,
+      IngredientID: item.IngredientID,
+      MeasureID: item.MeasureID,
+      Quantity: item.quantity,
     })),
     userId: user?.UserID,
   };
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  console.log('Payload:', payload);
-
-  fetch(apiUrl, {
-    method,
+  fetch('http://localhost:5001/api/shopping-lists', {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      }
-      return res.json().then((err) => Promise.reject(err));
-    })
+    .then((res) => res.json())
     .then((data) => {
       console.log('List saved:', data);
-
-      if (isEdit) {
-        // Update the existing list in the UI
-        setSavedLists((prev) =>
-          prev.map((list) =>
-            list.ShoppingListID === data.ShoppingListID
-              ? {
-                  ...list,
-                  ListName: listName,
-                  items: [...shoppingList],
-                }
-              : list
-          )
-        );
-        toast.success('List updated successfully!');
-        window.location.reload();
-
-      } else {
-        // Add the new list to the UI
-        setSavedLists((prev) => [
-          ...prev,
-          {
-            ShoppingListID: data.ShoppingListID,
-            ListName: listName,
-            CreatedDate: new Date().toLocaleDateString(),
-            items: [...shoppingList],
-          },
-        ]);
-        toast.success('List saved successfully!');
-        window.location.reload();
-
-      }
-
-      // Reset form fields after saving
+      setSavedLists((prev) => [
+        ...prev,
+        {
+          ShoppingListID: data.ShoppingListID,
+          ListName: listName,
+          CreatedDate: new Date().toLocaleDateString(),
+          items: shoppingList, // Ensure the items are saved correctly
+        },
+      ]);
+      toast.success('List saved successfully!');
       setListName('');
       setShoppingList([]);
     })
@@ -367,68 +317,51 @@ const saveToList = () => {
 };
 
 
-
-
-
-
-
-
-
-
 const addItem = () => {
-if (!searchTerm.trim()) {
-  toast.error('Ingredient is required!');
-  return;
-}
-if (!measure) {
-  toast.error('Please select a measure!');
-  return;
-}
-if (!selectedIngredient?.IngredientID) {
-  toast.error('Please select a valid ingredient from the suggestions!');
-  return;
-}
+  console.log('Selected Ingredient:', selectedIngredient);
+  console.log('Search Term:', searchTerm);
+  console.log('Quantity:', quantity);
+  console.log('Measure ID:', measure);
 
+  if (!searchTerm.trim()) {
+    toast.error('Ingredient is required!');
+    return;
+  }
+  if (!measure) {
+    toast.error('Please select a measure!');
+    return;
+  }
+  if (!selectedIngredient || !selectedIngredient.IngredientName) {
+    toast.error('Please select a valid ingredient from the suggestions!');
+    return;
+  }
 
-console.log('Adding item:', selectedIngredient);
+  const exists = shoppingList.some(
+    (item) => item.IngredientID === selectedIngredient.IngredientID
+  );
 
+  if (exists) {
+    toast.error('Ingredient already added!');
+    return;
+  }
 
-const exists = shoppingList.some(
-  (item) => item.label.toLowerCase() === searchTerm.toLowerCase()
-);
+  setShoppingList((prev) => [
+    ...prev,
+    {
+      IngredientID: selectedIngredient.IngredientID,
+      IngredientName: selectedIngredient.IngredientName,
+      quantity: quantity,
+      MeasureID: measure,
+      MeasureName: measures.find((m) => m.MeasureID === measure)?.MeasureName || '',
+    },
+  ]);
 
-
-
-
-if (exists) {
-  toast.error('Ingredient already added!');
-  return;
-}
-
-
-
-//!!!!?????????!!!!!!
-setShoppingList((prev) => [
-  ...prev,
-  {
-    label: searchTerm,
-    IngredientId: selectedIngredient.IngredientID, // Ensure this is valid
-    quantity,
-    MeasureId: measure,
-    MeasureName: measures.find((m) => m.MeasureID === measure)?.MeasureName || '',
-  },
-]);
-
-
-
-
-// Reset fields
-setSearchTerm('');
-setQuantity(1);
-setMeasure('');
-setSelectedIngredient(null);
+  // Reset fields after adding
+  setSearchTerm('');
+  setQuantity(1);
+  setMeasure('');
+  setSelectedIngredient(null);
 };
-
 
 
 
@@ -444,18 +377,17 @@ const handleEditList = (list) => {
   setListName(list.ListName || ''); // Populate the list name
   setShoppingList(
     list.items.map((item) => ({
-        IngredientID: item.IngredientID,   // Ensure IngredientID matches backend casing
-        MeasureID: item.MeasureID,         // Ensure MeasureID matches backend casing
-        Quantity: item.Quantity || 1,
-        IngredientName: item.IngredientName || 'Unknown Ingredient',
-        MeasureName: item.MeasureName || '',
+      IngredientID: item.IngredientID || null,
+      MeasureID: item.MeasureID || null,
+      quantity: item.Quantity || 1,
+      label: `${item.IngredientName} - ${item.Quantity} ${item.MeasureName || ''}`.trim(), // Corrected label format
+      IngredientName: item.IngredientName || 'Unknown Ingredient',
+      MeasureName: item.MeasureName || '',
     }))
-);
-
+  );
   toast.info('You can now edit this list. Don’t forget to save your changes!');
 };
 
-//!!!!!!!!!!!!!!!!!!!
 
 
 
@@ -473,8 +405,9 @@ const saveEditedList = () => {
 
 
  const invalidItem = shoppingList.find(
-   (item) => !item.IngredientID || !item.MeasureID || !item.Quantity
- );
+  (item) => !item.IngredientID || !item.MeasureID || !item.Quantity || item.Quantity <= 0
+);
+
  if (invalidItem) {
    console.error('Invalid item detected:', invalidItem);
    toast.error('One or more items in the list are invalid. Please check and try again.');
@@ -485,14 +418,12 @@ const saveEditedList = () => {
  const payload = {
    listName,
    shoppingList: shoppingList.map((item) => ({
-     IngredientID: item.IngredientID,
-     MeasureID: item.MeasureID,
-     Quantity: item.quantity,
-   })),
+  IngredientID: item.IngredientID,
+  MeasureID: item.MeasureID,
+  Quantity: item.quantity, // Ensure you use 'quantity'
+})),
    userId: user?.UserID,
  };
-
- console.log('Payload:', payload);
 
 
  fetch(`http://localhost:5001/api/update-shopping-list/${editingListId}`, {
@@ -537,6 +468,9 @@ const saveEditedList = () => {
      setEditingListId(null);
      setListName('');
      setShoppingList([]);
+     setIsEditing(false);
+     setEditingListId(null);
+     
    })
    .catch((error) => {
      console.error('Error saving edited list:', error);
@@ -558,13 +492,11 @@ const handleDeleteList = (listId, index) => {
  fetch(`http://localhost:5001/api/delete-shopping-list/${listId}`, {
      method: 'DELETE',
  })
-     .then((res) => {
-         if (res.ok) {
-             setSavedLists((prev) => prev.filter((_, i) => i !== index));
-             toast.success('List deleted successfully!');
-         } else {
-             return res.json().then((err) => Promise.reject(err));
-         }
+ .then((res) => {
+  if (!res.ok) {
+    return res.json().then((err) => Promise.reject(err)); // This ensures that you handle all errors correctly.
+  }
+  return res.json();
      })
      .catch((error) => {
          console.error('Error deleting shopping list:', error);
@@ -649,6 +581,7 @@ const updateQuantity = (index, quantity) => {
 
 
 
+
 const toggleEditing = (index) => {
  const updatedList = shoppingList.map((item, i) =>
    i === index
@@ -717,7 +650,7 @@ const handleAddNewIngredient = async (newIngredientName) => {
      alert(`"${newIngredientName}" added successfully to the database!`);
      setSuggestedIngredients((prevSuggestions) => [
        ...prevSuggestions,
-       { IngredientName: newIngredientName, IngredientID: data.IngredientID },
+       { IngredientName: newIngredientName, IngredientID: data.ingredientID },
      ]);
    } else {
      alert("Failed to add new ingredient. Please try again.");
@@ -850,164 +783,180 @@ const exportToWhatsApp = () => {
 
 {/* Form Container for Consistent Width */}
 <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+  {/* Add Ingredient Section */}
+  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', width: '100%' }}>
+    {/* Quantity Input */}
+    <TextField
+      label="Quantity"
+      value={quantity}
+      onChange={(e) => {
+        const value = e.target.value;
+        if (/^[0-9./]*$/.test(value)) {
+          setQuantity(value);
+        }
+      }}
+      style={{
+        flex: 1,
+        height: '48px',
+        borderRadius: '12px',
+        backgroundColor: 'transparent',
+      }}
+      InputProps={{
+        style: { borderRadius: '12px' },
+      }}
+      InputLabelProps={{
+        shrink: true,
+      }}
+    />
 
+    {/* Measure Dropdown */}
+    <TextField
+      select
+      label="Select Measure"
+      value={measure}
+      onChange={(e) => setMeasure(e.target.value)}
+      style={{
+        flex: 1,
+        height: '48px',
+        borderRadius: '12px',
+        backgroundColor: 'transparent',
+      }}
+      InputProps={{
+        style: { borderRadius: '12px' },
+      }}
+      InputLabelProps={{
+        shrink: true,
+      }}
+    >
+      <MenuItem value="" disabled>
+        Select Measure
+      </MenuItem>
+      {measures.map((m) => (
+        <MenuItem key={m.MeasureID} value={m.MeasureID}>
+          {m.MeasureName}
+        </MenuItem>
+      ))}
+    </TextField>
 
- {/* Add Ingredient Section */}
- <div style={{ display: 'flex', gap: '10px', alignItems: 'center', width: '100%' }}>
-   {/* Quantity Input */}
-   <TextField
-     label="Quantity"
-     value={quantity}
-     onChange={(e) => {
-       const value = e.target.value;
-       if (/^[0-9./]*$/.test(value)) {
-         setQuantity(value);
-       }
-     }}
-     style={{
-       flex: 1,
-       height: '48px',
-       borderRadius: '12px',
-       backgroundColor: 'transparent',
-     }}
-     InputProps={{
-       style: { borderRadius: '12px' },
-     }}
-     InputLabelProps={{
-       shrink: true,
-     }}
-   />
+    {/* Search Input */}
+    <div style={{ flex: 2, position: 'relative' }}>
+      <TextField
+        label="Search for ingredient"
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setSelectedIngredient(null); // Clear the selected ingredient when typing
+        }}
+        style={{
+          width: '100%',
+          height: '48px',
+          borderRadius: '12px',
+          backgroundColor: 'transparent',
+        }}
+        InputProps={{
+          style: { borderRadius: '12px' },
+        }}
+        InputLabelProps={{
+          shrink: true,
+        }}
+      />
 
+      {/* Autocomplete Section */}
+      {suggestedIngredients.length > 0 ? (
+        <ul
+          style={{
+            position: 'absolute',
+            top: '52px',
+            background: '#fff',
+            border: '1px solid #ddd',
+            listStyle: 'none',
+            margin: 0,
+            padding: '5px 0',
+            zIndex: 1000,
+            width: '100%',
+            borderRadius: '8px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          {suggestedIngredients.map((ingredient) => (
+            <li
+              key={ingredient.IngredientID}
+              onClick={() => {
+                setSearchTerm(ingredient.IngredientName);
+                setSelectedIngredient(ingredient); // Set the selected ingredient
+                setSuggestedIngredients([]);
+              }}
+              style={{
+                padding: '8px 12px',
+                cursor: 'pointer',
+                fontFamily: "'Poppins', sans-serif",
+                fontSize: '14px',
+                borderBottom: '1px solid #eee',
+              }}
+            >
+              {ingredient.IngredientName}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        searchTerm && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '60px',
+              left: 0,
+              width: '100%',
+              textAlign: 'center',
+              color: 'red',
+              fontSize: '16px',
+              fontFamily: "'Raleway', sans-serif",
+              fontWeight: 'bold',
+            }}
+            onClick={() => handleAddNewIngredient(searchTerm)}
+          >
+            Item not found, to add it — click on me!
+          </div>
+        )
+      )}
+    </div>
 
-   {/* Measure Dropdown */}
-   <TextField
-     select
-     label="Select Measure"
-     value={measure}
-     onChange={(e) => setMeasure(e.target.value)}
-     style={{
-       flex: 1,
-       height: '48px',
-       borderRadius: '12px',
-       backgroundColor: 'transparent',
-     }}
-     InputProps={{
-       style: { borderRadius: '12px' },
-     }}
-     InputLabelProps={{
-       shrink: true,
-     }}
-   >
-     <MenuItem value="" disabled>
-       Select Measure
-     </MenuItem>
-     {measures.map((m) => (
-       <MenuItem key={m.MeasureID} value={m.MeasureID}>
-         {m.MeasureName}
-       </MenuItem>
-     ))}
-   </TextField>
+    {/* Add Button */}
+    <Button
+      variant="contained"
+      style={{
+        backgroundColor: '#B55335',
+        color: '#fff',
+        borderRadius: '12px',
+        height: '48px',
+        width: '100px',
+        fontFamily: "'Merienda', cursive",
+        fontWeight: 'bold',
+        fontSize: '16px',
+      }}
+      onClick={() => {
+        if (!selectedIngredient || !selectedIngredient.IngredientName) {
+          toast.error('Please select a valid ingredient!');
+          console.log('No valid ingredient selected:', selectedIngredient);
+          return;
+        }
 
+        if (!quantity || isNaN(quantity) || quantity <= 0) {
+          toast.error('Please enter a valid quantity!');
+          return;
+        }
 
-   {/* Search Input */}
-   <div style={{ flex: 2, position: 'relative' }}>
-     <TextField
-       label="Search for ingredient"
-       value={searchTerm}
-       onChange={(e) => setSearchTerm(e.target.value)}
-       style={{
-         width: '100%',
-         height: '48px',
-         borderRadius: '12px',
-         backgroundColor: 'transparent',
-       }}
-       InputProps={{
-         style: { borderRadius: '12px' },
-       }}
-       InputLabelProps={{
-         shrink: true,
-       }}
-     />
+        if (!measure) {
+          toast.error('Please select a measure!');
+          return;
+        }
 
-
-     {/* Autocomplete Section */}
-     {suggestedIngredients.length > 0 ? (
-       <ul
-         style={{
-           position: 'absolute',
-           top: '52px',
-           background: '#fff',
-           border: '1px solid #ddd',
-           listStyle: 'none',
-           margin: 0,
-           padding: '5px 0',
-           zIndex: 1000,
-           width: '100%',
-           borderRadius: '8px',
-           boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-         }}
-       >
-         {suggestedIngredients.map((ingredient) => (
-           <li
-             key={ingredient.IngredientID}
-             onClick={() => {
-               setSearchTerm(ingredient.IngredientName);
-               setSelectedIngredient(ingredient);
-               setSuggestedIngredients([]);
-             }}
-             style={{
-               padding: '8px 12px',
-               cursor: 'pointer',
-               fontFamily: "'Poppins', sans-serif",
-               fontSize: '14px',
-               borderBottom: '1px solid #eee',
-             }}
-           >
-             {ingredient.IngredientName}
-           </li>
-         ))}
-       </ul>
-     ) : (
-       searchTerm && (
-         <div
-           style={{
-             position: 'absolute',
-             top: '60px',
-             left: 0,
-             width: '100%',
-             textAlign: 'center',
-             color: 'red',
-             fontSize: '16px',
-             fontFamily: "'Raleway', sans-serif",
-             fontWeight: 'bold',
-           }}
-           onClick={() => handleAddNewIngredient(searchTerm)}
-         >
-           Item not found, to add it — click on me!
-         </div>
-       )
-     )}
-   </div>
-
-
-   {/* Add Button */}
-   <Button
-     variant="contained"
-     style={{
-       backgroundColor: '#B55335',
-       color: '#fff',
-       borderRadius: '12px',
-       height: '48px',
-       width: '100px',
-       fontFamily: "'Merienda', cursive",
-       fontWeight: 'bold',
-       fontSize: '16px',
-     }}
-     onClick={addItem}
-   >
-     Add
-   </Button>
- </div>
+        // Add item to the list
+        addItem();
+      }}
+    >
+      Add
+    </Button>
+  </div>
 </div>
 
 
@@ -1034,8 +983,9 @@ const exportToWhatsApp = () => {
                   />
                 ) : (
                   <Typography>
-{item.label} - {item.quantity} {measures.find(m => m.MeasureID === item.measureId)?.MeasureName || ''}
-</Typography>
+                  {item.IngredientName} {item.quantity ? `- ${item.quantity}` : ''} {measures.find(m => m.MeasureID === item.MeasureID)?.MeasureName || ''}
+                </Typography>
+                
 
 
 
@@ -1088,7 +1038,10 @@ const exportToWhatsApp = () => {
                   autoFocus
                 />
               ) : (
-                <Typography>{item.label}</Typography>
+                <Typography>
+                {item.IngredientName} {item.quantity ? `- ${item.quantity}` : ''} {item.MeasureName || ''}
+              </Typography>
+              
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Button
@@ -1244,90 +1197,97 @@ const exportToWhatsApp = () => {
 
 
 
-
+{/* Saved Lists */}
 <div style={{ maxWidth: '800px', margin: '0 auto' }}> {/* Increased width to 800px */}
- <h2 style={{ fontSize: '24px', fontFamily: "'Merienda', cursive", fontWeight: 'bold', color: '#B55335', textAlign: 'center' }}>
-   Your Saved Lists
- </h2>
+  <h2 style={{ fontSize: '24px', fontFamily: "'Merienda', cursive", fontWeight: 'bold', color: '#B55335', textAlign: 'center' }}>
+    Your Saved Lists
+  </h2>
 
+  {savedLists.map((list, index) => (
+    <div
+      key={list.ShoppingListID || index} // Use ShoppingListID if available
+      style={{
+        border: '1px solid #ddd',
+        borderRadius: '12px',
+        padding: '20px',
+        marginBottom: '20px',
+        backgroundColor: '#fff',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        position: 'relative', // Positioning for the edit and delete icons
+      }}
+    >
+      {/* Date on the top left */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '10px',
+          left: '20px',
+          fontSize: '14px',
+          color: '#777',
+        }}
+      >
+        Created on: {new Date(list.CreatedDate).toLocaleDateString('en-GB')}
+      </div>
 
- {savedLists.map((list, index) => (
-   <div
-       key={list.ShoppingListID || index} // Use ShoppingListID if available
-       style={{
-           border: '1px solid #ddd',
-           borderRadius: '12px',
-           padding: '20px',
-           marginBottom: '20px',
-           backgroundColor: '#fff',
-           boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-           textAlign: 'center',
-       }}
-   >
-       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-           <h3 style={{ margin: '0', fontSize: '20px', fontWeight: 'bold' }}>
-               {list.ListName || 'Unnamed List'}
-           </h3>
-           <p style={{ margin: '5px 0', fontSize: '14px', color: '#777' }}>
-               Created on: {list.CreatedDate || 'N/A'}
-           </p>
-       </div>
+      {/* List Name in the center */}
+      <h3
+        style={{
+          margin: '0',
+          fontSize: '20px',
+          fontWeight: 'bold',
+          textAlign: 'center', // Centering the list name
+          fontFamily: "'Merienda', cursive",
+        }}
+      >
+        {list.ListName || 'Unnamed List'}
+      </h3>
 
+      {/* List Items in the middle */}
+      <ul style={{ marginTop: '20px', padding: '0', listStyle: 'none', textAlign: 'center' }}>
+        {list.items.map((item, idx) => (
+          <li key={idx} style={{ marginBottom: '8px', fontSize: '16px' }}>
+            {item.IngredientName} - {item.Quantity} {item.MeasureName || ''}
+          </li>
+        ))}
+      </ul>
 
-       {/* Buttons Section */}
-       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-           <Button
-               variant="text"
-               size="small"
-               onClick={() => handleEditList(savedLists[index])}
-               style={{ color: '#B55335' }}
-           >
-               <Edit />
-           </Button>
-           <Button
-               variant="text"
-               size="small"
-               onClick={() => confirmDeleteList(index)}
-               style={{ color: 'red' }}
-           >
-               <Delete />
-           </Button>
-       </div>
-
-
-       {/* Items in the List */}
-       <ul style={{ marginTop: '20px', padding: '0', listStyle: 'none', textAlign: 'left' }}>
-   {list.items.map((item, idx) => (
-       <li key={idx} style={{ marginBottom: '8px', fontSize: '16px' }}>
-           {item.IngredientName} - {item.Quantity} {item.MeasureName || ''}
-       </li>
-   ))}
-</ul>
-
-
-   </div>
-))}
-
-
+     {/* Edit and Delete Icons on the top right */}
+<div
+  style={{
+    position: 'absolute',
+    top: '10px',
+    right: '10px',
+    display: 'flex',
+    alignItems: 'center', // Align icons vertically centered
+    gap: '10px', // Add spacing between icons
+  }}
+>
+  <Button
+    variant="text"
+    size="small"
+    onClick={() => handleEditList(savedLists[index])}
+    style={{ color: '#B55335', padding: '0', minWidth: 'auto' }} // Removed unnecessary spacing
+  >
+    <Edit />
+  </Button>
+  <Button
+    variant="text"
+    size="small"
+    onClick={() => confirmDeleteList(index)}
+    style={{ color: 'red', padding: '0', minWidth: 'auto' }} // Removed unnecessary spacing
+  >
+    <Delete />
+  </Button>
+</div>
+    </div>
+  ))}
+</div>
 </div>
 
-
-
-
-</div>
    </div>
   
  )
 
-
-
-
-
-
- 
 }
-
-
-
 
 export default ShoppingListPage
