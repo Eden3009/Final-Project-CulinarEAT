@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from './UserContext';
 import { useNavigate } from 'react-router-dom';
+import { FaArrowLeft } from 'react-icons/fa';
+import { GiChefToque } from 'react-icons/gi';
+
 
 
 
@@ -31,25 +34,20 @@ const styles = {
     marginBottom: '30px',
   },
   section: {
-    backgroundColor: '#FFF',
-    padding: '20px',
+    padding: '20px', // Keep the padding for spacing
     marginBottom: '20px',
-    borderRadius: '10px',
-    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
   },
   sectionHeader: {
     fontSize: '22px',
     fontWeight: 'bold',
     marginBottom: '15px',
     color: '#B55335',
-    borderBottom: '2px solid #bd988a',
-    paddingBottom: '5px',
   },
   userDetails: {
     marginBottom: '15px',
     fontSize: '18px',
     color: '#555',
-    fontFamily: 'Georgia, serif', // Change font to Georgia
+    fontFamily: 'Georgia, serif',
   },
   recipeCard: {
     display: 'flex',
@@ -183,6 +181,79 @@ viewButton: {
 viewButtonHover: {
     backgroundColor: '#b25949',
 },
+backButton: {
+  position: 'absolute',
+  top: '20px',
+  left: '10px', 
+  zIndex: 10,
+  display: 'flex',
+  alignItems: 'center',
+  padding: '80px 12px',
+  fontSize: '28px', 
+  fontWeight: 'bold',
+  color: '#d2b9af',
+  fontFamily: 'Oregano, serif',
+  backgroundColor: 'transparent',
+  border: 'none',
+  borderRadius: '6px',
+  cursor: 'pointer',
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  
+},
+backButtonHover: {
+transform: 'scale(1.1)',
+
+},
+divider: {
+  width: '170%', // Adjust the width
+  margin: '20px auto', // Center
+  border: 'none',
+  borderTop: '1px solid #ccc',
+  position: 'relative',
+  left: '50%', // Start from the center
+  transform: 'translateX(-50%)', // Adjust to center the line
+},
+card: {
+  width: '200px',
+  backgroundColor: '#fff',
+  borderRadius: '8px',
+  padding: '10px',
+  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  cursor: 'pointer',
+  textAlign: 'center',
+  position: 'relative',
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+},
+image: {
+  width: '100%',
+  height: '150px',
+  objectFit: 'cover',
+  borderRadius: '8px',
+  marginBottom: '10px',
+},
+title: {
+  fontSize: '18px',
+  fontFamily: "'Georgia', serif",
+  color: '#8B4513',
+  fontWeight: 'bold',
+},
+comment: {
+  fontSize: '14px',
+  fontFamily: "'Georgia', serif",
+  color: '#555',
+  marginTop: '10px',
+},
+chefHats: {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginTop: '5px',
+},
+chefHat: {
+  width: '20px',
+  height: '20px',
+  margin: '0 2px',
+},
 
   
 };
@@ -265,16 +336,20 @@ function ProfilePage() {
   };
 
   return (
+    
     <div style={styles.pageWrapper}>
       <div style={styles.profilePage}>
-
+   {/* Back Button */}
+                <button style={styles.backButton} onClick={() => navigate(-1)}>
+                <FaArrowLeft /> Back
+              </button>
 <h1 style={styles.header}>
   {user ? `${user.UserName}'s Profile` : 'Your Profile'}
 </h1>
 
 
-        {/* Profile Information */}
-        <div style={styles.section}>
+      {/* Profile Information */}
+<div style={styles.section}>
   <h2 style={styles.sectionHeader}>Profile Information</h2>
   <p style={styles.userDetails}>
     <strong>Username:</strong> {user ? user.UserName : 'Not Available'}
@@ -283,76 +358,92 @@ function ProfilePage() {
     <strong>Email:</strong> {user ? user.Email : 'Not Available'}
   </p>
 </div>
+<hr style={styles.divider} />
 
-       {/* My Recipes */}
+{/* My Recipes */}
 <div style={styles.section}>
-    <h2 style={styles.sectionHeader}>My Recipes</h2>
-    {recipes.length > 0 ? (
-        <div style={styles.recipeGrid}>
-            {recipes.map((recipe) => (
-                <div key={recipe.RecipeID} style={styles.recipeCard}>
-                    {/* Recipe Image */}
-                    <img
-                        src={recipe.ImageURL ? require(`./images/${recipe.ImageURL}.jpg`) : defaultImage}
-                        alt={recipe.RecipeTitle}
-                        style={styles.recipeImage}
-                    />
-
-                    {/* Recipe Details */}
-                    <div style={styles.recipeDetails}>
-                        <h3 style={styles.recipeTitle}>{recipe.RecipeTitle}</h3>
-                        <p style={styles.recipeDescription}>
-                            {recipe.RecipeDescription || 'No description available.'}
-                        </p>
-                        <p style={styles.recipeRating}>
-                            Rating: {recipe.AverageRating || 'Not rated yet'}
-                        </p>
-                        <button
-                            style={styles.viewButton}
-                            onClick={() => navigate(`/recipe/${recipe.RecipeID}`)}
-                        >
-                            View Recipe
-                        </button>
-                    </div>
-                </div>
-            ))}
+  <h2 style={styles.sectionHeader}>My Recipes</h2>
+  {recipes.length > 0 ? (
+    <div style={styles.cardContainer}>
+      {recipes.map((recipe) => (
+        <div
+          key={recipe.RecipeID}
+          style={styles.card}
+          onClick={() => navigate(`/recipe/${recipe.RecipeID}`)}
+        >
+          {/* Recipe Image */}
+          <img
+            src={(function getImage() {
+              try {
+                return require(`./images/${recipe.ImageURL}.jpg`);
+              } catch {
+                return defaultImage; // Fallback image
+              }
+            })()}
+            alt={recipe.RecipeTitle || 'Recipe Image'}
+            style={styles.image}
+          />
+          {/* Recipe Title */}
+          <p style={styles.title}>{recipe.RecipeTitle}</p>
         </div>
-    ) : (
-        <p>No recipes added yet.</p>
-    )}
+      ))}
+    </div>
+  ) : (
+    <p>No recipes added yet.</p>
+  )}
 </div>
 
+<hr style={styles.divider} />
 
-        {/* My Reviews */}
-        <div style={styles.section}>
-          <h2 style={styles.sectionHeader}>My Reviews</h2>
-          {reviews.length > 0 ? (
-            reviews.map((review) => (
-              <div key={review.id} style={styles.recipeCard}>
-                <span style={styles.reviewText}>{review.text}</span>
-                <div style={styles.actionButtons}>
-                  <button
-                    style={{ ...styles.button, ...styles.editButton }}
-                    onClick={() => console.log(`Edit review with ID: ${review.id}`)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    style={{ ...styles.button, ...styles.deleteButton }}
-                    onClick={() => console.log(`Delete review with ID: ${review.id}`)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>No reviews added yet.</p>
-          )}
-        </div>
-
-{/* My Shopping Lists Section */}
+       {/* My Reviews */}
 <div style={styles.section}>
+  <h2 style={styles.sectionHeader}>My Reviews</h2>
+  {reviews.length > 0 ? (
+    <div style={styles.cardContainer}>
+      {reviews.map((review) => (
+        <div
+          key={review.ReviewID}
+          style={styles.card}
+          onClick={() => navigate(`/recipe/${review.RecipeID}`)} // Navigate to associated recipe
+        >
+          {/* Recipe Image */}
+          <img
+            src={(function getImage() {
+              try {
+                return require(`./images/${review.ImageURL}.jpg`);
+              } catch {
+                return defaultImage; // Fallback image
+              }
+            })()}
+            alt={review.RecipeTitle || 'Recipe Image'}
+            style={styles.image}
+          />
+          {/* Recipe Title */}
+          <p style={styles.title}>{review.RecipeTitle}</p>
+          {/* Chef Hats */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', marginTop: '10px' }}>
+            {Array.from({ length: 5 }).map((_, index) => (
+              <GiChefToque
+                key={index}
+                style={{
+                  fontSize: '20px',
+                  color: index < review.Rating ? '#FFD700' : '#ccc', // Gold for filled, gray for empty
+                }}
+              />
+            ))}
+          </div>
+          {/* User Comment */}
+          <p style={styles.comment}>{review.Comment || 'No comment provided.'}</p>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p>No reviews added yet.</p>
+  )}
+</div>
+<hr style={styles.divider} />
+{/* My Shopping Lists Section */}
+{/*<div tyle={style.section}>
   <h2 style={styles.sectionHeader}>My Shopping Lists</h2>
   {shoppingLists.length > 0 ? (
     shoppingLists.map((list) => (
@@ -390,6 +481,7 @@ function ProfilePage() {
     <p>No shopping lists saved yet.</p>
   )}
 </div>
+*/}
 
         {/* Change Password */}
         <div style={{ ...styles.section, ...styles.changePasswordSection }}>
@@ -460,6 +552,7 @@ function ProfilePage() {
 
       </div>
     </div>
+    
   );
 }
 
