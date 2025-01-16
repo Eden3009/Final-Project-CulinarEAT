@@ -163,10 +163,15 @@ useEffect(() => {
                 onClick={() => handleRemoveFavorite(recipe.id)}
               />
               <img
-  src={recipe.ImageURL ? require(`./images/${recipe.ImageURL}.jpg`) : lunchImage}
-  alt={recipe.title || 'Recipe Image'}
+                src={(function getImage() {
+                  try {
+                    return require(`./images/${recipe.imageUrl}.jpg`);
+                  } catch {
+                    return lunchImage; // Fallback image
+                  }
+                })()}
+                alt={recipe.title || 'Recipe Image'}
                 style={styles.image}
-                onError={(e) => (e.currentTarget.src = lunchImage)} // Fallback if image not found
                 onClick={() => handleRecipeClick(recipe.id)}
               />
               <p style={styles.title}>{recipe.title}</p>
