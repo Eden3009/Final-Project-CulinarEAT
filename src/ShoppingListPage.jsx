@@ -180,6 +180,13 @@ const [isEditingItem, setIsEditingItem] = useState(false); // Track if editing a
 const [editingIndex, setEditingIndex] = useState(null); // Track the index of the item being edited
 const [expandedLists, setExpandedLists] = useState({}); // State to track expanded/collapsed lists
 
+const resetEditingState = () => {
+  setIsEditing(false);
+  setEditingListId(null);
+  setListName('');
+  setShoppingList([]);
+};
+
 useEffect(() => {
 fetch('/api/session', { credentials: 'include' })
   .then((res) => res.json())
@@ -196,7 +203,17 @@ useEffect(() => {
  }
 }, [user]);
 
+useEffect(() => {
+  resetEditingState(); // Reset editing state when the page loads
+}, []);
 
+useEffect(() => {
+  if (savedLists.some((list) => !list.CreatedDate)) {
+    console.warn('Incomplete lists detected. Refreshing data.');
+    // Optionally refetch or fix the state
+    setSavedLists((prev) => prev.filter((list) => list.CreatedDate));
+  }
+}, [savedLists]);
 
 
 
@@ -276,11 +293,18 @@ const saveToList = () => {
   };
 
   // Log the payload being sent to backend
-  console.log("Payload being sent to backend:", JSON.stringify(payload));
+  console.log('Payload being sent to backend:', JSON.stringify(payload));
+
+  // Dynamically decide the API endpoint and method
+  const endpoint = isEditing
+    ? `http://localhost:5001/api/update-shopping-list/${editingListId}`
+    : 'http://localhost:5001/api/shopping-lists';
+
+  const method = isEditing ? 'PUT' : 'POST';
 
   // Proceed to make the API call
-  fetch(`http://localhost:5001/api/update-shopping-list/${editingListId}`, {
-    method: 'PUT',
+  fetch(endpoint, {
+    method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   })
@@ -295,25 +319,31 @@ const saveToList = () => {
       return res.json();
     })
     .then((data) => {
-      console.log('List updated successfully:', data); // Log the successful response from the backend
-      setSavedLists((prev) =>
-        prev.map((list) =>
-          list.ShoppingListID === editingListId
-            ? { ...list, ListName: listName, items: [...shoppingList] }
-            : list
-        )
-      );
-      toast.success('List updated successfully!');
-      setIsEditing(false); // Exit editing mode
-      setEditingListId(null);
-      setListName('');
-      setShoppingList([]); // Clear the list
+      console.log('List saved successfully:', data); // Log the successful response from the backend
+      if (!isEditing) {
+        // Append the new list to saved lists if creating a new one
+        setSavedLists((prev) => [...prev, data.newList]);
+      } else {
+        // Update the saved lists if editing an existing one
+        setSavedLists((prev) =>
+          prev.map((list) =>
+            list.ShoppingListID === editingListId
+              ? { ...list, ListName: listName, items: [...shoppingList] }
+              : list
+          )
+        );
+      }
+      toast.success('List saved successfully!');
+      resetEditingState(); // Reset state for creating or editing
+      window.location.reload();
+
     })
     .catch((error) => {
       console.error('Error saving list:', error); // Log any errors
       toast.error('Failed to save the list. Please try again.');
     });
 };
+
 
   
 
@@ -777,6 +807,7 @@ const exportToWhatsApp = () => {
 
 
  return (
+  
   <div style={styles.pageContainer}>
     <h1 style={styles.header}>Shopping List</h1>
   
@@ -1244,8 +1275,9 @@ const exportToWhatsApp = () => {
           color: '#777',
         }}
       >
-        Created on: {new Date(list.CreatedDate).toLocaleDateString('en-GB')}
-      </div>
+Created on: {list.CreatedDate 
+        ? new Date(list.CreatedDate).toLocaleDateString('en-GB') 
+        : 'Date not available'}      </div>
 
       {/* List Name in the center */}
       <h3

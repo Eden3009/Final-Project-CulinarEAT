@@ -249,12 +249,11 @@ app.post('/api/shopping-lists', (req, res) => {
     }
 
     const insertShoppingListSQL = `
-    INSERT INTO ShoppingList (UserID, ListName, CreatedDate)
-    VALUES (?, ?, NOW())
-`;
+        INSERT INTO ShoppingList (UserID, ListName, CreatedDate)
+        VALUES (?, ?, NOW())
+    `;
 
-db.query(insertShoppingListSQL, [userId, req.body.listName], (err, result) => {
-
+    db.query(insertShoppingListSQL, [userId, listName], (err, result) => { // Changed req.body.listName to listName
         if (err) {
             console.error('Error creating shopping list:', err);
             return res.status(500).json({ message: 'Database error', error: err.message });
@@ -284,6 +283,7 @@ db.query(insertShoppingListSQL, [userId, req.body.listName], (err, result) => {
         });
     });
 });
+
 
 
 
