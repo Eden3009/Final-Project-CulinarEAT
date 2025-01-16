@@ -1,39 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaHeart } from 'react-icons/fa'; // Import the heart icon
+import { UserContext } from './UserContext'; // Adjust the path as necessary
+import lunchImage from './images/lunch.png'; // Default image for recipes
 
-// Import images explicitly
-import asianImage from './images/asian.jpg';
-import cookiesImage from './images/ancho-mole-cookies.jpg';
-import stewImage from './images/apple-and-kohlrabi-coleslaw-vegetable-kingdom.jpg';
-
-const initialFavorites = [
-  {
-    id: 1,
-    title: 'Asian Sushi',
-    imageUrl: asianImage,
-  },
-  {
-    id: 2,
-    title: 'Classic Chocolate Chip Cookies',
-    imageUrl: cookiesImage,
-  },
-  {
-    id: 3,
-    title: 'Hearty Vegetable Stew',
-    imageUrl: stewImage,
-  },
-  {
-    id: 4,
-    title: 'Delicious Pasta',
-    imageUrl: asianImage,
-  },
-  {
-    id: 5,
-    title: 'Summer Salad',
-    imageUrl: stewImage,
-  },
-];
 
 const styles = {
   page: {
@@ -114,14 +84,56 @@ const styles = {
 
 const FavoritesPage = () => {
   const navigate = useNavigate();
-  const [favorites, setFavorites] = useState(initialFavorites);
-  const [hoveredRecipeId, setHoveredRecipeId] = useState(null); // Track which recipe is hovered
+  const [favorites, setFavorites] = useState([]); // Empty array as default
+  const [hoveredRecipeId, setHoveredRecipeId] = useState(null); // Track hovered recipe
+  const { user } = useContext(UserContext);
 
-  const handleRemoveFavorite = (id) => {
-    const updatedFavorites = favorites.filter((recipe) => recipe.id !== id);
-    setFavorites(updatedFavorites);
+ // Fetch user's favorites from backend
+useEffect(() => {
+  const fetchFavorites = async () => {
+      if (!user?.UserID) return; // Ensure UserID is available
+      try {
+        const response = await fetch(`http://localhost:5001/api/user-favorites/${user.UserID}`);
+        if (response.ok) {
+              const data = await response.json();
+              console.log('Fetched favorites from backend:', data); // Debugging log
+
+              // Map backend favorites to match frontend structure if necessary
+              const formattedFavorites = data.map((favorite) => ({
+                id: favorite.FavoriteID, // Use FavoriteID from backend
+                title: favorite.RecipeTitle, // Use RecipeTitle from backend
+                imageUrl: `/images/${favorite.ImageURL}`, // Construct ImageURL
+              }));
+              
+            
+
+              setFavorites(formattedFavorites);
+          } else {
+              console.error('Failed to fetch favorites:', await response.text());
+          }
+      } catch (error) {
+          console.error('Error fetching favorites:', error);
+      }
   };
 
+  fetchFavorites();
+}, [user?.UserID]);
+
+  // Handle recipe removal from favorites
+  const handleRemoveFavorite = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5001/api/favorites/${id}`, { method: 'DELETE' });
+      if (response.ok) {
+        setFavorites(favorites.filter((recipe) => recipe.id !== id));
+      } else {
+        console.error('Failed to remove favorite:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error removing favorite:', error);
+    }
+  };
+
+  // Navigate to the recipe's detail page
   const handleRecipeClick = (id) => {
     navigate(`/recipe/${id}`);
   };
@@ -130,35 +142,39 @@ const FavoritesPage = () => {
     <div style={styles.page}>
       <h1 style={styles.headline}>Your Favorite Recipes</h1>
       <div style={styles.cardContainer}>
-        {favorites.map((recipe) => (
-          <div key={recipe.id} style={styles.card}>
-            {/* Tooltip */}
-            <span
-              style={{
-                ...styles.tooltip,
-                ...(hoveredRecipeId === recipe.id ? styles.tooltipVisible : {}),
-              }}
-            >
-              Remove from Favorites
-            </span>
+        {favorites.length > 0 ? (
+          favorites.map((recipe) => (
+            <div key={recipe.id} style={styles.card}>
+              {/* Tooltip */}
+              <span
+                style={{
+                  ...styles.tooltip,
+                  ...(hoveredRecipeId === recipe.id ? styles.tooltipVisible : {}),
+                }}
+              >
+                Remove from Favorites
+              </span>
 
-            {/* Heart Icon */}
-            <FaHeart
-              style={styles.heartIcon}
-              onMouseEnter={() => setHoveredRecipeId(recipe.id)}
-              onMouseLeave={() => setHoveredRecipeId(null)}
-              onClick={() => handleRemoveFavorite(recipe.id)}
-            />
-            <img
-              src={recipe.imageUrl}
-              alt={recipe.title}
-              style={styles.image}
-              onClick={() => handleRecipeClick(recipe.id)}
-            />
-            <p style={styles.title}>{recipe.title}</p>
-          </div>
-        ))}
-        {favorites.length === 0 && <p>No favorites added yet.</p>}
+              {/* Heart Icon */}
+              <FaHeart
+                style={styles.heartIcon}
+                onMouseEnter={() => setHoveredRecipeId(recipe.id)}
+                onMouseLeave={() => setHoveredRecipeId(null)}
+                onClick={() => handleRemoveFavorite(recipe.id)}
+              />
+              <img
+  src={recipe.ImageURL ? require(`./images/${recipe.ImageURL}.jpg`) : lunchImage}
+  alt={recipe.title || 'Recipe Image'}
+                style={styles.image}
+                onError={(e) => (e.currentTarget.src = lunchImage)} // Fallback if image not found
+                onClick={() => handleRecipeClick(recipe.id)}
+              />
+              <p style={styles.title}>{recipe.title}</p>
+            </div>
+          ))
+        ) : (
+          <p>No favorites added yet.</p>
+        )}
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ const app = express();
 const port = 5001;
 
 
+
 // Test route
 app.get('/api/reviews/test', (req, res) => {
     res.status(200).json({ message: 'API is working!' });
@@ -1045,8 +1046,109 @@ app.get('/api/recipes/:RecipeID/reviews', (req, res) => {
     });
 });
 
+app.post('/api/favorites', (req, res) => {
+    const { UserID, RecipeID } = req.body;
 
+    if (!UserID || !RecipeID) {
+        return res.status(400).send({ error: 'UserID and RecipeID are required' });
+    }
 
+    const query = 'INSERT INTO Favorites (UserID, RecipeID, AddedDate) VALUES (?, ?, NOW())';
+
+    db.query(query, [UserID, RecipeID], (err, result) => {
+        if (err) {
+            console.error('Error adding to favorites:', err);
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(409).send({ error: 'Recipe is already in favorites' });
+            }
+            return res.status(500).send({ error: 'Failed to add to favorites' });
+        }
+
+        res.status(200).send({ message: 'Recipe added to favorites!', favoriteId: result.insertId });
+    });
+});
+
+  
+app.delete('/api/favorites/:favoriteId', (req, res) => {
+    const { favoriteId } = req.params;
+
+    if (!favoriteId) {
+        return res.status(400).send({ error: 'FavoriteID is required' });
+    }
+
+    const query = 'DELETE FROM Favorites WHERE FavoriteID = ?';
+
+    db.query(query, [favoriteId], (err, result) => {
+        if (err) {
+            console.error('Error removing from favorites:', err);
+            return res.status(500).send({ error: 'Failed to remove from favorites' });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).send({ error: 'Favorite not found' });
+        }
+
+        res.status(200).send({ message: 'Recipe removed from favorites!' });
+    });
+});
+
+// Updated GET for user's favorites
+app.get('/api/user-favorites/:userId', (req, res) => {
+    const { userId } = req.params;
+  
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+  
+    const query = `
+      SELECT f.FavoriteID, r.RecipeTitle, r.ImageURL
+      FROM Favorites f
+      JOIN Recipe r ON f.RecipeID = r.RecipeID
+      WHERE f.UserID = ?
+    `;
+  
+    db.query(query, [userId], (err, results) => {
+      if (err) {
+        console.error('Error fetching favorites:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+      res.json(results);
+    });
+  });
+  
+  
+
+  
+
+  //get for the recipe itself 
+app.get('/api/favorites/:userId/:recipeId', (req, res) => {
+    const { userId, recipeId } = req.params;
+  
+    if (!userId || !recipeId) {
+      return res.status(400).json({ error: 'UserID and RecipeID are required' });
+    }
+  
+    const query = `
+      SELECT FavoriteID
+      FROM Favorites
+      WHERE UserID = ? AND RecipeID = ?
+    `;
+  
+    db.query(query, [userId, recipeId], (err, results) => {
+      if (err) {
+        console.error('Error fetching favorite status:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+  
+      if (results.length > 0) {
+        res.status(200).json({ isFavorite: true, favoriteId: results[0].FavoriteID });
+      } else {
+        res.status(200).json({ isFavorite: false });
+      }
+    });
+  });
+
+  
 
 
 const addLabelsAndThemes = (recipeID, labels, themes, res) => {

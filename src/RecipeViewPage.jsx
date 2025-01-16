@@ -229,6 +229,7 @@ function RecipeViewPage() {
   const [editReviewId, setEditReviewId] = useState(null);  // Track which review is being edited
   const [editComment, setEditComment] = useState('');      // Store the review comment during editing
   const [editRating, setEditRating] = useState(0);         // Store the review rating during editing
+  const [favoriteId, setFavoriteId] = useState(null);
 
 
 
@@ -386,8 +387,82 @@ const handleSaveChanges = async (reviewID) => {
       }
     };
     
+
+    //favorite
+    useEffect(() => {
+      const checkFavoriteStatus = async () => {
+        try {
+          const response = await fetch(`/api/favorites/${user?.UserID}/${RecipeID}`);
+          if (response.ok) {
+            const data = await response.json();
+            setIsFavorite(data.isFavorite); // Update favorite state
+            if (data.favoriteId) {
+              setFavoriteId(data.favoriteId); // Store favoriteId for removal
+            }
+          }
+        } catch (error) {
+          console.error('Error checking favorite status:', error);
+        }
+      };
+    
+      if (user?.UserID && RecipeID) {
+        checkFavoriteStatus();
+      }
+    }, [user?.UserID, RecipeID]);
     
     
+
+
+    const handleAddToFavorites = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ UserID: user?.UserID, RecipeID }),
+        });
+        if (response.ok) {
+          const data = await response.json(); // Assuming the backend returns the new favoriteId
+          setFavoriteId(data.favoriteId); // Store the favoriteId
+          toast.success('Recipe added to favorites!');
+          setIsFavorite(true);
+        } else {
+          toast.error('Failed to add recipe to favorites.');
+        }
+      } catch (error) {
+        console.error('Error adding to favorites:', error);
+        toast.error('An error occurred. Please try again.');
+      }
+    };
+    
+    
+    
+    
+    const handleRemoveFromFavorites = async () => {
+      if (!favoriteId) {
+        console.error('Favorite ID is undefined.');
+        toast.error('Unable to remove favorite.');
+        return;
+      }
+    
+      try {
+        const response = await fetch(`http://localhost:5001/api/favorites/${favoriteId}`, {
+          method: 'DELETE',
+        });
+    
+        if (response.ok) {
+          toast.success('Recipe removed from favorites!');
+          setIsFavorite(false); // Update the state to reflect the change
+          setFavoriteId(null); // Clear the favoriteId
+        } else {
+          toast.error('Failed to remove recipe from favorites.');
+        }
+      } catch (error) {
+        console.error('Error removing from favorites:', error);
+        toast.error('An error occurred. Please try again.');
+      }
+    };
+    
+
 
     
     const handleReviewSubmit = async (e) => {
@@ -925,7 +1000,7 @@ const ingredients = recipe && recipe.Ingredients
   <button
     onClick={() => {
       setIsFavorite(!isFavorite); // Toggle favorite state
-      toast.success(isFavorite ? 'Recipe removed from favorites!' : 'Recipe added to favorites!');
+      toast.success(isFavorite ? handleRemoveFromFavorites() : handleAddToFavorites());
     }}
     style={{
       backgroundColor: '#d2b9af',
