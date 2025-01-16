@@ -100,9 +100,9 @@ useEffect(() => {
 
               // Map backend favorites to match frontend structure if necessary
               const formattedFavorites = data.map((favorite) => ({
-                id: favorite.FavoriteID, // Use FavoriteID from backend
-                title: favorite.RecipeTitle, // Use RecipeTitle from backend
-                imageUrl: `/images/${favorite.ImageURL}`, // Construct ImageURL
+                id: favorite.FavoriteID,
+                title: favorite.RecipeTitle,
+                imageUrl: favorite.ImageURL, // Keep ImageURL simple
               }));
               
             
@@ -133,9 +133,10 @@ useEffect(() => {
     }
   };
 
-  // Navigate to the recipe's detail page
   const handleRecipeClick = (id) => {
-    navigate(`/recipe/${id}`);
+    const recipeIdString = String(id); // Ensure ID is a string
+    navigate(`/recipe-view/${recipeIdString}`);
+
   };
 
   return (
