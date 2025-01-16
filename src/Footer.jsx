@@ -43,7 +43,7 @@ const Footer = () => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginTop: '20px', // Adjusted to align with other sections
+            marginTop: '20px',
           }}
         >
           <h1
@@ -91,33 +91,31 @@ const Footer = () => {
             Quick Links
           </h4>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-  <li style={{ margin: '5px 0' }}>
-    <Link to="/" style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}>
-      Home Page
-    </Link>
-  </li>
-  <li style={{ margin: '5px 0' }}>
-    <Link to="/about" style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}>
-      About Us
-    </Link>
-  </li>
-  <li style={{ margin: '5px 0' }}>
-    <Link to="/contact" style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}>
-      Contact Us
-    </Link>
-  </li>
-  <li style={{ margin: '5px 0' }}>
-    <Link to="/privacy" style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}>
-      Privacy Policy
-    </Link>
-  </li>
-  <li style={{ margin: '5px 0' }}>
-    <Link to="/terms" style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}>
-      Terms of Service
-    </Link>
-  </li>
-</ul>
+            <li style={{ margin: '5px 0' }}>
+              <Link to="/" style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}>
+                Home Page
+              </Link>
+            </li>
+            <li style={{ margin: '5px 0' }}>
+  <a
+    href="mailto:culinareat@gmail.com?subject=Contact%20Us&body=Hi%20CulinarEAT%20Team%2C"
+    style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}
+  >
+    Contact Us
+  </a>
+</li>
 
+            <li style={{ margin: '5px 0' }}>
+              <Link to="/privacy" style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}>
+                Privacy Policy
+              </Link>
+            </li>
+            <li style={{ margin: '5px 0' }}>
+              <Link to="/terms" style={{ color: '#333', textDecoration: 'none', transition: 'color 0.3s' }}>
+                Terms of Service
+              </Link>
+            </li>
+          </ul>
         </div>
 
         {/* Social Media Section */}
@@ -169,7 +167,7 @@ const Footer = () => {
           fontSize: '0.9rem',
           color: '#666',
           textAlign: 'center',
-          padding: '10px 0', // Ensure no extra space is added below the footer
+          padding: '10px 0',
           margin: '0',
         }}
       >

@@ -17,7 +17,7 @@ import axios from 'axios';
 import RecipeViewPage from './RecipeViewPage'; // Import the new component
 import { UserProvider } from './UserContext';
 import ProtectedRoute from './ProtectedRoute';
-
+import TermsOfService from './TermsOfService'; // Import the TermsOfService component
 
 const appStyles = {
   app: {
@@ -107,6 +107,7 @@ function App() {
               <Route path="/register" element={<RegistrationPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/privacy" element={<PrivacyPolicyPage />} /> {/* Privacy route */}
+              <Route path="/terms" element={<TermsOfService />} /> {/* Terms of Service route */}
 
               {/* Protected Routes */}
               <Route
