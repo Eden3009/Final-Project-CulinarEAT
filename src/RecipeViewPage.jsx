@@ -18,6 +18,8 @@ import { MdEdit } from 'react-icons/md';  // Importing the correct pencil icon
 import { FaTrash } from 'react-icons/fa'; // Trash icon for delete
 import { confirmAlert } from 'react-confirm-alert'; // Import confirmation dialog
 import { format } from 'date-fns'; // Import date-fns for formatting
+import ShoppingListModal from './ShoppingListModal'; // Adjust the path if needed
+
 
 const styles = {
   page: {
@@ -230,16 +232,57 @@ function RecipeViewPage() {
   const [editComment, setEditComment] = useState('');      // Store the review comment during editing
   const [editRating, setEditRating] = useState(0);         // Store the review rating during editing
   const [favoriteId, setFavoriteId] = useState(null);
-
-
-
-  
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility
+const [savedLists, setSavedLists] = useState([]); // To store existing shopping lists
     const [recipe, setRecipe] = useState({
       Reviews: [], // Default empty array
       AverageRating: 0,
     });
     
+//modal
+const handleModalSubmit = async ({ type, name, listId }) => {
+  try {
+    const payload = {
+      userId: user?.UserID,
+      shoppingList: checkedIngredients.map((ingredient) => ({
+        IngredientName: ingredient.name,
+        IngredientID: ingredient.id,
+        MeasureID: ingredient.measureId,
+        Quantity: ingredient.quantity,
+      })),
+    };
 
+    if (type === 'new') {
+      payload.listName = name;
+      const response = await fetch('http://localhost:5001/api/shopping-lists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (response.ok) {
+        toast.success('New shopping list created successfully!');
+      } else {
+        throw new Error('Failed to create a new shopping list.');
+      }
+    } else if (type === 'existing') {
+      const response = await fetch(`http://localhost:5001/api/update-shopping-list/${listId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (response.ok) {
+        toast.success('Shopping list updated successfully!');
+      } else {
+        throw new Error('Failed to update the shopping list.');
+      }
+    }
+
+    setIsModalOpen(false); // Close the modal
+  } catch (error) {
+    console.error('Error handling shopping list:', error);
+    toast.error(error.message || 'An error occurred while saving the shopping list.');
+  }
+};
 
     const handleDeleteReview = (reviewID) => {
       toast.info(
@@ -410,8 +453,16 @@ const handleSaveChanges = async (reviewID) => {
       }
     }, [user?.UserID, RecipeID]);
     
+    //use effect fetch shopping list
+    useEffect(() => {
+      if (user?.UserID) {
+        fetch(`http://localhost:5001/api/get-shopping-lists/${user.UserID}`)
+          .then((res) => res.json())
+          .then((data) => setSavedLists(data))
+          .catch((error) => console.error('Error fetching shopping lists:', error));
+      }
+    }, [user]);
     
-
 
     const handleAddToFavorites = async () => {
       try {
@@ -566,7 +617,9 @@ useEffect(() => {
   }
 }, [RecipeID]);
 
-  
+
+
+
   
 
   // Parse and format ingredients
@@ -903,34 +956,30 @@ const ingredients = recipe && recipe.Ingredients
 
   {/* Buttons Section */}
   <div style={{ marginTop: '20px', textAlign: 'left' }}>
-    <button
-      onClick={() => {
-        toast.success('The items were added successfully to your shopping list!', {
-          position: "top-center",
-          className: "custom-toast",
-        });
-      }}
-      disabled={checkedIngredients.length === 0}
-      style={{
-        backgroundColor: checkedIngredients.length > 0 ? '#d2b9af' : '#ccc',
-        color: '#fff',
-        padding: '12px 20px',
-        border: 'none',
-        borderRadius: '8px',
-        cursor: checkedIngredients.length > 0 ? 'pointer' : 'not-allowed',
-        fontFamily: "'Merienda', cursive",
-        fontSize: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '10px',
-        transition: 'background-color 0.3s ease',
-        marginBottom: '10px',  // Add spacing between the shopping list button and toggle
-      }}
-    >
-      Add to Shopping List
-      <BsCartPlus style={{ fontSize: '20px', color: '#fff' }} />
-    </button>
+  <button
+  onClick={() => setIsModalOpen(true)} // Open modal
+  disabled={checkedIngredients.length === 0}
+  style={{
+    backgroundColor: checkedIngredients.length > 0 ? '#d2b9af' : '#ccc',
+    color: '#fff',
+    padding: '12px 20px',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: checkedIngredients.length > 0 ? 'pointer' : 'not-allowed',
+    fontFamily: "'Merienda', cursive",
+    fontSize: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+    transition: 'background-color 0.3s ease',
+    marginBottom: '10px', // Add spacing between the shopping list button and toggle
+  }}
+>
+  Add to Shopping List
+  <BsCartPlus style={{ fontSize: '20px', color: '#fff' }} />
+</button>
+
 
     {/* Toggle Button for US/EU Conversion */}
     <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
@@ -1409,6 +1458,12 @@ const ingredients = recipe && recipe.Ingredients
       {recipe.Reviews && recipe.Reviews.length === 0 ? 'No reviews yet.' : 'Loading reviews...'}
     </p>
   )}
+  <ShoppingListModal
+  isOpen={isModalOpen}
+  onClose={() => setIsModalOpen(false)}
+  savedLists={savedLists}
+  onSubmit={handleModalSubmit}
+/>
 </div>
 
 
