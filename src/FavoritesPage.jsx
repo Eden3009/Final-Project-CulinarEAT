@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaHeart } from 'react-icons/fa'; // Import the heart icon
 import { UserContext } from './UserContext'; // Adjust the path as necessary
 import lunchImage from './images/lunch.png'; // Default image for recipes
+import { FaArrowLeft } from 'react-icons/fa';
 
 
 const styles = {
@@ -80,6 +81,29 @@ const styles = {
     opacity: '1',
     visibility: 'visible',
   },
+  backButton: {
+    position: 'absolute',
+    top: '20px',
+    left: '10px', 
+    zIndex: 10,
+    display: 'flex',
+    alignItems: 'center',
+    padding: '80px 12px',
+    fontSize: '28px', 
+    fontWeight: 'bold',
+    color: '#d2b9af',
+    fontFamily: 'Oregano, serif',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    
+},
+backButtonHover: {
+  transform: 'scale(1.1)',
+  
+},
 };
 
 const FavoritesPage = () => {
@@ -140,12 +164,18 @@ useEffect(() => {
   };
 
   return (
+       
     <div style={styles.page}>
+            {/* Back Button */}
+            <button style={styles.backButton} onClick={() => navigate(-1)}>
+            <FaArrowLeft /> Back
+          </button>
       <h1 style={styles.headline}>Your Favorite Recipes</h1>
       <div style={styles.cardContainer}>
         {favorites.length > 0 ? (
           favorites.map((recipe) => (
             <div key={recipe.id} style={styles.card}>
+           
               {/* Tooltip */}
               <span
                 style={{
