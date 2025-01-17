@@ -27,10 +27,21 @@ const ShoppingListModal = ({ isOpen, onClose, savedLists, onSubmit }) => {
         toast.error('Please select an existing list.');
         return;
       }
-      onSubmit({ type: 'existing', listId: selectedListId });
+  
+      // Find the list name for the selected listId
+      const selectedList = savedLists.find((list) => list.ShoppingListID === parseInt(selectedListId, 10));
+      const selectedListName = selectedList?.ListName || '';
+  
+      if (!selectedListName.trim()) {
+        toast.error('Failed to find the name for the selected list.');
+        return;
+      }
+  
+      onSubmit({ type: 'existing', listId: selectedListId, name: selectedListName });
     }
     onClose();
   };
+  
 
   return (
     <Modal

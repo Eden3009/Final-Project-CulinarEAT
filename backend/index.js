@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');  // Import cookie-parser
 
 const app = express();
 const port = 5001;
+app.use(express.json());
 
 
 // Test route
@@ -233,7 +234,7 @@ app.post('/logout', (req, res) => {
 
 
 app.post('/api/shopping-lists', (req, res) => {
-    console.log('Received request:', req.body);
+    console.log('Received request to add a new list:', req.body);
     console.log('Session data in /api/shopping-lists:', req.session);
 
     const { shoppingList, userId, listName } = req.body; // Extract listName
@@ -373,7 +374,7 @@ app.put('/api/update-shopping-list/:listId', (req, res) => {
     const { listName, items } = req.body;
   
     // Log the received body to verify its structure
-    console.log("Received body for update:", req.body);
+    console.log("Received body for update UPDATE:", req.body);
   
     // Validation checks
     if (!listName || !listName.trim()) {
@@ -428,7 +429,61 @@ app.put('/api/update-shopping-list/:listId', (req, res) => {
     });
   });
   
-
+// Append Items to Shopping List API
+app.put('/api/append-shopping-list/:listId', (req, res) => {
+    const listId = req.params.listId;
+    const { listName, items } = req.body;
+  
+    // Log the received body to verify its structure
+    console.log("Received body for append:", req.body);
+  
+    // Validation checks
+    if (!listName || !listName.trim()) {
+      console.error('Missing or empty listName:', listName);
+      return res.status(400).json({ message: 'List name is required.' });
+    }
+  
+    if (!items || items.length === 0) {
+      console.error('Missing or empty items:', items);
+      return res.status(400).json({ message: 'Items are required.' });
+    }
+  
+    // Step 1: Update the list name
+    const updateListNameQuery = `UPDATE ShoppingList SET ListName = ? WHERE ShoppingListID = ?`;
+  
+    db.query(updateListNameQuery, [listName, listId], (err) => {
+      if (err) {
+        console.error('Error updating list name:', err);
+        return res.status(500).json({ message: 'Failed to update list name.' });
+      }
+  
+      // Step 2: Insert new items into the list (without deleting existing ones)
+      const insertNewItemsQuery = `
+        INSERT INTO ListIngredient (ShoppingListID, IngredientID, MeasureID, Quantity)
+        VALUES ?
+        ON DUPLICATE KEY UPDATE
+          Quantity = VALUES(Quantity), MeasureID = VALUES(MeasureID)
+      `;
+  
+      const itemsData = items.map((item) => [
+        listId,
+        item.IngredientID,
+        item.MeasureID,
+        item.Quantity,
+      ]);
+  
+      db.query(insertNewItemsQuery, [itemsData], (err) => {
+        if (err) {
+          console.error('Error inserting new items:', err);
+          return res.status(500).json({ message: 'Failed to insert new items.' });
+        }
+  
+        // Step 3: Return success response
+        res.status(200).json({ message: 'Items appended successfully to shopping list.' });
+      });
+    });
+  });
+  
   
 // API Route to Fetch All Measures
 app.get('/api/measures', (req, res) => {
@@ -606,7 +661,88 @@ app.post('/api/addingredients', (req, res) => {
     });
 });
 
+app.post('/api/get-ingredients-by-names', (req, res) => {
+    let { ingredientNames, RecipeID } = req.body;
+  
+    
+  
+    // Forcefully parse RecipeID into a number
+    const numericRecipeID =
+  parseInt(req.body.RecipeID, 10) ||
+  parseInt(req.body.recipeID, 10) ||
+  parseInt(req.body.data?.RecipeID, 10) ||
+  parseInt(req.body.data?.recipeID, 10) ||
+  0; // Default to 0 if nothing matches
 
+
+if (!Number.isInteger(numericRecipeID) || numericRecipeID <= 0) {
+  console.error('Invalid RecipeID:', numericRecipeID);
+  return res.status(400).json({ error: 'Invalid or missing RecipeID' });
+}
+
+
+    // Check if RecipeID is still invalid
+    if (!Number.isInteger(numericRecipeID) || numericRecipeID <= 0) {
+      console.error(`Invalid RecipeID: ${RecipeID}`);
+      return res.status(400).json({ error: 'Invalid or missing RecipeID' });
+    }
+  
+  
+    if (!ingredientNames || !Array.isArray(ingredientNames) || ingredientNames.length === 0) {
+      console.error('Invalid or missing ingredientNames');
+      return res.status(400).json({ error: 'Invalid or missing ingredientNames' });
+    }
+  
+    const query = `
+      SELECT
+        i.IngredientID,
+        ri.Quantity,
+        ri.MeasureID
+      FROM
+        Ingredient i
+      INNER JOIN
+        RecipeIngredient ri ON i.IngredientID = ri.IngredientID
+      WHERE
+        i.IngredientName LIKE ? AND ri.RecipeID = ?
+      LIMIT 1;
+    `;
+  
+    const results = [];
+    const promises = ingredientNames.map((name) => {
+      const likeName = `%${name}%`;
+      return new Promise((resolve, reject) => {
+        db.query(query, [likeName, numericRecipeID], (error, rows) => {
+          if (error) {
+            console.error(`Query error for ingredient "${name}":`, error);
+            return reject(error);
+          }
+          if (rows.length > 0) {
+            results.push(rows[0]);
+          }
+          resolve();
+        });
+      });
+    });
+  
+    Promise.all(promises)
+      .then(() => {
+        if (results.length === 0) {
+          console.error('No matching ingredients found.');
+          return res.status(404).json({ error: 'No ingredients found for the given recipe' });
+        }
+        console.log('Query results:', results);
+        res.json({ ingredients: results });
+      })
+      .catch((error) => {
+        console.error('Error executing queries:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      });
+  });
+  
+  
+  
+  
+  
 
 app.get('/api/ingredients', (req, res) => {
     const { query } = req.query;

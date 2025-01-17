@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
 import lunchImage from './images/lunch.png'; // Default image for recipes
@@ -19,6 +19,7 @@ import { FaTrash } from 'react-icons/fa'; // Trash icon for delete
 import { confirmAlert } from 'react-confirm-alert'; // Import confirmation dialog
 import { format } from 'date-fns'; // Import date-fns for formatting
 import ShoppingListModal from './ShoppingListModal'; // Adjust the path if needed
+
 
 
 const styles = {
@@ -238,51 +239,118 @@ const [savedLists, setSavedLists] = useState([]); // To store existing shopping 
       Reviews: [], // Default empty array
       AverageRating: 0,
     });
-    
-//modal
-const handleModalSubmit = async ({ type, name, listId }) => {
-  try {
-    const payload = {
-      userId: user?.UserID,
-      shoppingList: checkedIngredients.map((ingredient) => ({
-        IngredientName: ingredient.name,
-        IngredientID: ingredient.id,
-        MeasureID: ingredient.measureId,
-        Quantity: ingredient.quantity,
-      })),
-    };
+    const parsedRecipeID = useMemo(() => parseInt(RecipeID, 10), [RecipeID]); // Parse once and memoize
 
-    if (type === 'new') {
-      payload.listName = name;
-      const response = await fetch('http://localhost:5001/api/shopping-lists', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (response.ok) {
-        toast.success('New shopping list created successfully!');
-      } else {
-        throw new Error('Failed to create a new shopping list.');
-      }
-    } else if (type === 'existing') {
-      const response = await fetch(`http://localhost:5001/api/update-shopping-list/${listId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (response.ok) {
+  
+    const handleModalSubmit = async ({ type, name, listId }) => {
+      console.log('Checked Ingredients:', checkedIngredients); // Debug raw data
+    
+      try {
+        // Extract ingredient names (clean input)
+        const extractedIngredientNames = checkedIngredients.map((ingredientString) => {
+          const parts = ingredientString.split(' '); // Split by space
+          return parts.slice(2).join(' '); // Skip quantity and measure, keep the name
+        });
+
+
+        // Send payload to the backend
+        const response = await fetch('http://localhost:5001/api/get-ingredients-by-names', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ingredientNames: extractedIngredientNames,
+            recipeID: parsedRecipeID,
+          }),
+        });
+    
+        if (!response.ok) {
+          const errorDetails = await response.json();
+          console.error('API Response Error:', errorDetails);
+          throw new Error(errorDetails.error || 'Failed to fetch ingredient details');
+        }
+    
+        const data = await response.json();
+    
+        console.log('Ingredients Data from Backend:', data.ingredients);
+    
+        const payload = {
+          userId: user?.UserID, // Add userId
+          listName: name || 'New Shopping List', // Add a default or provided list name
+          shoppingList: data.ingredients.map((ingredient) => ({
+            IngredientID: ingredient.IngredientID,
+            Quantity: ingredient.Quantity,
+            MeasureID: ingredient.MeasureID,
+          })),
+        };
+        
+
+        console.log('Payload for shopping list:', payload); // Log payload for debugging
+        if (type === 'new') {
+          await createNewList(payload);
+        } else if (type === 'existing') {
+          const transformedPayload = {
+            listName: name, // Correctly pass the list name
+            items: data.ingredients.map((ingredient) => ({
+              IngredientID: ingredient.IngredientID,
+              Quantity: ingredient.Quantity,
+              MeasureID: ingredient.MeasureID,
+            })),
+          };
+
+          await updateExistingList(listId, transformedPayload);
+        }
+
+    
         toast.success('Shopping list updated successfully!');
-      } else {
-        throw new Error('Failed to update the shopping list.');
+      } catch (error) {
+        console.error('Error submitting shopping list:', error);
+        toast.error(error.message || 'Failed to update shopping list.');
       }
+    };
+    
+
+
+//add new list
+const createNewList = async (payload) => {
+  try {
+    const response = await fetch('http://localhost:5001/api/shopping-lists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create a new shopping list');
     }
 
-    setIsModalOpen(false); // Close the modal
+    const data = await response.json();
+    console.log('Shopping list created:', data);
   } catch (error) {
-    console.error('Error handling shopping list:', error);
-    toast.error(error.message || 'An error occurred while saving the shopping list.');
+    console.error('Error creating new shopping list:', error);
   }
 };
+
+
+//update list
+const updateExistingList = async (listId, payload) => {
+  try {
+    const response = await fetch(`http://localhost:5001/api/append-shopping-list/${listId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update the shopping list');
+    }
+
+    const data = await response.json();
+    console.log('Shopping list updated:', data);
+  } catch (error) {
+    console.error('Error updating shopping list:', error);
+  }
+};
+
 
     const handleDeleteReview = (reviewID) => {
       toast.info(
@@ -429,6 +497,15 @@ const handleSaveChanges = async (reviewID) => {
         console.error('Error fetching recipe:', error);
       }
     };
+
+    useEffect(() => {
+      if (recipe && recipe.Ingredients) {
+        console.log('Ingredients Data:', recipe.Ingredients);
+      } else {
+        console.warn('No ingredients data found');
+      }
+    }, [recipe]);
+    
     
 
     //favorite
@@ -550,15 +627,16 @@ const handleSaveChanges = async (reviewID) => {
     };
     
     
-  const handleCheckboxChange = (event, ingredient) => {
-    if (event.target.checked) {
-      setCheckedIngredients((prev) => [...prev, ingredient]);
-    } else {
-      setCheckedIngredients((prev) =>
-        prev.filter((item) => item !== ingredient)
-      );
-    }
-  };
+    const handleCheckboxChange = (event, ingredientName) => {
+      if (event.target.checked) {
+        setCheckedIngredients((prev) => [...prev, ingredientName]);
+      } else {
+        setCheckedIngredients((prev) =>
+          prev.filter((name) => name !== ingredientName)
+        );
+      }
+    };
+    
   
 
   const cleanReviews = (reviews) => {
