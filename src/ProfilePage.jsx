@@ -286,35 +286,53 @@ function ProfilePage() {
   
   useEffect(() => {
     if (user && user.UserID) {
-        // Fetch user recipes
-        fetch(`/api/user/recipes?userId=${user.UserID}`)
-            .then((res) => {
-                if (!res.ok) {
-                    throw new Error('Failed to fetch recipes');
-                }
-                return res.json();
-            })
-            .then((data) => {
-                setRecipes(data.recipes || []); // Set recipes to the state
-            })
-            .catch((err) => console.error('Error fetching user recipes:', err));
+      console.log("Starting to fetch recipes for UserID:", user?.UserID);
+  
+      fetch(`http://localhost:5001/api/user/recipes?userId=${user.UserID}`)
+      .then((res) => {
+          console.log("Response status for recipes:", res.status);
+          if (!res.ok) {
+            throw new Error("Failed to fetch recipes");
+          }
+          return res.json();
+        })
+        .then((data) => {
+          console.log("Fetched recipes data:", data);
+          setRecipes(data.recipes || []); // Set recipes to state
+        })
+        .catch((err) => {
+          console.error("Error fetching user recipes:", err);
+        });
+    } else {
+      console.warn("User is not defined or UserID is missing:", user);
     }
-}, [user]); // Re-run when the user changes
-
+  }, [user]);
+  
   useEffect(() => {
-    // Fetch profile info
-    fetch('/api/profile')
-      .then((res) => res.json())
-      .then((data) => setProfile(data))
-      .catch((err) => console.error(err));
-
-   
-    // Fetch user reviews
-    fetch('/api/user/reviews')
-      .then((res) => res.json())
-      .then((data) => setReviews(data))
-      .catch((err) => console.error(err));
-  }, []);
+    if (user && user.UserID) {
+      console.log("Starting to fetch reviews for UserID:", user?.UserID);
+  
+      fetch(`http://localhost:5001/api/user/reviews-user?userId=${user.UserID}`)
+      .then(async (res) => {
+          console.log("Response status for reviews:", res.status);
+          if (!res.ok) {
+            throw new Error("Failed to fetch reviews");
+          }
+          return res.json();
+        })
+        .then((data) => {
+          console.log("Fetched reviews data:", data);
+          setReviews(data.reviews || []); // Set reviews to state
+        })
+        .catch((err) => {
+          console.error("Error fetching user reviews:", err);
+        });
+    } else {
+      console.warn("User is not defined or UserID is missing:", user);
+    }
+  }, [user]);
+  
+  
 
   const handlePasswordChange = () => {
     const validationErrors = {};
@@ -364,27 +382,25 @@ function ProfilePage() {
 <div style={styles.section}>
   <h2 style={styles.sectionHeader}>My Recipes</h2>
   {recipes.length > 0 ? (
-    <div style={styles.cardContainer}>
+    <div style={styles.recipeGrid}>
       {recipes.map((recipe) => (
         <div
           key={recipe.RecipeID}
-          style={styles.card}
-          onClick={() => navigate(`/recipe/${recipe.RecipeID}`)}
+          style={styles.recipeCard}
+          onClick={() => navigate(`/recipe-view/${recipe.RecipeID}`)} // Navigate to the recipe view
         >
           {/* Recipe Image */}
           <img
-            src={(function getImage() {
-              try {
-                return require(`./images/${recipe.ImageURL}.jpg`);
-              } catch {
-                return defaultImage; // Fallback image
-              }
-            })()}
+            src={
+              recipe.ImageURL
+                ? `http://localhost:5001/images/${recipe.ImageURL}.jpg` // Assuming the backend serves images
+                : require('./images/default-image.jpg') // Fallback image
+            }
             alt={recipe.RecipeTitle || 'Recipe Image'}
-            style={styles.image}
+            style={styles.recipeImage}
           />
           {/* Recipe Title */}
-          <p style={styles.title}>{recipe.RecipeTitle}</p>
+          <h3 style={styles.recipeTitle}>{recipe.RecipeTitle}</h3>
         </div>
       ))}
     </div>
@@ -393,35 +409,30 @@ function ProfilePage() {
   )}
 </div>
 
-<hr style={styles.divider} />
-
-       {/* My Reviews */}
+{/* My Reviews */}
 <div style={styles.section}>
   <h2 style={styles.sectionHeader}>My Reviews</h2>
   {reviews.length > 0 ? (
-    <div style={styles.cardContainer}>
+    <div style={styles.recipeGrid}>
       {reviews.map((review) => (
         <div
           key={review.ReviewID}
-          style={styles.card}
-          onClick={() => navigate(`/recipe/${review.RecipeID}`)} // Navigate to associated recipe
+          style={styles.recipeCard}
+          onClick={() => navigate(`/recipe-view/${review.RecipeID}`)} // Navigate to the reviewed recipe
         >
           {/* Recipe Image */}
           <img
-            src={(function getImage() {
-              try {
-                return require(`./images/${review.ImageURL}.jpg`);
-              } catch {
-                return defaultImage; // Fallback image
-              }
-            })()}
-            alt={review.RecipeTitle || 'Recipe Image'}
-            style={styles.image}
-          />
+  src={review.ImageURL
+    ? require(`./images/${review.ImageURL}.jpg`) // Dynamic import for specific images
+    : require('./images/default-image.jpg')} // Fallback image
+  alt={review.RecipeTitle || 'Recipe Image'}
+  style={styles.recipeImage}
+/>
+
           {/* Recipe Title */}
-          <p style={styles.title}>{review.RecipeTitle}</p>
-          {/* Chef Hats */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', marginTop: '10px' }}>
+          <h3 style={styles.recipeTitle}>{review.RecipeTitle}</h3>
+          {/* User Rating */}
+          <div style={styles.chefHats}>
             {Array.from({ length: 5 }).map((_, index) => (
               <GiChefToque
                 key={index}
@@ -433,7 +444,9 @@ function ProfilePage() {
             ))}
           </div>
           {/* User Comment */}
-          <p style={styles.comment}>{review.Comment || 'No comment provided.'}</p>
+          <p style={styles.recipeDescription}>
+            {review.Comment || 'No comment provided.'}
+          </p>
         </div>
       ))}
     </div>
@@ -441,6 +454,9 @@ function ProfilePage() {
     <p>No reviews added yet.</p>
   )}
 </div>
+
+
+
 <hr style={styles.divider} />
 {/* My Shopping Lists Section */}
 {/*<div tyle={style.section}>

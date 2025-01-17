@@ -502,8 +502,10 @@ app.get('/api/measures', (req, res) => {
 // API to fetch recipes added by a specific user
 app.get('/api/user/recipes', (req, res) => {
     const { userId } = req.query; // Get the userId from query parameters
+    console.log("Received request to fetch recipes for userId:", userId);
 
     if (!userId) {
+        console.error("Missing userId parameter in /api/user/recipes");
         return res.status(400).json({ message: 'Missing userId parameter.' });
     }
 
@@ -530,7 +532,7 @@ app.get('/api/user/recipes', (req, res) => {
         if (results.length === 0) {
             return res.status(404).json({ message: 'No recipes found for this user.' });
         }
-
+        console.log("Fetched recipes for userId:", userId, "Results:", results);
         res.status(200).json({ recipes: results });
     });
 });
@@ -1181,6 +1183,47 @@ app.get('/api/recipes/:RecipeID/reviews', (req, res) => {
     });
 });
 
+// API to fetch user reviews
+app.get('/api/user/reviews', (req, res) => {
+    const { userId } = req.query;
+    console.log("Received request to fetch reviews for userId:", userId);
+
+    if (!userId) {
+        console.error("Missing userId parameter in /api/user/reviews");
+        return res.status(400).json({ message: 'Missing userId parameter.' });
+    }
+
+    const sql = `
+        SELECT 
+            r.ReviewID,
+            r.RecipeID,
+            r.Rating,
+            r.Comment,
+            r.Date,
+            re.RecipeTitle,
+            re.ImageURL
+        FROM 
+            Review r
+        JOIN 
+            Recipe re ON r.RecipeID = re.RecipeID
+        WHERE 
+            r.UserID = ?
+    `;
+
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching reviews:', err);
+            return res.status(500).json({ message: 'Database error.', error: err });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No reviews found for this user.' });
+        }
+        console.log("Fetched reviews for userId:", userId, "Results:", results);
+        res.status(200).json({ reviews: results });
+    });
+});
+
 
 app.post('/api/favorites', (req, res) => {
     const { UserID, RecipeID } = req.body;
@@ -1382,6 +1425,47 @@ app.put('/api/reviews/:reviewID', (req, res) => {
       });
     });
   });
+
+  // API to fetch reviews left by a specific user
+app.get('/api/user/reviews-user', (req, res) => {
+    const { userId } = req.query; // Get the userId from query parameters
+
+    if (!userId) {
+        return res.status(400).json({ message: 'Missing userId parameter.' });
+    }
+
+    const sql = `
+        SELECT 
+    r.ReviewID, 
+    r.UserID, 
+    r.RecipeID, 
+    r.Rating, 
+    r.Comment, 
+    rec.RecipeTitle, 
+    rec.ImageURL
+FROM 
+    Review r
+JOIN 
+    Recipe rec ON r.RecipeID = rec.RecipeID
+WHERE 
+    r.UserID = ?
+
+    `;
+
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching reviews:', err);
+            return res.status(500).json({ message: 'Database error.', error: err });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No reviews found for this user.' });
+        }
+
+        res.status(200).json({ reviews: results });
+    });
+});
+
 
 
 
