@@ -15,37 +15,31 @@ const questions = [
   },
 ];
 
-const CategoryQuiz = ({ categories = [], onQuizComplete = () => {} }) => {
+const CategoryQuiz = ({ categories = [], onComplete = () => {} }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
-  const [isComplete, setIsComplete] = useState(false);
 
   const handleAnswer = (answer) => {
     const updatedAnswers = [...selectedAnswers, answer];
     setSelectedAnswers(updatedAnswers);
 
     if (currentQuestionIndex + 1 < questions.length) {
+      // Move to the next question
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // Ensure categories is defined and filter correctly
+      // All questions answered
       const filteredCategories = categories.filter((category) =>
         updatedAnswers.some(
           (answer) => category.label?.toLowerCase() === answer.toLowerCase()
         )
       );
 
-      // Fallback if no matching categories are found
       const results =
         filteredCategories.length > 0
           ? filteredCategories
           : [{ label: "No matching categories found. Try again!" }];
 
-      setIsComplete(true);
-
-      // Simulate delay before showing recommendations
-      setTimeout(() => {
-        onQuizComplete(results);
-      }, 2000);
+      onComplete(results); // Pass results to the parent (LandingPage)
     }
   };
 
@@ -79,82 +73,65 @@ const CategoryQuiz = ({ categories = [], onQuizComplete = () => {} }) => {
       >
         Let's Find Your Perfect Dish!
       </h2>
-      {!isComplete ? (
-        <>
-          <h3
-            style={{
-              fontSize: "22px",
-              fontWeight: "500",
-              color: "#555",
-              textAlign: "left",
-              marginBottom: "30px",
-              lineHeight: "1.5",
-              fontFamily: "'Poppins', sans-serif",
-            }}
-          >
-            {questions[currentQuestionIndex].question}
-          </h3>
 
-          {/* Answer Options */}
+      <h3
+        style={{
+          fontSize: "22px",
+          fontWeight: "500",
+          color: "#555",
+          textAlign: "left",
+          marginBottom: "30px",
+          lineHeight: "1.5",
+          fontFamily: "'Poppins', sans-serif",
+        }}
+      >
+        {questions[currentQuestionIndex].question}
+      </h3>
+
+      {/* Answer Options */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)", // 2 columns for a grid layout
+          gap: "20px", // Proper spacing between cards
+          justifyContent: "center", // Center-align the grid
+          alignItems: "center", // Align vertically
+          width: "100%",
+        }}
+      >
+        {questions[currentQuestionIndex].options.map((option) => (
           <div
+            key={option}
+            onClick={() => handleAnswer(option)}
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)", // 2 columns for a grid layout
-              gap: "20px", // Proper spacing between cards
-              justifyContent: "center", // Center-align the grid
-              alignItems: "center", // Align vertically
-              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "linear-gradient(90deg, #d4856d, #B55335)",
+              color: "#fff",
+              borderRadius: "15px",
+              width: "160px",
+              height: "120px",
+              cursor: "pointer",
+              fontSize: "18px",
+              fontWeight: "bold",
+              textAlign: "center",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+              transition: "transform 0.2s ease, background-color 0.3s ease",
             }}
+            onMouseEnter={(e) =>
+              (e.target.style.background =
+                "linear-gradient(90deg, #B55335, #9C442C)")
+            }
+            onMouseLeave={(e) =>
+              (e.target.style.background =
+                "linear-gradient(90deg, #d4856d, #B55335)")
+            }
           >
-            {questions[currentQuestionIndex].options.map((option) => (
-              <div
-                key={option}
-                onClick={() => handleAnswer(option)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "linear-gradient(90deg, #d4856d, #B55335)",
-                  color: "#fff",
-                  borderRadius: "15px",
-                  width: "160px", // Maintain square dimensions
-                  height: "120px", // Adjust height for proper proportions
-                  cursor: "pointer",
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                  transition: "transform 0.2s ease, background-color 0.3s ease",
-                }}
-                onMouseEnter={(e) =>
-                  (e.target.style.background =
-                    "linear-gradient(90deg, #B55335, #9C442C)")
-                }
-                onMouseLeave={(e) =>
-                  (e.target.style.background =
-                    "linear-gradient(90deg, #d4856d, #B55335)")
-                }
-              >
-                {option}
-              </div>
-            ))}
+            {option}
           </div>
-        </>
-      ) : (
-        <h3
-          style={{
-            fontSize: "22px",
-            fontWeight: "500",
-            color: "#555",
-            textAlign: "left",
-            marginTop: "30px",
-            lineHeight: "1.5",
-            fontFamily: "'Poppins', sans-serif",
-          }}
-        >
-          Calculating your recommendations...
-        </h3>
-      )}
+        ))}
+      </div>
     </div>
   );
 };

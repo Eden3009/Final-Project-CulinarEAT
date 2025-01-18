@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Wheel } from "react-custom-roulette";
+import { useNavigate } from "react-router-dom";
 
 const data = [
   { option: "Breakfast" },
@@ -20,12 +21,28 @@ const SpinTheWheel = () => {
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(null);
   const [isSpun, setIsSpun] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  const navigate = useNavigate();
 
   const handleSpinClick = () => {
     const newPrizeNumber = Math.floor(Math.random() * data.length);
     setPrizeNumber(newPrizeNumber);
     setMustSpin(true);
+    setIsSpun(false);
+    setRedirecting(false);
+  };
+
+  const handleSpinEnd = () => {
+    setMustSpin(false);
     setIsSpun(true);
+
+    // After showing the category, display the redirecting message
+    setTimeout(() => {
+      setRedirecting(true);
+      setTimeout(() => {
+        navigate("/login");
+      }, 5000); // Wait 5 seconds before redirecting
+    }, 2000); // Show the selected category for 2 seconds before redirecting message
   };
 
   return (
@@ -71,7 +88,7 @@ const SpinTheWheel = () => {
           innerBorderWidth={1}
           radiusLineColor="#333"
           radiusLineWidth={2}
-          onStopSpinning={() => setMustSpin(false)}
+          onStopSpinning={handleSpinEnd}
         />
       </div>
 
@@ -80,46 +97,64 @@ const SpinTheWheel = () => {
         onClick={handleSpinClick}
         disabled={mustSpin}
         style={{
-          padding: "15px 40px", // Adjusted to match the "good" button
-          borderRadius: "20px", // Slightly rounded corners
+          padding: "15px 40px",
+          borderRadius: "20px",
           background: mustSpin
             ? "#ccc"
-            : "linear-gradient(90deg,rgba(203, 75, 42, 0.8),rgb(190, 151, 140))", // Gradient for vibrant look
+            : "linear-gradient(90deg,rgba(203, 75, 42, 0.8),rgb(190, 151, 140))",
           color: "#fff",
           border: "none",
-          fontSize: "20px", // Larger font for emphasis
+          fontSize: "20px",
           fontWeight: "bold",
           fontFamily: "'Poppins', sans-serif",
           cursor: mustSpin ? "not-allowed" : "pointer",
           transition: "transform 0.2s ease, box-shadow 0.3s ease",
-          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.2)", // Subtle shadow for depth
+          boxShadow: "0 8px 15px rgba(0, 0, 0, 0.2)",
           outline: "none",
         }}
         onMouseEnter={(e) => {
-          e.target.style.transform = "scale(1.1)"; // Hover scaling effect
-          e.target.style.boxShadow = "0 12px 20px rgba(0, 0, 0, 0.3)"; // Enhanced shadow on hover
+          e.target.style.transform = "scale(1.1)";
+          e.target.style.boxShadow = "0 12px 20px rgba(0, 0, 0, 0.3)";
         }}
         onMouseLeave={(e) => {
-          e.target.style.transform = "scale(1)"; // Reset scaling
-          e.target.style.boxShadow = "0 8px 15px rgba(0, 0, 0, 0.2)"; // Reset shadow
+          e.target.style.transform = "scale(1)";
+          e.target.style.boxShadow = "0 8px 15px rgba(0, 0, 0, 0.2)";
         }}
       >
         {mustSpin ? "Spinning..." : "Spin the Wheel!"}
       </button>
 
-      {/* Selected Category Text */}
+      {/* Selected Category and Redirecting Message */}
       {isSpun && !mustSpin && prizeNumber !== null && (
-        <p
+        <div
           style={{
             marginTop: "20px",
-            fontSize: "18px",
-            fontWeight: "bold",
-            color: "#333",
+            textAlign: "center",
           }}
         >
-          🎉 Selected Category:{" "}
-          <span style={{ color: "#B55335" }}>{data[prizeNumber].option}</span>
-        </p>
+          <p
+            style={{
+              fontSize: "18px",
+              fontWeight: "bold",
+              color: "#333",
+            }}
+          >
+            🎉 Selected Category:{" "}
+            <span style={{ color: "#B55335" }}>{data[prizeNumber].option}</span>
+          </p>
+          {redirecting && (
+            <p
+              style={{
+                marginTop: "10px",
+                fontSize: "16px",
+                fontWeight: "bold",
+                color: "#B55335",
+              }}
+            >
+              Redirecting to login page in 5 seconds...
+            </p>
+          )}
+        </div>
       )}
     </div>
   );
