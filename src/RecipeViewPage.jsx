@@ -214,6 +214,7 @@ backButtonHover: {
     textAlign: 'left', // Ensure proper alignment of text
   },
   
+  
  
 };
 
@@ -240,6 +241,8 @@ const [savedLists, setSavedLists] = useState([]); // To store existing shopping 
       AverageRating: 0,
     });
     const parsedRecipeID = useMemo(() => parseInt(RecipeID, 10), [RecipeID]); // Parse once and memoize
+    const [substitutions, setSubstitutions] = useState({});
+    const [ingredients, setIngredients] = useState([]);
 
   
     const handleModalSubmit = async ({ type, name, listId }) => {
@@ -247,12 +250,25 @@ const [savedLists, setSavedLists] = useState([]); // To store existing shopping 
     
       try {
         // Extract ingredient names (clean input)
-        const extractedIngredientNames = checkedIngredients.map((ingredientString) => {
-          const parts = ingredientString.split(' '); // Split by space
-          return parts.slice(2).join(' '); // Skip quantity and measure, keep the name
+        const extractedIngredientNames = checkedIngredients.map((ingredient) => {
+          if (typeof ingredient === 'string') {
+            // Handle legacy string format
+            const parts = ingredient.split(' ');
+            return parts.slice(2).join(' ').replace(/\[Substitute\]/g, '').trim();
+          } else if (ingredient && ingredient.DisplayName) {
+            // Handle regular ingredients with DisplayName
+            const displayParts = ingredient.DisplayName.split(' ');
+            return displayParts.slice(2).join(' ').replace(/\[Substitute\]/g, '').trim();
+          } else if (ingredient && ingredient.Substitutes && ingredient.currentSubstituteIndex > 0) {
+            // Handle selected substitutes
+            const substitute = ingredient.Substitutes[ingredient.currentSubstituteIndex - 1];
+            return substitute.SubstituteName.replace(/\[Substitute\]/g, '').trim();
+          } else {
+            console.error('Unexpected ingredient format:', ingredient);
+            return '';
+          }
         });
-
-
+    
         // Send payload to the backend
         const response = await fetch('http://localhost:5001/api/get-ingredients-by-names', {
           method: 'POST',
@@ -273,15 +289,44 @@ const [savedLists, setSavedLists] = useState([]); // To store existing shopping 
     
         console.log('Ingredients Data from Backend:', data.ingredients);
     
+        // Combine backend data with frontend `ingredients` state to ensure the correct Quantity/Measure
         const payload = {
-          userId: user?.UserID, // Add userId
-          listName: name || 'New Shopping List', // Add a default or provided list name
-          shoppingList: data.ingredients.map((ingredient) => ({
-            IngredientID: ingredient.IngredientID,
-            Quantity: ingredient.Quantity,
-            MeasureID: ingredient.MeasureID,
-          })),
+          userId: user?.UserID,
+          listName: name || 'New Shopping List',
+          shoppingList: ingredients.map((ingredient) => {
+            // Backend ingredient match
+            const backendIngredient = data.ingredients.find(
+              (backendItem) =>
+                backendItem.IngredientID === ingredient.IngredientID ||
+                ingredient.Substitutes.some(
+                  (sub) => sub.IngredientID === backendItem.IngredientID
+                )
+            );
+    
+            // Handle substitutes or main ingredient
+            const currentSubstituteIndex = ingredient.currentSubstituteIndex || 0;
+            const isUsingSubstitute = currentSubstituteIndex > 0;
+            const selectedSubstitute =
+              isUsingSubstitute && ingredient.Substitutes[currentSubstituteIndex - 1];
+    
+            // Fallback to backend data if frontend state is incomplete
+            return {
+              IngredientID: isUsingSubstitute
+                ? selectedSubstitute?.IngredientID || backendIngredient?.IngredientID
+                : ingredient.IngredientID || backendIngredient?.IngredientID,
+              Quantity: isUsingSubstitute
+                ? selectedSubstitute?.Quantity || backendIngredient?.Quantity
+                : ingredient.Quantity || backendIngredient?.Quantity,
+              MeasureID: isUsingSubstitute
+                ? selectedSubstitute?.MeasureID || backendIngredient?.MeasureID
+                : ingredient.MeasureID || backendIngredient?.MeasureID,
+            };
+          }),
         };
+    
+        console.log('Final Payload:', payload); // Log the final payload for debuggin
+        
+        
         
 
         console.log('Payload for shopping list:', payload); // Log payload for debugging
@@ -349,6 +394,14 @@ const updateExistingList = async (listId, payload) => {
   } catch (error) {
     console.error('Error updating shopping list:', error);
   }
+};
+
+//handle sub
+const handleSubstituteToggle = (ingredientId, substituteId) => {
+  setSubstitutions((prev) => ({
+      ...prev,
+      [ingredientId]: substituteId || null, // Reset to original if null
+  }));
 };
 
 
@@ -698,6 +751,8 @@ useEffect(() => {
 
 
 
+
+
   
 
   // Parse and format ingredients
@@ -732,23 +787,129 @@ useEffect(() => {
     return number.toFixed(2);
   }
   
-// Parse and format ingredients
-const ingredients = recipe && recipe.Ingredients
-  ? recipe.Ingredients.split(',').map((item) => {
-      const match = item.match(/^(.*) - (.*)$/);
-      if (match) {
-        const [, ingredientName, quantityMeasure] = match;
+  useEffect(() => {
+    if (recipe && recipe.Ingredients) {
+      const parsedIngredients = recipe.Ingredients.split('|').reduce((result, item) => {
+        // Check for substitute marker and split accordingly
+        const isSubstitute = item.includes('[Substitute]');
+        const match = item.match(/^(.*?)(?: \[Substitute\])? - (.*)$/);
+  
+        if (match) {
+          const [, ingredientName, quantityMeasure] = match;
+  
+          // Extract quantity and measure
+          const [quantity, ...rest] = quantityMeasure.split(' ');
+          const measure = rest.join(' ');
+  
+          if (isSubstitute) {
+            // Add this substitute to the last ingredient in the list
+            const lastIngredient = result[result.length - 1];
+            if (lastIngredient) {
+              lastIngredient.Substitutes.push({
+                SubstituteName: ingredientName.trim(),
+                Quantity: quantity || '',
+                Measure: measure.trim(),
+              });
+            }
+          } else {
+            // Add a new main ingredient
+            result.push({
+              IngredientName: ingredientName.trim(),
+              Quantity: quantity || '',
+              Measure: measure.trim(),
+              Substitutes: [], // Initialize with an empty array for substitutes
+              currentSubstituteIndex: 0,
+              DisplayName: `${quantity || ''} ${measure || ''} ${ingredientName.trim()}`, // Initial display
+            });
+          }
+        }
+  
+        return result;
+      }, []);
+  
+      console.log('Parsed Ingredients:', parsedIngredients);
+      setIngredients(parsedIngredients);
+    }
+  }, [recipe]);
+  
 
-        const [quantity, ...rest] = quantityMeasure.split(' '); // Separate quantity from measure
-        const formattedQuantity = convertToFraction(parseFloat(quantity)); // Convert quantity to fraction if needed
-        const measure = rest.join(' '); // Combine remaining parts as the measure
 
-        return `${formattedQuantity} ${measure ? measure : ''} ${ingredientName}`.trim();
 
-      }
-      return item.trim();
-    })
-  : [];  // If recipe.Ingredients is null, return an empty list
+// Log for debugging
+console.log("Parsed Ingredients Array:", ingredients);
+
+const handleSwap = (index) => {
+  setIngredients((prevIngredients) => {
+    const updatedIngredients = [...prevIngredients];
+    const current = updatedIngredients[index];
+
+    if (!current || !current.Substitutes || current.Substitutes.length === 0) {
+      console.error('No substitutes available for this ingredient:', current);
+      return prevIngredients; // Exit early if no substitutes
+    }
+
+    // Calculate the next substitute index
+    const nextSubstituteIndex =
+      (current.currentSubstituteIndex + 1) % (current.Substitutes.length + 1);
+
+    updatedIngredients[index] = {
+      ...current,
+      currentSubstituteIndex: nextSubstituteIndex,
+      DisplayName:
+        nextSubstituteIndex === 0
+          ? `${current.Quantity} ${current.Measure} ${current.IngredientName}`
+          : `${current.Substitutes[nextSubstituteIndex - 1]?.Quantity || ''} ${
+              current.Substitutes[nextSubstituteIndex - 1]?.Measure || ''
+            } ${current.Substitutes[nextSubstituteIndex - 1]?.SubstituteName || ''}`,
+      Quantity:
+        nextSubstituteIndex === 0
+          ? current.Quantity
+          : current.Substitutes[nextSubstituteIndex - 1]?.Quantity,
+      Measure:
+        nextSubstituteIndex === 0
+          ? current.Measure
+          : current.Substitutes[nextSubstituteIndex - 1]?.Measure,
+    };
+
+    return updatedIngredients;
+  });
+
+  // Ensure `checkedIngredients` is also updated
+  setCheckedIngredients((prevCheckedIngredients) => {
+    const updatedChecked = [...prevCheckedIngredients];
+    const ingredientToUpdate = updatedChecked.find(
+      (ingredient) => ingredient.IngredientName === ingredients[index]?.IngredientName
+    );
+
+    if (ingredientToUpdate) {
+      const nextSubstituteIndex =
+        (ingredientToUpdate.currentSubstituteIndex + 1) %
+        (ingredientToUpdate.Substitutes.length + 1);
+
+      ingredientToUpdate.Quantity =
+        nextSubstituteIndex === 0
+          ? ingredientToUpdate.Quantity
+          : ingredientToUpdate.Substitutes[nextSubstituteIndex - 1]?.Quantity;
+
+      ingredientToUpdate.Measure =
+        nextSubstituteIndex === 0
+          ? ingredientToUpdate.Measure
+          : ingredientToUpdate.Substitutes[nextSubstituteIndex - 1]?.Measure;
+
+      ingredientToUpdate.currentSubstituteIndex = nextSubstituteIndex;
+    }
+
+    return updatedChecked;
+  });
+};
+
+
+
+useEffect(() => {
+  console.log('Ingredients state updated:', ingredients);
+}, [ingredients]);
+
+
   if (!recipe) {
     return <p>Loading recipe...</p>;  // Return a loading message until the data is fetched
   }
@@ -967,23 +1128,27 @@ const ingredients = recipe && recipe.Ingredients
   padding: '20px 0',
 }}>
 {/* Ingredients Section */}
-<div style={{
-  flex: '1',
-  textAlign: 'left',
-  paddingRight: '40px',
-  paddingLeft: '40px',
-  borderRight: '2px solid #E0E0E0',
-}}>
-  <h2 style={{
-    fontSize: '26px',
-    fontWeight: 'bold',
-    fontFamily: "'Merienda', cursive",
-    color: '#B55335',
-    marginBottom: '15px',
-  }}>
-    Ingredients
-  </h2>
-  <ul style={{
+<div
+  style={{
+    flex: '1',
+    textAlign: 'left',
+    paddingRight: '40px',
+    paddingLeft: '40px',
+    borderRight: '2px solid #E0E0E0',
+  }}
+>
+  <h2
+    style={{
+      fontSize: '26px',
+      fontWeight: 'bold',
+      fontFamily: "'Merienda', cursive",
+      color: '#B55335',
+      marginBottom: '15px',
+    }}
+  >
+   Ingredients</h2>
+<ul
+  style={{
     listStyleType: 'none',
     padding: '0',
     margin: '0',
@@ -991,46 +1156,82 @@ const ingredients = recipe && recipe.Ingredients
     lineHeight: '1.8',
     fontFamily: "'Georgia', serif",
     color: '#333',
-  }}>
-    {ingredients.map((ingredient, index) => (
-      <li key={index} style={{
+  }}
+>
+  {ingredients.map((ingredient, index) => (
+    <li
+      key={index}
+      style={{
         marginBottom: '10px',
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
-      }}>
-        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-          <input
-            type="checkbox"
-            style={{
-              appearance: 'none',
-              width: '22px',
-              height: '22px',
-              borderRadius: '50%',
-              border: '1px solid #B55335',
-              backgroundColor: 'transparent',
-              cursor: 'pointer',
-              outline: 'none',
-              transition: 'background-color 0.3s ease, transform 0.2s ease',
-            }}
-            onChange={(e) => handleCheckboxChange(e, ingredient)}
-            onMouseEnter={(e) => {
-              if (!e.target.checked) e.target.style.backgroundColor = '#F5F5DC';
-            }}
-            onMouseLeave={(e) => {
-              if (!e.target.checked) e.target.style.backgroundColor = 'transparent';
-            }}
-            onClick={(e) => {
-              e.target.style.backgroundColor = e.target.checked ? '#d2b9af' : 'transparent';
-              e.target.style.transform = 'scale(1.1)';
-              setTimeout(() => (e.target.style.transform = 'scale(1)'), 200);
-            }}
-          />
-          <span style={{ marginLeft: '10px' }}>{ingredient}</span>
-        </label>
-      </li>
-    ))}
-  </ul>
+      }}
+    >
+      <label
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          cursor: 'pointer',
+        }}
+      >
+        {/* Checkbox */}
+        <input
+          type="checkbox"
+          style={{
+            appearance: 'none',
+            width: '22px',
+            height: '22px',
+            borderRadius: '50%',
+            border: '1px solid #B55335',
+            backgroundColor: 'transparent',
+            cursor: 'pointer',
+            outline: 'none',
+            transition: 'background-color 0.3s ease, transform 0.2s ease',
+          }}
+          onChange={(e) => handleCheckboxChange(e, ingredient)}
+          onMouseEnter={(e) => {
+            if (!e.target.checked) e.target.style.backgroundColor = '#F5F5DC';
+          }}
+          onMouseLeave={(e) => {
+            if (!e.target.checked) e.target.style.backgroundColor = 'transparent';
+          }}
+          onClick={(e) => {
+            e.target.style.backgroundColor = e.target.checked
+              ? '#d2b9af'
+              : 'transparent';
+            e.target.style.transform = 'scale(1.1)';
+            setTimeout(() => (e.target.style.transform = 'scale(1)'), 200);
+          }}
+        />
+        {/* Ingredient Display */}
+        <span style={{ marginLeft: '10px' }}>
+        {ingredient.DisplayName}        </span>
+      </label>
+
+      {/* Swap Button for Ingredients with Substitutes */}
+      {ingredient.Substitutes.length > 0 && (
+        <button
+          style={{
+            marginLeft: '15px',
+            padding: '5px 10px',
+            borderRadius: '5px',
+            border: '1px solid #B55335',
+            backgroundColor: '#FFF',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontFamily: "'Georgia', serif",
+            color: '#B55335',
+          }}
+          onClick={() => handleSwap(index)}
+        >
+          Swap
+        </button>
+      )}
+    </li>
+  ))}
+</ul>
+
 
   {/* Buttons Section */}
   <div style={{ marginTop: '20px', textAlign: 'left' }}>

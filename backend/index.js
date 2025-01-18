@@ -544,62 +544,68 @@ app.get('/api/recipe/:id', (req, res) => {
     console.log('Recipe ID received in backend:', recipeId); // Debugging
 
     const sql = `
-        SELECT 
-            r.RecipeID, 
-            r.RecipeTitle, 
-            r.RecipeDescription, 
-            r.RecipeInstructions, 
-            r.ImageURL, 
-            r.AverageRating, 
-            r.SkillLevel,
-            r.yield,
-            GROUP_CONCAT(DISTINCT 
-                CONCAT(i.IngredientName, 
-                    CASE 
-                        WHEN ri.Comments IS NOT NULL AND ri.Comments != '' THEN CONCAT(' (', ri.Comments, ')') 
-                        ELSE '' 
-                    END, 
-                    ' - ', 
-                    ri.Quantity, 
-                    ' ', 
-                    CASE 
-                        WHEN m.MeasureName = 'some' THEN '' 
-                        ELSE m.MeasureName 
-                    END)
-            ) AS Ingredients,
-            GROUP_CONCAT(DISTINCT t.ThemeName) AS Themes,
-            GROUP_CONCAT(DISTINCT l.LabelName) AS Labels,
-            CONCAT('[', 
-                GROUP_CONCAT(
-                    CONCAT(
-                        '{',
-                        '"Rating": "', rev.Rating, '", ',
-                        '"Comment": "', rev.Comment, '", ',
-                        '"Date": "', rev.Date, '", ',
-                        '"User": "', CONCAT(u.FName, ' ', u.LName), '"',
-                        '}'
-                    ) SEPARATOR ','
-                ), 
-            ']') AS Reviews,
-            CONCAT(a.FName, ' ', a.LName) AS AuthorName,
-            r.PreparationTime,
-            r.TotalTime
-        FROM 
-            Recipe r
-        LEFT JOIN RecipeIngredient ri ON r.RecipeID = ri.RecipeID
-        LEFT JOIN Ingredient i ON ri.IngredientID = i.IngredientID
-        LEFT JOIN Measure m ON ri.MeasureID = m.MeasureID
-        LEFT JOIN ThemeOfRecipe tr ON r.RecipeID = tr.RecipeID
-        LEFT JOIN Theme t ON tr.ThemeID = t.ThemeID
-        LEFT JOIN RecipeLabel rl ON r.RecipeID = rl.RecipeID
-        LEFT JOIN Label l ON rl.LabelID = l.LabelID
-        LEFT JOIN Review rev ON r.RecipeID = rev.RecipeID
-        LEFT JOIN User u ON rev.UserID = u.UserID
-        LEFT JOIN User a ON r.AuthorID = a.UserID
-        WHERE 
-            r.RecipeID = ?
-        GROUP BY 
-            r.RecipeID;
+ SELECT 
+    r.RecipeID, 
+    r.RecipeTitle, 
+    r.RecipeDescription, 
+    r.RecipeInstructions, 
+    r.ImageURL, 
+    r.AverageRating, 
+    r.SkillLevel,
+    r.yield,
+    GROUP_CONCAT(
+        DISTINCT CONCAT(
+            CASE 
+                WHEN ri.IsSubstitute = 1 THEN si.SubIngName
+                ELSE i.IngredientName 
+            END, 
+            CASE 
+                WHEN ri.Comments IS NOT NULL AND ri.Comments != '' THEN CONCAT(' (', ri.Comments, ')') 
+                ELSE '' 
+            END, 
+            ' - ', 
+            ri.Quantity, 
+            ' ', 
+            m.MeasureName, 
+            CASE 
+                WHEN ri.IsSubstitute = 1 THEN ' [Substitute]' 
+                ELSE '' 
+            END
+        ) SEPARATOR '|'
+    ) AS Ingredients,
+    GROUP_CONCAT(DISTINCT t.ThemeName SEPARATOR ', ') AS Themes,
+    GROUP_CONCAT(DISTINCT l.LabelName SEPARATOR ', ') AS Labels,
+    GROUP_CONCAT(
+        DISTINCT CONCAT(
+            '{"Rating": "', rev.Rating, '", ',
+            '"Comment": "', rev.Comment, '", ',
+            '"Date": "', rev.Date, '", ',
+            '"User": "', CONCAT(u.FName, ' ', u.LName), '"}'
+        ) SEPARATOR ','
+    ) AS Reviews,
+    CONCAT(a.FName, ' ', a.LName) AS AuthorName,
+    r.PreparationTime,
+    r.TotalTime
+FROM 
+    Recipe r
+LEFT JOIN RecipeIngredient ri ON r.RecipeID = ri.RecipeID
+LEFT JOIN Ingredient i ON ri.IngredientID = i.IngredientID
+LEFT JOIN Measure m ON ri.MeasureID = m.MeasureID
+LEFT JOIN Substitutes s ON i.IngredientID = s.IngredientID
+LEFT JOIN SubstituteIngredient si ON s.SubIngID = si.SubIngID
+LEFT JOIN ThemeOfRecipe tr ON r.RecipeID = tr.RecipeID
+LEFT JOIN Theme t ON tr.ThemeID = t.ThemeID
+LEFT JOIN RecipeLabel rl ON r.RecipeID = rl.RecipeID
+LEFT JOIN Label l ON rl.LabelID = l.LabelID
+LEFT JOIN Review rev ON r.RecipeID = rev.RecipeID
+LEFT JOIN User u ON rev.UserID = u.UserID
+LEFT JOIN User a ON r.AuthorID = a.UserID
+WHERE 
+    r.RecipeID = ?
+GROUP BY 
+    r.RecipeID;
+
+
     `;
 
     db.query(sql, [recipeId], (err, results) => {
@@ -666,54 +672,67 @@ app.post('/api/addingredients', (req, res) => {
 app.post('/api/get-ingredients-by-names', (req, res) => {
     let { ingredientNames, RecipeID } = req.body;
   
-    
-  
     // Forcefully parse RecipeID into a number
     const numericRecipeID =
-  parseInt(req.body.RecipeID, 10) ||
-  parseInt(req.body.recipeID, 10) ||
-  parseInt(req.body.data?.RecipeID, 10) ||
-  parseInt(req.body.data?.recipeID, 10) ||
-  0; // Default to 0 if nothing matches
-
-
-if (!Number.isInteger(numericRecipeID) || numericRecipeID <= 0) {
-  console.error('Invalid RecipeID:', numericRecipeID);
-  return res.status(400).json({ error: 'Invalid or missing RecipeID' });
-}
-
-
-    // Check if RecipeID is still invalid
+      parseInt(req.body.RecipeID, 10) ||
+      parseInt(req.body.recipeID, 10) ||
+      parseInt(req.body.data?.RecipeID, 10) ||
+      parseInt(req.body.data?.recipeID, 10) ||
+      0; // Default to 0 if nothing matches
+  
     if (!Number.isInteger(numericRecipeID) || numericRecipeID <= 0) {
-      console.error(`Invalid RecipeID: ${RecipeID}`);
+      console.error('Invalid RecipeID:', numericRecipeID);
       return res.status(400).json({ error: 'Invalid or missing RecipeID' });
     }
-  
   
     if (!ingredientNames || !Array.isArray(ingredientNames) || ingredientNames.length === 0) {
       console.error('Invalid or missing ingredientNames');
       return res.status(400).json({ error: 'Invalid or missing ingredientNames' });
     }
   
+    // Clean up ingredient names by removing "[Substitute]"
+    const cleanedIngredientNames = ingredientNames.map((name) => name.replace(/\[Substitute\]/g, '').trim());
+  
+    console.log('Cleaned Ingredient Names:', cleanedIngredientNames);
+  
     const query = `
-      SELECT
-        i.IngredientID,
-        ri.Quantity,
-        ri.MeasureID
-      FROM
-        Ingredient i
-      INNER JOIN
-        RecipeIngredient ri ON i.IngredientID = ri.IngredientID
-      WHERE
-        i.IngredientName LIKE ? AND ri.RecipeID = ?
-      LIMIT 1;
+      SELECT * FROM (
+    -- Regular ingredients
+    SELECT
+      i.IngredientID,
+      ri.Quantity,
+      ri.MeasureID
+    FROM
+      Ingredient i
+    INNER JOIN
+      RecipeIngredient ri ON i.IngredientID = ri.IngredientID
+    WHERE
+      i.IngredientName LIKE ? AND ri.RecipeID = ?
+    
+    UNION
+    
+    -- Substitute ingredients
+    SELECT
+      si.SubIngID AS IngredientID,
+      ri.Quantity,
+      ri.MeasureID
+    FROM
+      SubstituteIngredient si
+    INNER JOIN
+      Substitutes s ON si.SubIngID = s.SubIngID
+    INNER JOIN
+      RecipeIngredient ri ON s.IngredientID = ri.IngredientID
+    WHERE
+      si.SubIngName LIKE ? AND ri.RecipeID = ?
+) AS CombinedResults;
+
     `;
   
     const results = [];
-    const promises = ingredientNames.map((name) => {
+    const promises = cleanedIngredientNames.map((name) => {
       const likeName = `%${name}%`;
       return new Promise((resolve, reject) => {
-        db.query(query, [likeName, numericRecipeID], (error, rows) => {
+        db.query(query, [likeName, numericRecipeID, likeName, numericRecipeID], (error, rows) => {
           if (error) {
             console.error(`Query error for ingredient "${name}":`, error);
             return reject(error);
