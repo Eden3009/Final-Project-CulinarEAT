@@ -333,7 +333,6 @@ app.get('/api/get-shopping-lists/:userId', (req, res) => {
                 MeasureName: row.MeasureName,
                 Quantity: row.Quantity,
             });
-            console.log('Results:', results);
 
             return acc;
         }, {});
@@ -696,35 +695,39 @@ app.post('/api/get-ingredients-by-names', (req, res) => {
     console.log('Cleaned Ingredient Names:', cleanedIngredientNames);
   
     const query = `
-      SELECT * FROM (
+     SELECT * FROM (
     -- Regular ingredients
     SELECT
-      i.IngredientID,
-      ri.Quantity,
-      ri.MeasureID
+        i.IngredientID AS IngredientID,
+        ri.Quantity AS Quantity,
+        ri.MeasureID AS MeasureID,
+        i.IngredientName AS IngredientName
     FROM
-      Ingredient i
+        Ingredient i
     INNER JOIN
-      RecipeIngredient ri ON i.IngredientID = ri.IngredientID
+        RecipeIngredient ri ON i.IngredientID = ri.IngredientID
     WHERE
-      i.IngredientName LIKE ? AND ri.RecipeID = ?
-    
+        i.IngredientName LIKE ? AND ri.RecipeID = ? AND ri.IsSubstitute = 0
+
     UNION
-    
+
     -- Substitute ingredients
     SELECT
-      si.SubIngID AS IngredientID,
-      ri.Quantity,
-      ri.MeasureID
+        si.SubIngID AS IngredientID,
+        ri.Quantity AS Quantity,
+        ri.MeasureID AS MeasureID,
+        si.SubIngName AS IngredientName
     FROM
-      SubstituteIngredient si
+        SubstituteIngredient si
     INNER JOIN
-      Substitutes s ON si.SubIngID = s.SubIngID
+        Substitutes s ON si.SubIngID = s.SubIngID
     INNER JOIN
-      RecipeIngredient ri ON s.IngredientID = ri.IngredientID
+        RecipeIngredient ri ON s.IngredientID = ri.IngredientID
     WHERE
-      si.SubIngName LIKE ? AND ri.RecipeID = ?
+        si.SubIngName LIKE ? AND ri.RecipeID = ? AND ri.IsSubstitute = 1
 ) AS CombinedResults;
+
+
 
     `;
   
@@ -737,6 +740,8 @@ app.post('/api/get-ingredients-by-names', (req, res) => {
             console.error(`Query error for ingredient "${name}":`, error);
             return reject(error);
           }
+          console.log('this comes back measure sub:', results);
+
           if (rows.length > 0) {
             results.push(rows[0]);
           }
