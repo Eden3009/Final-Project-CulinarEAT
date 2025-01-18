@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './HomePage';
@@ -18,6 +19,7 @@ import RecipeViewPage from './RecipeViewPage'; // Import the new component
 import { UserProvider } from './UserContext';
 import ProtectedRoute from './ProtectedRoute';
 import TermsOfService from './TermsOfService'; // Import the TermsOfService component
+import LandingPage from './LandingPage'; // Import LandingPage component
 
 const appStyles = {
   app: {
@@ -55,11 +57,8 @@ const keyframeStyles = `
 `;
 
 function ErrorBoundary({ children }) {
-  return (
-    <React.Suspense fallback={<div>Loading...</div>}>
-      {children}
-    </React.Suspense>
-  );
+
+  return <React.Suspense fallback={<div>Loading...</div>}>{children}</React.Suspense>;
 }
 
 // Inject keyframes into the document
@@ -90,7 +89,9 @@ function App() {
   }, []);
 
   return (
-    <UserProvider> {/* Wrap the app with UserProvider */}
+
+    <UserProvider>
+      {/* Wrap the app with UserProvider */}
       <div style={appStyles.app}>
         <Router>
           {/* Navbar */}
@@ -99,15 +100,17 @@ function App() {
           {/* Routes */}
           <ErrorBoundary>
             <Routes>
+              {/* Landing Page */}
+              <Route path="/" element={<LandingPage />} /> {/* Add LandingPage */}
+              
               {/* Public Routes */}
-              <Route path="/" element={<HomePage />} />
-              <Route path="/category" element={<CategoryPage />} /> {/* Dynamic category route */}
+              <Route path="/category" element={<CategoryPage />} />
               <Route path="/recipe-view/:RecipeID" element={<RecipeViewPage />} />
               <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} />
               <Route path="/register" element={<RegistrationPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/privacy" element={<PrivacyPolicyPage />} /> {/* Privacy route */}
-              <Route path="/terms" element={<TermsOfService />} /> {/* Terms of Service route */}
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms" element={<TermsOfService />} />
 
               {/* Protected Routes */}
               <Route
