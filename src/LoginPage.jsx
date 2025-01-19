@@ -113,7 +113,7 @@ const styles = {
   },
 };
 
-function LoginPage({ setIsLoggedIn }) {
+function LoginPage({  }) {
   const [formData, setFormData] = useState({
     UserName: '',
     Password: '',
@@ -122,7 +122,7 @@ function LoginPage({ setIsLoggedIn }) {
   const [isHovering, setIsHovering] = useState(false); // Track hover state
   const [showPopup, setShowPopup] = useState(false);
   const navigate = useNavigate();
-  const { setUser } = useContext(UserContext); // Access setUser from context
+  const { setIsLoggedIn, setUser } = useContext(UserContext); // Access directly from UserContext
 
 
 
@@ -189,7 +189,7 @@ function LoginPage({ setIsLoggedIn }) {
 
             // Login successful
             console.log('Login successful:', data);
-            setIsLoggedIn(true);
+            setIsLoggedIn(true); // Update the logged-in state in context
             setUser(data.user); // Ensure this is the correct user object
             setShowPopup(true); // Show success popup
 
