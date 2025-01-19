@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Modal from 'react-modal';
 import { toast } from 'react-toastify';
 
@@ -27,21 +27,20 @@ const ShoppingListModal = ({ isOpen, onClose, savedLists, onSubmit }) => {
         toast.error('Please select an existing list.');
         return;
       }
-  
-      // Find the list name for the selected listId
-      const selectedList = savedLists.find((list) => list.ShoppingListID === parseInt(selectedListId, 10));
+      const selectedList = savedLists.find(
+        (list) => list.ShoppingListID === parseInt(selectedListId, 10)
+      );
       const selectedListName = selectedList?.ListName || '';
-  
+
       if (!selectedListName.trim()) {
         toast.error('Failed to find the name for the selected list.');
         return;
       }
-  
+
       onSubmit({ type: 'existing', listId: selectedListId, name: selectedListName });
     }
     onClose();
   };
-  
 
   return (
     <Modal
@@ -50,28 +49,38 @@ const ShoppingListModal = ({ isOpen, onClose, savedLists, onSubmit }) => {
       contentLabel="Add to Shopping List"
       style={{
         content: {
-          width: '400px',
-          height: '300px',
+          width: '450px',
+          height: '400px',
           margin: 'auto',
-          borderRadius: '12px',
-          padding: '20px',
-          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+          borderRadius: '16px',
+          padding: '30px',
+          backgroundColor: '#FAF9F6', // Matching modal background color
+          boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+          fontFamily: "'Poppins', sans-serif",
         },
         overlay: {
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backgroundColor: 'rgba(0, 0, 0, 0.6)', // Slightly darker overlay
         },
       }}
     >
-      <h2 style={{ textAlign: 'center', fontFamily: "'Merienda', cursive" }}>
+      <h2
+        style={{
+          textAlign: 'center',
+          fontFamily: "'Merienda', cursive",
+          fontSize: '28px',
+          color: '#B55335', // Consistent with your theme
+        }}
+      >
         Add to Shopping List
       </h2>
-      <div style={{ margin: '20px 0' }}>
-        <label style={{ display: 'block', marginBottom: '10px' }}>
+      <div style={{ marginTop: '30px' }}>
+        <label style={{ fontSize: '16px', fontWeight: 'bold', color: '#333' }}>
           <input
             type="radio"
             value="new"
             checked={isCreatingNewList}
             onChange={() => handleOptionChange('new')}
+            style={{ marginRight: '8px' }}
           />
           Create a New List
         </label>
@@ -83,19 +92,29 @@ const ShoppingListModal = ({ isOpen, onClose, savedLists, onSubmit }) => {
             onChange={(e) => setNewListName(e.target.value)}
             style={{
               width: '100%',
-              padding: '10px',
+              padding: '12px',
               borderRadius: '8px',
               border: '1px solid #ddd',
-              marginTop: '10px',
+              marginTop: '12px',
+              fontFamily: "'Georgia', serif",
             }}
           />
         )}
-        <label style={{ display: 'block', marginTop: '20px' }}>
+        <label
+          style={{
+            display: 'block',
+            marginTop: '20px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            color: '#333',
+          }}
+        >
           <input
             type="radio"
             value="existing"
             checked={!isCreatingNewList}
             onChange={() => handleOptionChange('existing')}
+            style={{ marginRight: '8px' }}
           />
           Add to Existing List
         </label>
@@ -105,10 +124,11 @@ const ShoppingListModal = ({ isOpen, onClose, savedLists, onSubmit }) => {
             onChange={(e) => setSelectedListId(e.target.value)}
             style={{
               width: '100%',
-              padding: '10px',
+              padding: '12px',
               borderRadius: '8px',
               border: '1px solid #ddd',
-              marginTop: '10px',
+              marginTop: '12px',
+              fontFamily: "'Georgia', serif",
             }}
           >
             <option value="">Select a list</option>
@@ -120,17 +140,19 @@ const ShoppingListModal = ({ isOpen, onClose, savedLists, onSubmit }) => {
           </select>
         )}
       </div>
-      <div style={{ textAlign: 'center' }}>
+      <div style={{ textAlign: 'center', marginTop: '30px' }}>
         <button
           onClick={handleSubmit}
           style={{
             backgroundColor: '#B55335',
             color: '#fff',
-            padding: '10px 20px',
+            padding: '12px 24px',
             border: 'none',
             borderRadius: '8px',
             cursor: 'pointer',
             fontFamily: "'Merienda', cursive",
+            fontSize: '16px',
+            marginRight: '10px',
           }}
         >
           Submit
@@ -140,12 +162,12 @@ const ShoppingListModal = ({ isOpen, onClose, savedLists, onSubmit }) => {
           style={{
             backgroundColor: '#ccc',
             color: '#000',
-            padding: '10px 20px',
+            padding: '12px 24px',
             border: 'none',
             borderRadius: '8px',
             cursor: 'pointer',
             fontFamily: "'Merienda', cursive",
-            marginLeft: '10px',
+            fontSize: '16px',
           }}
         >
           Cancel
