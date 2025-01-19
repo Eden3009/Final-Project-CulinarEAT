@@ -195,7 +195,7 @@ function LoginPage({  }) {
 
             // Redirect to homepage after 4 seconds
             setTimeout(() => {
-              navigate('/');
+              navigate('/home');
             }, 4000);
           } catch (error) {
             console.error('Error during login:', error);

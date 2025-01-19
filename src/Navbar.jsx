@@ -94,21 +94,23 @@ const handleLogout = async () => {
   return (
     <nav style={styles.navbar}>
       <div style={styles.navbarLogo}>
-        <Link to="/">
-          <img src={logo} alt="Culinareat Logo" style={styles.logoImage} />
-        </Link>
+      <Link to="/home">
+  <img src={logo} alt="Culinareat Logo" style={styles.logoImage} />
+</Link>
+
       </div>
 
       <div style={styles.navbarContent}>
-        <Link
-          to="/"
-          style={styles.navbarLink}
-          title="Home"
-          onMouseEnter={(e) => (e.target.style.color = styles.navbarLinkHover.color)}
-          onMouseLeave={(e) => (e.target.style.color = styles.navbarLink.color)}
-        >
-          <FiHome />
-        </Link>
+      <Link
+  to="/home"
+  style={styles.navbarLink}
+  title="Home"
+  onMouseEnter={(e) => (e.target.style.color = styles.navbarLinkHover.color)}
+  onMouseLeave={(e) => (e.target.style.color = styles.navbarLink.color)}
+>
+  <FiHome />
+</Link>
+
 
         {!isLoggedIn ? (
           <>

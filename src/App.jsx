@@ -102,6 +102,8 @@ function App() {
             <Routes>
               {/* Landing Page */}
               <Route path="/" element={<LandingPage />} /> {/* Add LandingPage */}
+               {/* Home Page */}
+  <Route path="/home" element={<HomePage />} /> {/* Add this route */}
               
               {/* Public Routes */}
               <Route path="/category" element={<CategoryPage />} />
