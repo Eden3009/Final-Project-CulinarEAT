@@ -60,36 +60,37 @@ const styles = {
 };
 
 function Navbar() {
-  const { user, setUser } = useContext(UserContext);
 
-  const isLoggedIn = !!user;
+  //const isLoggedIn = !!user;
 
-  const handleLogout = async () => {
+  const { user, setUser, isLoggedIn, setIsLoggedIn } = useContext(UserContext); // Extract isLoggedIn
+
+const handleLogout = async () => {
     toast.dismiss();
     try {
-      const response = await fetch('http://localhost:5001/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
+        const response = await fetch('http://localhost:5001/logout', {
+            method: 'POST',
+            credentials: 'include',
+        });
 
-      if (response.ok) {
-        toast.success('You have been logged out successfully!', {
-          position: 'top-center',
-          autoClose: 3000,
-        });
-        setUser(null);
-      } else {
-        toast.error('Failed to log out. Please try again.', {
-          position: 'top-center',
-        });
-      }
+        if (response.ok) {
+            toast.success('You have been logged out successfully!', {
+                position: 'top-center',
+                autoClose: 3000,
+            });
+            setUser(null); // Clear user data
+            setIsLoggedIn(false); // Set login state to false
+        } else {
+            toast.error('Failed to log out. Please try again.', {
+                position: 'top-center',
+            });
+        }
     } catch (error) {
-      toast.error(`Error during logout: ${error.message}`, {
-        position: 'top-center',
-      });
+        toast.error(`Error during logout: ${error.message}`, {
+            position: 'top-center',
+        });
     }
-  };
-
+};
   return (
     <nav style={styles.navbar}>
       <div style={styles.navbarLogo}>

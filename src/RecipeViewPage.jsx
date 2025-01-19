@@ -227,7 +227,7 @@ function RecipeViewPage() {
   const [hoverRating, setHoverRating] = useState(0);  // User's hover state
   const [isFavorite, setIsFavorite] = useState(false); // Track whether the recipe is in favorites
   const [measurementSystem, setMeasurementSystem] = useState('US'); // Default to US
-  const { user } = React.useContext(UserContext); // Access `UserContext` at the top level
+  const { user, isLoggedIn } = React.useContext(UserContext);
   const [isEditing, setIsEditing] = useState(false); // To toggle edit modal
   const [editReview, setEditReview] = useState({ ReviewID: null, Comment: '', Rating: 0 }); // Store the review to be edited
   const [editReviewId, setEditReviewId] = useState(null);  // Track which review is being edited
@@ -243,6 +243,7 @@ const [savedLists, setSavedLists] = useState([]); // To store existing shopping 
     const parsedRecipeID = useMemo(() => parseInt(RecipeID, 10), [RecipeID]); // Parse once and memoize
     const [substitutions, setSubstitutions] = useState({});
     const [ingredients, setIngredients] = useState([]);
+    console.log('UserContext:', { user, isLoggedIn });
 
   
     const handleModalSubmit = async ({ type, name, listId }) => {
@@ -827,7 +828,7 @@ useEffect(() => {
         return result;
       }, []);
   
-      console.log('Parsed Ingredients:', parsedIngredients);
+     // console.log('Parsed Ingredients:', parsedIngredients);
       setIngredients(parsedIngredients);
     }
   }, [recipe]);
@@ -836,7 +837,7 @@ useEffect(() => {
 
 
 // Log for debugging
-console.log("Parsed Ingredients Array:", ingredients);
+//console.log("Parsed Ingredients Array:", ingredients);
 
 const handleSwap = (index) => {
   setIngredients((prevIngredients) => {
@@ -906,7 +907,7 @@ const handleSwap = (index) => {
 
 
 useEffect(() => {
-  console.log('Ingredients state updated:', ingredients);
+  //console.log('Ingredients state updated:', ingredients);
 }, [ingredients]);
 
 
@@ -1236,7 +1237,10 @@ useEffect(() => {
   {/* Buttons Section */}
   <div style={{ marginTop: '20px', textAlign: 'left' }}>
   <button
-  onClick={() => setIsModalOpen(true)} // Open modal
+onClick={() => {
+  console.log("Button clicked");
+  setIsModalOpen(true);
+}}  
   disabled={checkedIngredients.length === 0}
   style={{
     backgroundColor: checkedIngredients.length > 0 ? '#d2b9af' : '#ccc',
@@ -1252,12 +1256,13 @@ useEffect(() => {
     justifyContent: 'center',
     gap: '10px',
     transition: 'background-color 0.3s ease',
-    marginBottom: '10px', // Add spacing between the shopping list button and toggle
+    marginBottom: '10px',
   }}
 >
   Add to Shopping List
   <BsCartPlus style={{ fontSize: '20px', color: '#fff' }} />
 </button>
+
 
 
     {/* Toggle Button for US/EU Conversion */}
@@ -1506,8 +1511,10 @@ useEffect(() => {
 </div>
 </div>
 
- {/* Add Review Form */}
- <form
+ {/* Add Review Section */}
+{isLoggedIn ? (
+  // Logged-in users see the review form
+  <form
     onSubmit={handleReviewSubmit}
     style={{
       maxWidth: '700px',
@@ -1531,7 +1538,7 @@ useEffect(() => {
       value={reviewData.comment}
       onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
       style={{
-        width: '700px',
+        width: '100%',
         height: '100px',
         padding: '15px',
         marginBottom: '15px',
@@ -1542,32 +1549,33 @@ useEffect(() => {
         boxShadow: 'inset 0 2px 5px rgba(0, 0, 0, 0.05)',
         transition: 'border-color 0.3s ease',
       }}
-      onFocus={(e) => e.target.style.borderColor = '#8B4513'}
-      onBlur={(e) => e.target.style.borderColor = '#DDD'}
+      onFocus={(e) => (e.target.style.borderColor = '#8B4513')}
+      onBlur={(e) => (e.target.style.borderColor = '#DDD')}
     />
-{/* Editable Chef Hat Icons for Rating */}
-<div style={{
-  display: 'flex',
-  justifyContent: 'center',
-  gap: '15px',
-  marginBottom: '20px',
-}}>
-  {Array.from({ length: 5 }).map((_, i) => (
-    <GiChefToque
-      key={i}
-      style={{
-        fontSize: '30px',
-        cursor: 'pointer', // Allow clicking
-        color: i < (hoverRating || rating) ? '#FFD700' : '#ccc', // Yellow when hovered or selected, gray otherwise
-        transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)',
-        transition: 'transform 0.2s ease, color 0.3s ease',
-      }}
-      onMouseEnter={() => setHoverRating(i + 1)} // Highlight hats up to this index on hover
-      onMouseLeave={() => setHoverRating(0)} // Reset highlight when mouse leaves
-      onClick={() => setRating(i + 1)} // Set the rating when clicked
-    />
-  ))}
-</div>
+
+    {/* Editable Chef Hat Icons for Rating */}
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '15px',
+      marginBottom: '20px',
+    }}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <GiChefToque
+          key={i}
+          style={{
+            fontSize: '30px',
+            cursor: 'pointer', // Allow clicking
+            color: i < (hoverRating || rating) ? '#FFD700' : '#ccc', // Yellow when hovered or selected, gray otherwise
+            transform: i < hoverRating ? 'scale(1.2)' : 'scale(1)',
+            transition: 'transform 0.2s ease, color 0.3s ease',
+          }}
+          onMouseEnter={() => setHoverRating(i + 1)} // Highlight hats up to this index on hover
+          onMouseLeave={() => setHoverRating(0)} // Reset highlight when mouse leaves
+          onClick={() => setRating(i + 1)} // Set the rating when clicked
+        />
+      ))}
+    </div>
 
     {/* Submit Button */}
     <button
@@ -1590,6 +1598,19 @@ useEffect(() => {
       Submit Review
     </button>
   </form>
+) : (
+  // Logged-out users see a message
+  <p style={{
+    fontSize: '18px',
+    fontFamily: "'Georgia', serif",
+    color: '#333',
+    margin: '20px 0',
+    textAlign: 'center',
+  }}>
+    Log in to leave a comment or rating.
+  </p>
+)}
+
 
 {/* Reviews Section */}
 <div style={{ marginTop: '40px', textAlign: 'center' }}>
@@ -1630,6 +1651,7 @@ useEffect(() => {
             </p>
 
             {editReviewId === review.ReviewID ? (
+              // Edit Review Section
               <div style={{ width: '100%', maxWidth: '600px' }}>
                 {/* Editable Chef Hats */}
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '10px' }}>
@@ -1696,34 +1718,21 @@ useEffect(() => {
                 <p style={{ fontSize: '18px', color: '#333', margin: '0' }}>
                   {review.Comment || 'No comment provided.'}
                 </p>
-                <div style={{ display: 'flex', gap: '15px' }}>
-                  <MdEdit
-                    style={{ cursor: 'pointer', color: 'blue', fontSize: '20px' }}
-                    onClick={() => handleEditClick(review)}
-                  />
-                  <FaTrash
-                    style={{ cursor: 'pointer', color: 'red', fontSize: '20px' }}
-                    onClick={() => handleDeleteReview(review.ReviewID)}
-                  />
-                </div>
+                {review.UserID === user?.UserID && (
+                  <div style={{ display: 'flex', gap: '15px' }}>
+                    <MdEdit
+                      style={{ cursor: 'pointer', color: 'blue', fontSize: '20px' }}
+                      onClick={() => handleEditClick(review)}
+                    />
+                    <FaTrash
+                      style={{ cursor: 'pointer', color: 'red', fontSize: '20px' }}
+                      onClick={() => handleDeleteReview(review.ReviewID)}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
-
-          {/* Add a line between reviews except after the last one */}
-          {index !== recipe.Reviews.length - 1 && (
-        <hr style={{
-          width: '90vw',  // 90% of the viewport width
-          height: '2px',
-          backgroundColor: '#E0E0E0',
-          border: 'none',
-          margin: '20px auto',
-          position: 'relative',
-          left: '50%',
-          transform: 'translateX(-50%)',  // Centers the line horizontally
-        }} />
-        
-          )}
         </div>
       ))}
     </div>
@@ -1737,13 +1746,14 @@ useEffect(() => {
       {recipe.Reviews && recipe.Reviews.length === 0 ? 'No reviews yet.' : 'Loading reviews...'}
     </p>
   )}
-  <ShoppingListModal
+   <ShoppingListModal
   isOpen={isModalOpen}
   onClose={() => setIsModalOpen(false)}
   savedLists={savedLists}
   onSubmit={handleModalSubmit}
 />
 </div>
+
 
 
 
