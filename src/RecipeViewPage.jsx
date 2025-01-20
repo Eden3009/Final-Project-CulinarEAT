@@ -76,13 +76,14 @@ const styles = {
   
   listItem: {
     display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
+    alignItems: 'center', /* Vertical alignment */
+    justifyContent: 'flex-start', /* Prevents stretching */
+    gap: '10px', /* Space between items */
     marginBottom: '10px',
-    fontSize: '18px', // Match the updated font size
-    fontFamily: 'Georgia, serif', // Ensure consistency with the list style
-    lineHeight: '1.8',
+    flexWrap: 'nowrap', /* Ensures content stays in a single line */
   },
+  
+  
   listIcon: {
     color: '#8B4513',
     fontSize: '18px',
@@ -138,17 +139,29 @@ backButtonHover: {
   
   checkboxContainer: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'center', /* Ensure vertical alignment */
+    justifyContent: 'space-between', /* Separate checkbox and button properly */
     gap: '10px',
-    marginBottom: '10px', // Add spacing between items
+    marginBottom: '10px',
+    
   },
 
   checkbox: {
-    width: '0', // Hide the default checkbox
-    height: '0',
-    opacity: '0',
-    position: 'absolute',
+    appearance: 'none',
+    width: '24px', /* Fixed width */
+    height: '24px', /* Fixed height */
+    borderRadius: '50%', /* Makes it a perfect circle */
+    border: '2px solid #B55335', /* Consistent border styling */
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+    outline: 'none',
+    boxSizing: 'border-box', /* Prevents padding from affecting size */
+    flexShrink: 0, /* Prevents resizing due to flex properties */
+    transition: 'background-color 0.3s ease, transform 0.2s ease',
   },
+  
+  
+  
   customCheckbox: {
     display: 'inline-block',
     width: '20px', // Adjust checkbox size to be slightly smaller
@@ -1175,14 +1188,17 @@ useEffect(() => {
           type="checkbox"
           style={{
             appearance: 'none',
-            width: '22px',
-            height: '22px',
-            borderRadius: '50%',
-            border: '1px solid #B55335',
+            width: '24px', /* Slightly larger to ensure the circle is noticeable */
+            height: '24px', /* Match the width */
+            borderRadius: '50%', /* Ensure it's a perfect circle */
+            border: '2px solid #B55335', /* Thicker border for better visibility */
             backgroundColor: 'transparent',
             cursor: 'pointer',
             outline: 'none',
+            boxSizing: 'border-box', /* Ensures padding or borders don’t break the shape */
             transition: 'background-color 0.3s ease, transform 0.2s ease',
+            
+            
           }}
           onChange={(e) => handleCheckboxChange(e, ingredient)}
           onMouseEnter={(e) => {
@@ -1208,15 +1224,17 @@ useEffect(() => {
       {ingredient.Substitutes.length > 0 && (
         <button
           style={{
-            marginLeft: '15px',
-            padding: '5px 10px',
-            borderRadius: '5px',
-            border: '1px solid #B55335',
-            backgroundColor: '#FFF',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontFamily: "'Georgia', serif",
-            color: '#B55335',
+            marginLeft: '10px',
+padding: '6px 12px',
+borderRadius: '6px',
+border: 'none',
+backgroundColor: '#B55335', /* Red background */
+cursor: 'pointer',
+fontSize: '14px',
+fontFamily: "'Merienda', cursive", /* Updated font */
+color: '#FFF', /* White text */
+transition: 'background-color 0.3s ease',
+
           }}
           onClick={() => handleSwap(index)}
         >

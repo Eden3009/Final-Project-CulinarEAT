@@ -111,6 +111,7 @@ const SpinTheWheel = () => {
           transition: "transform 0.2s ease, box-shadow 0.3s ease",
           boxShadow: "0 8px 15px rgba(0, 0, 0, 0.2)",
           outline: "none",
+          overflowX: "hidden",
         }}
         onMouseEnter={(e) => {
           e.target.style.transform = "scale(1.1)";

@@ -276,6 +276,22 @@ function LoginPage({  }) {
 >
   Sign In
 </button>
+{/* Continue as a Guest link beneath the button */}
+<Link
+  to="/home"
+  style={{
+    display: 'block',
+    marginTop: '10px',
+    fontSize: '14px',
+    color: '#B55335',
+    textDecoration: 'none',
+    fontFamily: "'Poppins', sans-serif",
+    fontWeight: '500',
+    textAlign: 'center', // Align the link to the center
+  }}
+>
+  Continue as a Guest
+</Link>
 {errors.general && (
   <div style={{ color: 'red', marginTop: '10px', fontWeight: 'bold' }}>
     {errors.general}
@@ -292,7 +308,7 @@ function LoginPage({  }) {
       </div>
       <div>
       {showPopup && <Popup message="Login successful! Redirecting to the homepage..." onClose={() => setShowPopup(false)} />}
-      {/* Rest of the login form */}
+      
     </div>
     </div>
     
