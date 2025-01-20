@@ -39,6 +39,20 @@ import bakingTipsImage from './images/baking4.png'; // Baking Tips
 import conversionsImage from './images/conversions4.png'; // Conversions
 import specialOffersImage from './images/new2.jpeg'; // New this week
 
+// Content in the circles
+import aboutUs1 from './images/aboutUs1.png';
+import aboutUs2 from './images/aboutUs2.png';
+import aboutUs3 from './images/aboutUs3.png';
+import cookingTips1 from './images/cookingTips1.png';
+import cookingTips2 from './images/cookingTips2.mp4';
+import bakingTips1 from './images/bakingTips1.mp4';
+import bakingTips2 from './images/bakingTips2.png';
+import conversions1 from './images/conversions1.png';
+import conversions2 from './images/conversions2.png';
+import newThisWeek1 from './images/newThisWeek1.png';
+import newThisWeek2 from './images/newThisWeek2.png';
+
+
 const styles = {
   homePage: {
     display: 'flex',
@@ -291,6 +305,17 @@ const styles = {
     cursor: 'pointer',
     borderBottom: '1px solid #eee',
   },
+  rotatingCircle: {
+    animation: 'rotate 1s linear infinite', // Apply rotation animation
+  },
+  '@keyframes rotate': {
+    '0%': {
+      transform: 'rotate(0deg)',
+    },
+    '100%': {
+      transform: 'rotate(360deg)',
+    },
+  },
   
 };
 
@@ -302,6 +327,43 @@ function HomePage() {
   const [selectedIngredients, setSelectedIngredients] = useState([]);
   const [suggestedIngredients, setSuggestedIngredients] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
+  const [currentTipIndex, setCurrentTipIndex] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  
+
+  const openModal = (tipIndex) => {
+    setIsLoading(true); // Start loading animation
+    setCurrentTipIndex(tipIndex);
+    setCurrentStoryIndex(0);
+
+  // Simulate image loading time with a timeout
+  setTimeout(() => {
+    setIsLoading(false); // Stop loading animation once the modal is ready
+    setIsModalOpen(true);
+  }, 1000); // Adjust delay as needed
+};
+
+
+const closeModal = () => {
+  setIsModalOpen(false);
+};
+
+const handleNext = () => {
+  if (currentTipIndex !== null) {
+    const stories = tips[currentTipIndex].stories;
+    setCurrentStoryIndex((prev) => (prev + 1) % stories.length);
+  }
+};
+
+const handlePrev = () => {
+  if (currentTipIndex !== null) {
+    const stories = tips[currentTipIndex].stories;
+    setCurrentStoryIndex((prev) => (prev - 1 + stories.length) % stories.length);
+  }
+};
+
 
 
   
@@ -395,13 +457,36 @@ const handleSearch = () => {
     
 
   const tips = [
-    { img: aboutUsImage, label: 'About Us' },
-    { img: cookingTipsImage, label: 'Cooking Tips' },
-    { img: bakingTipsImage, label: 'Baking Tips' },
-    { img: conversionsImage, label: 'Conversions' },
-    { img: specialOffersImage, label: 'New This Week' },
+    {
+      img: aboutUsImage,
+      label: 'About Us',
+      stories: [aboutUs1, aboutUs2, aboutUs3],
+    },
+    {
+      img: cookingTipsImage,
+      label: 'Cooking Tips',
+      stories: [cookingTips1, cookingTips2], // Use imported images
+    },
+    {
+      img: bakingTipsImage,
+      label: 'Baking Tips',
+      stories: [bakingTips1, bakingTips2],
+    },
+    {
+      img: conversionsImage,
+      label: <span>Conversions&<br />Substitutes</span>,
+      stories: [conversions1, conversions2],
+    },
+    
+    {
+      img: specialOffersImage,
+      label: 'New This Week',
+      stories: [newThisWeek1, newThisWeek2],
+    },
   ];
+  
 
+  
   return (
     <div style={styles.homePage}>
       {/* Hero Section */}
@@ -411,8 +496,98 @@ const handleSearch = () => {
         </div>
       </div>
 
+      {isModalOpen && currentTipIndex !== null && (
+  <div
+    style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000,
+    }}
+    onClick={closeModal} // Close modal on click outside
+  >
+    <div
+      style={{
+        position: 'relative',
+        width: '80%',
+        maxWidth: '600px',
+        backgroundColor: '#fff',
+        borderRadius: '10px',
+        overflow: 'hidden',
+      }}
+      onClick={(e) => e.stopPropagation()} // Prevent click inside modal from closing it
+    >
+      {/* Render Image or Video Dynamically */}
+      {tips[currentTipIndex]?.stories[currentStoryIndex].endsWith('.mp4') ? (
+        <video
+          src={tips[currentTipIndex]?.stories[currentStoryIndex]}
+          controls
+          autoPlay
+          style={{
+            width: '100%',
+            height: 'auto',
+            display: 'block',
+          }}
+        />
+      ) : (
+        <img
+          src={tips[currentTipIndex]?.stories[currentStoryIndex]}
+          alt={`Story ${currentStoryIndex + 1}`}
+          style={{
+            width: '100%',
+            height: 'auto',
+            display: 'block',
+          }}
+        />
+      )}
+
+      {/* Navigation Buttons */}
+      <button
+        onClick={handlePrev}
+        style={{
+          position: 'absolute',
+          left: '-2px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          background: 'none',
+          border: 'none',
+          color: 'black',
+          fontSize: '36px',
+          cursor: 'pointer',
+        }}
+      >
+        ‹
+      </button>
+      <button
+        onClick={handleNext}
+        style={{
+          position: 'absolute',
+          right: '-2px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          background: 'none',
+          border: 'none',
+          color: 'black',
+          fontSize: '36px',
+          cursor: 'pointer',
+        }}
+      >
+        ›
+      </button>
+    </div>
+  </div>
+
+)}
+
+
     {/* Circles Section */}
-<div style={styles.circlesSection}>
+    <div style={styles.circlesSection}>
   {tips.map((tip, index) => (
     <div
       style={{
@@ -422,15 +597,21 @@ const handleSearch = () => {
       key={`circle-${index}`}
       onMouseEnter={() => setHoverIndex(`circle-${index}`)}
       onMouseLeave={() => setHoverIndex(null)}
+      onClick={() => openModal(index)} // Open the modal for the clicked circle
     >
-      {/* Gradient border container */}
-      <div style={styles.circleGradient}>
+      <div
+        style={{
+          ...styles.circleGradient,
+          ...(isLoading && currentTipIndex === index ? styles.rotatingCircle : {}), // Apply rotation when loading
+        }}
+      >
         <img src={tip.img} alt={tip.label} style={styles.circleImage} />
       </div>
       <span style={styles.circleLabel}>{tip.label}</span>
     </div>
   ))}
 </div>
+
 
 
 {/* Search Bar */}  
