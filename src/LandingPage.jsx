@@ -29,7 +29,7 @@ const LandingPage = () => {
 
   const handleQuizComplete = (results) => {
     setShowQuiz(false);
-    setPopupContent("Your Recommendations:");
+    setPopupContent("Your Recommendations are:");
     setSubContent("Calculating your recommendations...");
     setRedirectMessage("");
     setShowPopup(true);
@@ -39,7 +39,7 @@ const LandingPage = () => {
         results.length > 0
           ? results.map((res) => res.label).join(", ")
           : "No matching categories found. Try again!";
-      setSubContent(`Your recommendations are: ${recommendations}`);
+      setSubContent(`${recommendations}`);
       setRedirectMessage("Redirecting to login page in 5 seconds...");
 
       setTimeout(() => {
@@ -68,21 +68,24 @@ const LandingPage = () => {
 
   return (
     <div
-      style={{
-        height: "100vh",
-        width: "100vw",
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-end",
-        justifyContent: "flex-start",
-        margin: 0,
-        padding: 0,
-      }}
-    >
+    style={{
+      height: "100vh",
+      width: "100%",
+      backgroundImage: `url(${backgroundImage})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-end",
+      justifyContent: "flex-start",
+      margin: 0,
+      padding: 0,
+      overflowX: "hidden", // Prevent horizontal scrolling
+      boxSizing: "border-box", // Include padding and borders in width calculation
+    }}
+  >
+  
       {showPopup && (
         <div
           style={{
@@ -127,10 +130,10 @@ const LandingPage = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            backgroundColor: "#fff",
+          
             padding: "20px",
             borderRadius: "10px",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+           
             zIndex: 1000,
           }}
         >
@@ -145,84 +148,125 @@ const LandingPage = () => {
         <div
           style={{
             position: "absolute",
-            top: "50%",
-            left: "50%",
+            top: "375px",
+            left: "1320px",
             transform: "translate(-50%, -50%)",
-            backgroundColor: "#fff",
+            backgroundColor: "#f9f7f4",
             padding: "20px",
             borderRadius: "10px",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            width:"647px",
+            //boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
             zIndex: 1000,
+            
           }}
         >
           <SpinTheWheel onSpinComplete={handleSpinComplete} />
         </div>
       )}
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          gap: "20px",
-          marginRight: "80px",
-          marginTop: "400px",
-        }}
-      >
-        <button
-          onClick={() => setShowQuiz(true)}
-          style={{
-            padding: "15px 40px",
-            borderRadius: "20px",
-            background: "linear-gradient(90deg, #FF7E5F, #FD3A69)",
-            color: "#fff",
-            border: "none",
-            fontSize: "20px",
-            fontWeight: "bold",
-            fontFamily: "'Poppins', sans-serif",
-            cursor: "pointer",
-            transition: "transform 0.2s ease, box-shadow 0.3s ease",
-            boxShadow: "0 8px 15px rgba(0, 0, 0, 0.2)",
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.transform = "scale(1.1)";
-            e.target.style.boxShadow = "0 12px 20px rgba(0, 0, 0, 0.3)";
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = "scale(1)";
-            e.target.style.boxShadow = "0 8px 15px rgba(0, 0, 0, 0.2)";
-          }}
-        >
-          Take the Quiz!
-        </button>
+<div
+  style={{
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: "20px",
+    marginRight: "80px",
+    marginTop: "400px",
+  }}
+>
+  <button
+    onClick={() => setShowQuiz(true)}
+    style={{
+      padding: "15px 40px",
+      borderRadius: "20px",
+      background: "linear-gradient(90deg, #FF7E5F, #FD3A69)",
+      color: "#fff",
+      border: "none",
+      fontSize: "20px",
+      fontWeight: "bold",
+      fontFamily: "'Poppins', sans-serif",
+      cursor: "pointer",
+      transition: "transform 0.2s ease, box-shadow 0.3s ease",
+      boxShadow: "0 8px 15px rgba(0, 0, 0, 0.2)",
+    }}
+    onMouseEnter={(e) => {
+      e.target.style.transform = "scale(1.1)";
+      e.target.style.boxShadow = "0 12px 20px rgba(0, 0, 0, 0.3)";
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.transform = "scale(1)";
+      e.target.style.boxShadow = "0 8px 15px rgba(0, 0, 0, 0.2)";
+    }}
+  >
+    Take the Quiz!
+  </button>
 
-        <button
-          onClick={() => setShowWheel(true)}
-          style={{
-            padding: "15px 40px",
-            borderRadius: "20px",
-            background: "linear-gradient(90deg, #FF7E5F, #FD3A69)",
-            color: "#fff",
-            border: "none",
-            fontSize: "20px",
-            fontWeight: "bold",
-            fontFamily: "'Poppins', sans-serif",
-            cursor: "pointer",
-            transition: "transform 0.2s ease, box-shadow 0.3s ease",
-            boxShadow: "0 8px 15px rgba(0, 0, 0, 0.2)",
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.transform = "scale(1.1)";
-            e.target.style.boxShadow = "0 12px 20px rgba(0, 0, 0, 0.3)";
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = "scale(1)";
-            e.target.style.boxShadow = "0 8px 15px rgba(0, 0, 0, 0.2)";
-          }}
-        >
-          Spin the Wheel!
-        </button>
-      </div>
+  <p style={{ fontSize: "18px", fontWeight: "bold", color: "#333" }}>OR</p>
+
+  <button
+    onClick={() => setShowWheel(true)}
+    style={{
+      padding: "15px 40px",
+      borderRadius: "20px",
+      background: "linear-gradient(90deg, #FF7E5F, #FD3A69)",
+      color: "#fff",
+      border: "none",
+      fontSize: "20px",
+      fontWeight: "bold",
+      fontFamily: "'Poppins', sans-serif",
+      cursor: "pointer",
+      transition: "transform 0.2s ease, box-shadow 0.3s ease",
+      boxShadow: "0 8px 15px rgba(0, 0, 0, 0.2)",
+    }}
+    onMouseEnter={(e) => {
+      e.target.style.transform = "scale(1.1)";
+      e.target.style.boxShadow = "0 12px 20px rgba(0, 0, 0, 0.3)";
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.transform = "scale(1)";
+      e.target.style.boxShadow = "0 8px 15px rgba(0, 0, 0, 0.2)";
+    }}
+  >
+    Spin the Wheel!
+  </button>
+</div>
+
+<p
+
+  onClick={() => navigate("/login")}
+  style={{
+    marginTop: "40px",
+    fontSize: "14px",
+    color: "#007BFF",
+    textDecoration: "underline",
+    cursor: "pointer",
+    fontFamily: "'Poppins', sans-serif",
+    textAlign: "left", // Align the text to the left
+    alignSelf: "flex-start", // Align the element itself to the left
+    marginLeft: "1220px", // Add space from the left side of the container
+  }}
+>
+  Navigate to the login page
+</p>
+<p
+  onClick={() => navigate("/home")}
+  style={{
+    marginTop: "10px",
+    fontSize: "14px",
+    color: "black",
+   // textDecoration: "underline",
+    cursor: "pointer",
+    fontFamily: "'Poppins', sans-serif",
+    textAlign: "left", // Align the text to the left
+    alignSelf: "flex-start", // Align the element itself to the left
+    marginLeft: "1260px", // Add space from the left side of the container
+  }}
+>
+  Continue as a guest
+</p>
+
+
+
     </div>
   );
 };
