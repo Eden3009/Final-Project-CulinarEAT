@@ -243,8 +243,11 @@ const [savedLists, setSavedLists] = useState([]); // To store existing shopping 
     const parsedRecipeID = useMemo(() => parseInt(RecipeID, 10), [RecipeID]); // Parse once and memoize
     const [substitutions, setSubstitutions] = useState({});
     const [ingredients, setIngredients] = useState([]);
-    console.log('UserContext:', { user, isLoggedIn });
-
+    //console.log('UserContext:', { user, isLoggedIn });
+    const cleanIngredientName = (name) => {
+      return name.replace(/\[Substitute\]/g, '').trim();
+    };
+    
   
     const handleModalSubmit = async ({ type, name, listId }) => {
       console.log('Checked Ingredients:', checkedIngredients); // Debug raw data
@@ -791,19 +794,15 @@ useEffect(() => {
   useEffect(() => {
     if (recipe && recipe.Ingredients) {
       const parsedIngredients = recipe.Ingredients.split('|').reduce((result, item) => {
-        // Check for substitute marker and split accordingly
         const isSubstitute = item.includes('[Substitute]');
         const match = item.match(/^(.*?)(?: \[Substitute\])? - (.*)$/);
   
         if (match) {
           const [, ingredientName, quantityMeasure] = match;
-  
-          // Extract quantity and measure
           const [quantity, ...rest] = quantityMeasure.split(' ');
           const measure = rest.join(' ');
   
           if (isSubstitute) {
-            // Add this substitute to the last ingredient in the list
             const lastIngredient = result[result.length - 1];
             if (lastIngredient) {
               lastIngredient.Substitutes.push({
@@ -813,14 +812,15 @@ useEffect(() => {
               });
             }
           } else {
-            // Add a new main ingredient
             result.push({
               IngredientName: ingredientName.trim(),
               Quantity: quantity || '',
               Measure: measure.trim(),
-              Substitutes: [], // Initialize with an empty array for substitutes
+              OriginalQuantity: quantity || '', // Save the original quantity
+              OriginalMeasure: measure.trim(), // Save the original measure
+              Substitutes: [],
               currentSubstituteIndex: 0,
-              DisplayName: `${quantity || ''} ${measure || ''} ${ingredientName.trim()}`, // Initial display
+              DisplayName: `${quantity || ''} ${measure || ''} ${ingredientName.trim()}`,
             });
           }
         }
@@ -828,7 +828,6 @@ useEffect(() => {
         return result;
       }, []);
   
-     // console.log('Parsed Ingredients:', parsedIngredients);
       setIngredients(parsedIngredients);
     }
   }, [recipe]);
@@ -846,36 +845,32 @@ const handleSwap = (index) => {
 
     if (!current || !current.Substitutes || current.Substitutes.length === 0) {
       console.error('No substitutes available for this ingredient:', current);
-      return prevIngredients; // Exit early if no substitutes
+      return prevIngredients;
     }
 
     // Calculate the next substitute index
     const nextSubstituteIndex =
       (current.currentSubstituteIndex + 1) % (current.Substitutes.length + 1);
 
+    // Determine whether we're displaying the original ingredient or a substitute
+    const isOriginal = nextSubstituteIndex === 0;
+    const substitute = current.Substitutes[nextSubstituteIndex - 1] || {};
+
+    // Update ingredient details for display
     updatedIngredients[index] = {
       ...current,
       currentSubstituteIndex: nextSubstituteIndex,
-      DisplayName:
-        nextSubstituteIndex === 0
-          ? `${current.Quantity} ${current.Measure} ${current.IngredientName}`
-          : `${current.Substitutes[nextSubstituteIndex - 1]?.Quantity || ''} ${
-              current.Substitutes[nextSubstituteIndex - 1]?.Measure || ''
-            } ${current.Substitutes[nextSubstituteIndex - 1]?.SubstituteName || ''}`,
-      Quantity:
-        nextSubstituteIndex === 0
-          ? current.Quantity
-          : current.Substitutes[nextSubstituteIndex - 1]?.Quantity,
-      Measure:
-        nextSubstituteIndex === 0
-          ? current.Measure
-          : current.Substitutes[nextSubstituteIndex - 1]?.Measure,
+      DisplayName: isOriginal
+        ? `${current.OriginalQuantity} ${current.OriginalMeasure} ${current.IngredientName}`
+        : `${substitute.Quantity || ''} ${substitute.Measure || ''} ${substitute.SubstituteName || ''}`,
+      Quantity: isOriginal ? current.OriginalQuantity : substitute.Quantity,
+      Measure: isOriginal ? current.OriginalMeasure : substitute.Measure,
     };
 
     return updatedIngredients;
   });
 
-  // Ensure `checkedIngredients` is also updated
+  // Ensure `checkedIngredients` is updated
   setCheckedIngredients((prevCheckedIngredients) => {
     const updatedChecked = [...prevCheckedIngredients];
     const ingredientToUpdate = updatedChecked.find(
@@ -887,16 +882,15 @@ const handleSwap = (index) => {
         (ingredientToUpdate.currentSubstituteIndex + 1) %
         (ingredientToUpdate.Substitutes.length + 1);
 
-      ingredientToUpdate.Quantity =
-        nextSubstituteIndex === 0
-          ? ingredientToUpdate.Quantity
-          : ingredientToUpdate.Substitutes[nextSubstituteIndex - 1]?.Quantity;
+      const isOriginal = nextSubstituteIndex === 0;
+      const substitute = ingredientToUpdate.Substitutes[nextSubstituteIndex - 1] || {};
 
-      ingredientToUpdate.Measure =
-        nextSubstituteIndex === 0
-          ? ingredientToUpdate.Measure
-          : ingredientToUpdate.Substitutes[nextSubstituteIndex - 1]?.Measure;
-
+      ingredientToUpdate.Quantity = isOriginal
+        ? ingredientToUpdate.OriginalQuantity
+        : substitute.Quantity;
+      ingredientToUpdate.Measure = isOriginal
+        ? ingredientToUpdate.OriginalMeasure
+        : substitute.Measure;
       ingredientToUpdate.currentSubstituteIndex = nextSubstituteIndex;
     }
 
@@ -1207,7 +1201,7 @@ useEffect(() => {
         />
         {/* Ingredient Display */}
         <span style={{ marginLeft: '10px' }}>
-        {ingredient.DisplayName}        </span>
+        {cleanIngredientName(ingredient.DisplayName)}        </span>
       </label>
 
       {/* Swap Button for Ingredients with Substitutes */}
