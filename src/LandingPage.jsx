@@ -243,7 +243,7 @@ const LandingPage = () => {
     fontFamily: "'Poppins', sans-serif",
     textAlign: "left", // Align the text to the left
     alignSelf: "flex-start", // Align the element itself to the left
-    marginLeft: "1220px", // Add space from the left side of the container
+    marginLeft: "1230px", // Add space from the left side of the container
   }}
 >
   Navigate to the login page
