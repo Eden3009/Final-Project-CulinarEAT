@@ -10,6 +10,7 @@ import { FaArrowLeft } from 'react-icons/fa';
 
 
 
+
 const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -37,24 +38,6 @@ const FormGroup = styled.div`
   position: relative;
 `;
 
-const Title = styled.h2`
-  text-align: center;
-  margin-bottom: 30px;
-  font-family: 'Merienda', cursive; 
-  color: #B55335;
-  font-size: 32px;
-  font-weight: bold;
-`;
-
-
-const Label = styled.label`
-  font-size: 16px;
-  color: #333;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
-`;
 const BackButton = styled.button`
   position: absolute;
   top: 20px;
@@ -78,6 +61,24 @@ const BackButton = styled.button`
   }
 `;
 
+const Title = styled.h2`
+  text-align: center;
+  margin-bottom: 30px;
+  font-family: 'Merienda', cursive; 
+  color: #B55335;
+  font-size: 32px;
+  font-weight: bold;
+`;
+
+
+const Label = styled.label`
+  font-size: 16px;
+  color: #333;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+`;
 
 const ErrorText = styled.span`
   color: #e74c3c;
@@ -207,7 +208,7 @@ const Button = styled.button`
   transition: background-color 0.3s, transform 0.2s;
   width: 100%;
   box-sizing: border-box;
-  fontFamily: 'Oregano, serif',
+  font-family: 'Merienda', cursive;
   &:hover {
     transform: translateY(-3px);
   }
@@ -732,7 +733,7 @@ const categories = [
 
   return (
     <PageWrapper>
-     <BackButton 
+      <BackButton 
   style={{
     position: 'absolute',
     top: '20px',
@@ -756,7 +757,6 @@ const categories = [
   <FaArrowLeft style={{ fontSize: '28px', marginRight: '0px' }} />
   Back
 </BackButton>
-
       <Form onSubmit={handleFormSubmit}>
         <Title>Add a New Recipe</Title>
 

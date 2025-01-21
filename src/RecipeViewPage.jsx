@@ -1553,9 +1553,9 @@ onClick={() => {
       value={reviewData.comment}
       onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
       style={{
-        width: '100%',
+        width: '400px',
         height: '100px',
-        padding: '15px',
+        padding: '5px',
         marginBottom: '15px',
         border: '1px solid #DDD',
         borderRadius: '12px',
