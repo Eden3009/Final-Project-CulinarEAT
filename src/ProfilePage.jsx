@@ -49,7 +49,7 @@ const styles = {
     color: '#555',
     fontFamily: 'Georgia, serif',
   },
-  recipeCard: {
+  /*recipeCard: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -58,7 +58,7 @@ const styles = {
     borderRadius: '8px',
     marginBottom: '10px',
     backgroundColor: '#FAFAFA',
-  },
+  },*/
   recipeName: {
     fontWeight: 'bold',
     fontSize: '16px',
@@ -134,17 +134,19 @@ const styles = {
 },
 recipeCard: {
     backgroundColor: '#fff',
-    borderRadius: '10px',
+    borderRadius: '2px',
     boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
     overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     padding: '15px',
+    width: '180px',
+    height:'220px',
 },
 recipeImage: {
-    width: '100%',
-    height: '150px',
+    width: '180px',
+    height: '200px',
     objectFit: 'cover',
     borderRadius: '8px',
 },
@@ -408,6 +410,8 @@ function ProfilePage() {
     <p>No recipes added yet.</p>
   )}
 </div>
+
+<hr style={styles.divider} />
 
 {/* My Reviews */}
 <div style={styles.section}>

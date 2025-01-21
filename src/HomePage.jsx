@@ -53,9 +53,6 @@ import newThisWeek1 from './images/newThisWeek1.png';
 import newThisWeek2 from './images/newThisWeek2.png';
 
 
-
-
-
 const styles = {
   homePage: {
     display: 'flex',
@@ -855,7 +852,7 @@ const handleSearch = () => {
         style={{
           textAlign: "center",
           color: "#B55335",
-          fontSize: "28px",
+          fontSize: "36px",
           fontFamily: "merienda, serif",
           marginBottom: "20px", // Space between headline and categories
         }}
