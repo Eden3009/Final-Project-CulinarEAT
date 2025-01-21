@@ -19,14 +19,40 @@ const ConversionModal = ({ isOpen, onClose }) => {
   const [toUnit, setToUnit] = useState("ml");
   const [result, setResult] = useState(null);
 
+  const handleQuantityChange = (e) => {
+    const value = e.target.value;
+  
+    // Regular expression to allow numbers, decimals, and fractions
+    const validInput = /^[0-9]*(\/[0-9]*)?(\.[0-9]*)?$/;
+  
+    if (value === '' || validInput.test(value)) {
+      setQuantity(value); // Update state only if input is valid
+    } else {
+      console.log('Invalid input: only numbers, "/", and "." are allowed.');
+    }
+  };
+  
+
   const convertUnits = () => {
-    if (!quantity || isNaN(quantity)) {
+    if (!quantity) {
       alert("Please enter a valid quantity.");
       return;
     }
-    const convertedValue = (quantity * units[fromUnit]) / units[toUnit];
+  
+    // Parse fractions into decimal
+    const parsedQuantity = quantity.includes("/")
+      ? eval(quantity) // Convert "1/2" into 0.5 using eval (or implement a custom parser)
+      : parseFloat(quantity);
+  
+    if (isNaN(parsedQuantity)) {
+      alert("Please enter a valid quantity.");
+      return;
+    }
+  
+    const convertedValue = (parsedQuantity * units[fromUnit]) / units[toUnit];
     setResult(convertedValue.toFixed(2));
   };
+  
 
   if (!isOpen) return null;
 
@@ -35,13 +61,14 @@ const ConversionModal = ({ isOpen, onClose }) => {
       <div style={styles.modal}>
         <h2 style={styles.title}>Conversion Calculator</h2>
         <div style={styles.form}>
-          <input
-            type="number"
-            placeholder="Enter quantity"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            style={styles.input}
-          />
+        <input
+  type="text"
+  placeholder="Enter quantity (e.g., 1, 1.5, or 1/2)"
+  value={quantity}
+  onChange={handleQuantityChange}
+  style={styles.input}
+/>
+
           <select
             value={fromUnit}
             onChange={(e) => setFromUnit(e.target.value)}
