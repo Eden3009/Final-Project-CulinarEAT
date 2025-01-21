@@ -113,24 +113,18 @@ const FavoritesPage = () => {
   const { user } = useContext(UserContext);
 
  // Fetch user's favorites from backend
-useEffect(() => {
+ useEffect(() => {
   const fetchFavorites = async () => {
-      if (!user?.UserID) return; // Ensure UserID is available
+      if (!user?.UserID) return;
       try {
-        const response = await fetch(`http://localhost:5001/api/user-favorites/${user.UserID}`);
-        if (response.ok) {
+          const response = await fetch(`http://localhost:5001/api/user-favorites/${user.UserID}`);
+          if (response.ok) {
               const data = await response.json();
-              console.log('Fetched favorites from backend:', data); // Debugging log
-
-              // Map backend favorites to match frontend structure if necessary
               const formattedFavorites = data.map((favorite) => ({
-                id: favorite.FavoriteID,
-                title: favorite.RecipeTitle,
-                imageUrl: favorite.ImageURL, // Keep ImageURL simple
+                  id: favorite.RecipeID, // Use RecipeID for navigation
+                  title: favorite.RecipeTitle,
+                  imageUrl: favorite.ImageURL,
               }));
-              
-            
-
               setFavorites(formattedFavorites);
           } else {
               console.error('Failed to fetch favorites:', await response.text());

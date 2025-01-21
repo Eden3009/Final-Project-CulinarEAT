@@ -1249,32 +1249,26 @@ app.get('/api/user/reviews', (req, res) => {
 });
 
 
-app.post('/api/favorites', (req, res) => {
-    const { UserID, RecipeID } = req.body;
- 
- 
-    if (!UserID || !RecipeID) {
-        return res.status(400).send({ error: 'UserID and RecipeID are required' });
-    }
- 
- 
-    const query = 'INSERT INTO Favorites (UserID, RecipeID, AddedDate) VALUES (?, ?, NOW())';
- 
- 
-    db.query(query, [UserID, RecipeID], (err, result) => {
+app.get('/api/user-favorites/:UserID', (req, res) => {
+    const { UserID } = req.params;
+
+    const query = `
+        SELECT Favorites.FavoriteID, Favorites.RecipeID, Recipe.RecipeTitle AS RecipeTitle, Recipe.ImageURL
+        FROM Favorites
+        INNER JOIN Recipe ON Favorites.RecipeID = Recipe.RecipeID
+        WHERE Favorites.UserID = ?
+    `;
+
+    db.query(query, [UserID], (err, results) => {
         if (err) {
-            console.error('Error adding to favorites:', err);
-            if (err.code === 'ER_DUP_ENTRY') {
-                return res.status(409).send({ error: 'Recipe is already in favorites' });
-            }
-            return res.status(500).send({ error: 'Failed to add to favorites' });
+            console.error('Error fetching user favorites:', err);
+            return res.status(500).send({ error: 'Failed to fetch user favorites' });
         }
- 
- 
-        res.status(200).send({ message: 'Recipe added to favorites!', favoriteId: result.insertId });
+
+        res.status(200).send(results);
     });
- });
- 
+});
+
  
   app.delete('/api/favorites/:favoriteId', (req, res) => {
     const { favoriteId } = req.params;
