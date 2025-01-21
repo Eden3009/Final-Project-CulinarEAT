@@ -926,10 +926,31 @@ useEffect(() => {
     return <p>Loading recipe...</p>;  // Return a loading message until the data is fetched
   }
   
-  // Split instructions into numbered steps
-  const instructions = recipe.RecipeInstructions
-  ? recipe.RecipeInstructions.split('\n').filter((step) => step.trim())
+  // Helper function to split instructions based on format
+const splitInstructions = (instructions) => {
+  if (!instructions) return [];
+  
+  // Check if the instructions are likely in single-block format
+  if (instructions.includes('..') || !instructions.includes('\n')) {
+    // Split by double periods or single period followed by a space
+    return instructions
+      .split(/\.\s+|\.\./)
+      .map((step) => step.trim())
+      .filter((step) => step); // Remove empty steps
+  } else {
+    // Split by newline for multi-step format
+    return instructions
+      .split('\n')
+      .map((step) => step.trim())
+      .filter((step) => step); // Remove empty steps
+  }
+};
+
+// Use the helper function to parse the instructions
+const instructions = recipe.RecipeInstructions
+  ? splitInstructions(recipe.RecipeInstructions)
   : [];
+
 
   // Split themes and labels into arrays
   const themes = recipe.Themes ? recipe.Themes.split(',') : [];

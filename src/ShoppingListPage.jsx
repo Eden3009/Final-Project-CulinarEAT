@@ -573,70 +573,92 @@ const saveEditedList = () => {
 
   
 // Only declare `handleDeleteList` once:
-const handleDeleteList = (listId, index) => {
- fetch(`http://localhost:5001/api/delete-shopping-list/${listId}`, {
-     method: 'DELETE',
- })
- .then((res) => {
-  if (!res.ok) {
-    return res.json().then((err) => Promise.reject(err)); // This ensures that you handle all errors correctly.
+const handleDeleteList = (listId) => {
+  if (!listId) {
+    console.error('Invalid listId provided:', listId);
+    toast.error('Failed to delete the list. Invalid ID.');
+    return;
   }
-  return res.json();
-     })
-     .catch((error) => {
-         console.error('Error deleting shopping list:', error);
-         toast.error('Failed to delete the list. Please try again.');
-     });
+
+  console.log('Getting ready to delete list with ID:', listId);
+
+  fetch(`http://localhost:5001/api/delete-shopping-list/${listId}`, {
+    method: 'DELETE',
+  })
+    .then((res) => {
+      if (!res.ok) {
+        return res.json().then((err) => Promise.reject(err));
+      }
+      return res.json();
+    })
+    .then(() => {
+      console.log('List deleted successfully.');
+      setSavedLists((prevLists) =>
+        prevLists.filter((list) => list.ShoppingListID !== listId)
+      );
+      toast.success('List deleted successfully!');
+    })
+    .catch((error) => {
+      console.error('Error deleting shopping list:', error);
+      toast.error('Failed to delete the list. Please try again.');
+    });
 };
+
 
 
 
 
 // Updated `confirmDeleteList` to use `handleDeleteList`:
-const confirmDeleteList = (index) => {
- toast(
-   ({ closeToast }) => (
-     <div style={{ textAlign: 'center' }}>
-       <p>Are you sure you want to delete this list?</p>
-       <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-         <Button
-           variant="contained"
-           color="error"
-           size="small"
-           onClick={() => {
-             handleDeleteList(index); // Perform delete
-             closeToast(); // Close the toast
-           }}
-           style={{
-             backgroundColor: '#B55335',
-             color: 'white',
-             fontWeight: 'bold',
-           }}
-         >
-           Yes
-         </Button>
-         <Button
-           variant="outlined"
-           size="small"
-           onClick={() => closeToast()} // Just close the toast
-           style={{
-             borderColor: '#B55335',
-             color: '#B55335',
-             fontWeight: 'bold',
-           }}
-         >
-           No
-         </Button>
-       </div>
-     </div>
-   ),
-   {
-     closeButton: false,
-     autoClose: false, // Disable auto-close for user interaction
-     hideProgressBar: true,
-   }
- );
+const confirmDeleteList = (listId) => {
+  if (!listId) {
+    console.error('Invalid listId:', listId);
+    return;
+  }
+
+  toast(
+    ({ closeToast }) => (
+      <div style={{ textAlign: 'center' }}>
+        <p>Are you sure you want to delete this list?</p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+          <Button
+            variant="contained"
+            color="error"
+            size="small"
+            onClick={() => {
+              handleDeleteList(listId); // Pass the correct listId
+              closeToast();
+            }}
+            style={{
+              backgroundColor: '#B55335',
+              color: 'white',
+              fontWeight: 'bold',
+            }}
+          >
+            Yes
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => closeToast()}
+            style={{
+              borderColor: '#B55335',
+              color: '#B55335',
+              fontWeight: 'bold',
+            }}
+          >
+            No
+          </Button>
+        </div>
+      </div>
+    ),
+    {
+      closeButton: false,
+      autoClose: false,
+      hideProgressBar: true,
+    }
+  );
 };
+
 
 
 
@@ -1333,7 +1355,7 @@ Created on: {list.CreatedDate
   <Button
     variant="text"
     size="small"
-    onClick={() => confirmDeleteList(index)}
+    onClick={() => confirmDeleteList(savedLists[index].ShoppingListID)} // Use the ID from the list
     style={{ color: 'red', padding: '0', minWidth: 'auto' }}
   >
     <Delete />
