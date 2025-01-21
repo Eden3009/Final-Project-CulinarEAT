@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { Modal, Box, Typography, TextField, MenuItem, IconButton } from "@mui/material";
+import { SwapHoriz, Close } from "@mui/icons-material";
+import { FaCalculator } from "react-icons/fa";
 
 const units = {
   ml: 1,
@@ -17,161 +20,151 @@ const ConversionModal = ({ isOpen, onClose }) => {
   const [quantity, setQuantity] = useState("");
   const [fromUnit, setFromUnit] = useState("ml");
   const [toUnit, setToUnit] = useState("ml");
-  const [result, setResult] = useState(null);
-
-  const handleQuantityChange = (e) => {
-    const value = e.target.value;
-  
-    // Regular expression to allow numbers, decimals, and fractions
-    const validInput = /^[0-9]*(\/[0-9]*)?(\.[0-9]*)?$/;
-  
-    if (value === '' || validInput.test(value)) {
-      setQuantity(value); // Update state only if input is valid
-    } else {
-      console.log('Invalid input: only numbers, "/", and "." are allowed.');
-    }
-  };
-  
 
   const convertUnits = () => {
-    if (!quantity) {
-      alert("Please enter a valid quantity.");
-      return;
-    }
-  
-    // Parse fractions into decimal
-    const parsedQuantity = quantity.includes("/")
-      ? eval(quantity) // Convert "1/2" into 0.5 using eval (or implement a custom parser)
-      : parseFloat(quantity);
-  
-    if (isNaN(parsedQuantity)) {
-      alert("Please enter a valid quantity.");
-      return;
-    }
-  
-    const convertedValue = (parsedQuantity * units[fromUnit]) / units[toUnit];
-    setResult(convertedValue.toFixed(2));
+    if (!quantity || isNaN(quantity)) return "";
+    const convertedValue = (quantity * units[fromUnit]) / units[toUnit];
+    return `${quantity} ${fromUnit} = ${convertedValue.toFixed(2)} ${toUnit}`;
   };
-  
 
-  if (!isOpen) return null;
+  const swapUnits = () => {
+    const temp = fromUnit;
+    setFromUnit(toUnit);
+    setToUnit(temp);
+  };
 
   return (
-    <div style={styles.overlay}>
-      <div style={styles.modal}>
-        <h2 style={styles.title}>Conversion Calculator</h2>
-        <div style={styles.form}>
-        <input
-  type="text"
-  placeholder="Enter quantity (e.g., 1, 1.5, or 1/2)"
-  value={quantity}
-  onChange={handleQuantityChange}
-  style={styles.input}
-/>
+    <Modal open={isOpen} onClose={onClose}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: 400,
+          bgcolor: "background.paper",
+          boxShadow: 24,
+          p: 4,
+          borderRadius: 2,
+          textAlign: "center",
+          position: "relative",
+        }}
+      >
+        {/* Close Icon */}
+        <IconButton
+          onClick={onClose}
+          sx={{
+            position: "absolute",
+            top: "10px",
+            left: "10px",
+            color: "gray",
+          }}
+        >
+          <Close />
+        </IconButton>
 
-          <select
+        {/* Calculator Icon */}
+        <FaCalculator
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            color: "#B55335",
+            fontSize: "24px",
+          }}
+        />
+
+        {/* Title */}
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 2,
+            fontFamily: "'Merienda', cursive",
+            color: "#B55335",
+            fontSize: "24px",
+            fontStyle: "bold",
+          }}
+        >
+          Conversion Calculator
+        </Typography>
+
+        {/* Input Fields */}
+        <TextField
+          label="Enter quantity"
+          variant="outlined"
+          value={quantity}
+          onChange={(e) => {
+            const value = e.target.value;
+            // Allow only numbers, dots, and slashes
+            if (/^[0-9./]*$/.test(value)) {
+              setQuantity(value);
+            }
+          }}
+          fullWidth
+          inputProps={{
+            style: { textAlign: "center", fontWeight: "bold", fontSize: "16px" },
+          }}
+          sx={{ mb: 2 }}
+        />
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2 }}>
+          <TextField
+            select
+            label="From"
             value={fromUnit}
             onChange={(e) => setFromUnit(e.target.value)}
-            style={styles.select}
+            sx={{ width: 100 }}
           >
             {Object.keys(units).map((unit) => (
-              <option key={unit} value={unit}>
+              <MenuItem key={unit} value={unit}>
                 {unit}
-              </option>
+              </MenuItem>
             ))}
-          </select>
-          <select
+          </TextField>
+          <IconButton
+            onClick={swapUnits}
+            sx={{
+              width: "50px",
+              height: "50px",
+              borderRadius: "50%",
+              bgcolor: "#B55335",
+              color: "white",
+              "&:hover": { bgcolor: "primary.dark" },
+            }}
+          >
+            <SwapHoriz sx={{ fontSize: "24px" }} />
+          </IconButton>
+          <TextField
+            select
+            label="To"
             value={toUnit}
             onChange={(e) => setToUnit(e.target.value)}
-            style={styles.select}
+            sx={{ width: 100 }}
           >
             {Object.keys(units).map((unit) => (
-              <option key={unit} value={unit}>
+              <MenuItem key={unit} value={unit}>
                 {unit}
-              </option>
+              </MenuItem>
             ))}
-          </select>
-        </div>
-        <button onClick={convertUnits} style={styles.convertButton}>
-          Convert
-        </button>
-        {result && (
-          <p style={styles.result}>
-            {quantity} {fromUnit} = {result} {toUnit}
-          </p>
-        )}
-        <button onClick={onClose} style={styles.closeButton}>
-          Close
-        </button>
-      </div>
-    </div>
-  );
-};
+          </TextField>
+        </Box>
 
-const styles = {
-  overlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  modal: {
-    backgroundColor: "#fff",
-    borderRadius: "10px",
-    padding: "20px",
-    maxWidth: "400px",
-    width: "90%",
-    textAlign: "center",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-  },
-  title: {
-    fontSize: "24px",
-    marginBottom: "20px",
-    color: "#8B4513",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-    marginBottom: "20px",
-  },
-  input: {
-    padding: "10px",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
-  },
-  select: {
-    padding: "10px",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
-  },
-  convertButton: {
-    padding: "10px 20px",
-    backgroundColor: "#B55335",
-    color: "#fff",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
-  result: {
-    marginTop: "10px",
-    fontSize: "18px",
-    color: "#333",
-  },
-  closeButton: {
-    marginTop: "10px",
-    padding: "8px 15px",
-    backgroundColor: "#ccc",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
+        {/* Result */}
+        <Typography
+          variant="body1"
+          sx={{
+            mt: 2,
+            p: 2,
+            bgcolor: "#f3f4f6",
+            borderRadius: 1,
+            fontSize: "16px",
+            fontWeight: "bold",
+          }}
+        >
+          {convertUnits() || "Conversion result will appear here"}
+        </Typography>
+      </Box>
+    </Modal>
+  );
 };
 
 export default ConversionModal;

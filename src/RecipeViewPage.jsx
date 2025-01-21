@@ -230,6 +230,19 @@ backButtonHover: {
     textAlign: 'left', // Ensure proper alignment of text
   },
   
+  swapButton: {
+    padding: "5px 10px",
+    fontSize: "16px",
+    backgroundColor: "#B55335",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    transition: "background-color 0.3s ease",
+  },
+  swapButtonHover: {
+    backgroundColor: "#8B4513", // Darker shade on hover
+  },
   
  
 };
