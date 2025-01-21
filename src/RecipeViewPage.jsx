@@ -19,6 +19,9 @@ import { FaTrash } from 'react-icons/fa'; // Trash icon for delete
 import { confirmAlert } from 'react-confirm-alert'; // Import confirmation dialog
 import { format } from 'date-fns'; // Import date-fns for formatting
 import ShoppingListModal from './ShoppingListModal'; // Adjust the path if needed
+import ConversionModal from "./ConversionModal";
+import { FaCalculator } from 'react-icons/fa'; // Import a calculator icon (or any other)
+
 
 
 
@@ -239,7 +242,6 @@ function RecipeViewPage() {
   const [reviewData, setReviewData] = useState({ name: '', comment: '' });
   const [hoverRating, setHoverRating] = useState(0);  // User's hover state
   const [isFavorite, setIsFavorite] = useState(false); // Track whether the recipe is in favorites
-  const [measurementSystem, setMeasurementSystem] = useState('US'); // Default to US
   const { user, isLoggedIn } = React.useContext(UserContext);
   const [isEditing, setIsEditing] = useState(false); // To toggle edit modal
   const [editReview, setEditReview] = useState({ ReviewID: null, Comment: '', Rating: 0 }); // Store the review to be edited
@@ -260,6 +262,8 @@ const [savedLists, setSavedLists] = useState([]); // To store existing shopping 
     const cleanIngredientName = (name) => {
       return name.replace(/\[Substitute\]/g, '').trim();
     };
+    const [isConversionModalOpen, setIsConversionModalOpen] = useState(false);
+
     
   
     const handleModalSubmit = async ({ type, name, listId }) => {
@@ -1274,49 +1278,27 @@ onClick={() => {
   Add to Shopping List
   <BsCartPlus style={{ fontSize: '20px', color: '#fff' }} />
 </button>
+<button
+  onClick={() => setIsConversionModalOpen(true)}
+  style={{
+    backgroundColor: "#d2b9af",
+    color: "#fff",
+    padding: "12px 20px",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontFamily: "'Merienda', cursive",
+    fontSize: "16px",
+    marginTop: "10px",
+    display: "flex", // Flexbox for alignment
+    alignItems: "center", // Center icon and text
+    gap: "10px", // Space between icon and text
+  }}
+>
+  Conversions
+  <FaCalculator style={{ fontSize: "20px", color: "#fff" }} />
 
-
-
-    {/* Toggle Button for US/EU Conversion */}
-    <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-  <button
-    onClick={() => setMeasurementSystem('US')}
-    style={{
-      width: '120px',
-      padding: '10px',
-      border: '2px solid #B55335',
-      borderRight: 'none', // Remove right border to merge with EU button
-      borderRadius: '8px 0 0 8px',
-      backgroundColor: measurementSystem === 'US' ? '#B55335' : 'transparent',
-      color: measurementSystem === 'US' ? '#fff' : '#B55335',
-      fontFamily: "'Merienda', cursive",
-      fontWeight: 'bold',
-      cursor: 'pointer',
-      textAlign: 'center',
-      margin: 0, // No margin to remove the gap
-    }}
-  >
-    US
-  </button>
-  <button
-    onClick={() => setMeasurementSystem('EU')}
-    style={{
-      width: '120px',
-      padding: '10px',
-      border: '2px solid #B55335',
-      borderRadius: '0 8px 8px 0',
-      backgroundColor: measurementSystem === 'EU' ? '#B55335' : 'transparent',
-      color: measurementSystem === 'EU' ? '#fff' : '#B55335',
-      fontFamily: "'Merienda', cursive",
-      fontWeight: 'bold',
-      cursor: 'pointer',
-      textAlign: 'center',
-      margin: 0, // No margin to remove the gap
-    }}
-  >
-    EU
-  </button>
-</div>
+</button>
   </div>
 
 
@@ -1764,6 +1746,11 @@ onClick={() => {
   savedLists={savedLists}
   onSubmit={handleModalSubmit}
 />
+<ConversionModal
+  isOpen={isConversionModalOpen}
+  onClose={() => setIsConversionModalOpen(false)}
+/>
+
 </div>
 
 
