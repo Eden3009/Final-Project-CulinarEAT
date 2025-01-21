@@ -1248,6 +1248,36 @@ app.get('/api/user/reviews', (req, res) => {
     });
 });
 
+//all favorite
+app.post('/api/favorites', (req, res) => {
+    const { UserID, RecipeID } = req.body;
+
+    // Validate input
+    if (!UserID || !RecipeID) {
+        return res.status(400).send({ error: 'UserID and RecipeID are required' });
+    }
+
+    // SQL query to insert a favorite
+    const query = `
+        INSERT INTO Favorites (UserID, RecipeID, AddedDate)
+        VALUES (?, ?, NOW())
+    `;
+
+    // Execute the query
+    db.query(query, [UserID, RecipeID], (err, result) => {
+        if (err) {
+            console.error('Error adding to favorites:', err);
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(409).send({ error: 'Recipe is already in favorites' });
+            }
+            return res.status(500).send({ error: 'Failed to add to favorites' });
+        }
+
+        // Return the ID of the newly inserted favorite
+        res.status(200).send({ message: 'Recipe added to favorites!', favoriteId: result.insertId });
+    });
+});
+
 
 app.get('/api/user-favorites/:UserID', (req, res) => {
     const { UserID } = req.params;
