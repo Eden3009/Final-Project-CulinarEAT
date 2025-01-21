@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserContext } from './UserContext'; // Adjust path as needed
 //import { WhatsApp } from '@mui/icons-material';
 import { Edit, Delete, WhatsApp } from '@mui/icons-material';
+import { FaArrowLeft } from 'react-icons/fa';
 
 
 const styles = {
@@ -148,7 +149,29 @@ errorBubble: {
   gap: '5px',
 },
 
+backButton: {
+  position: 'absolute',
+  top: '20px',
+  left: '10px', 
+  zIndex: 10,
+  display: 'flex',
+  alignItems: 'center',
+  padding: '80px 12px',
+  fontSize: '28px', 
+  fontWeight: 'bold',
+  color: '#d2b9af',
+  fontFamily: 'Oregano, serif',
+  backgroundColor: 'transparent',
+  border: 'none',
+  borderRadius: '6px',
+  cursor: 'pointer',
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  
+},
+backButtonHover: {
+transform: 'scale(1.1)',
 
+},
 
 
 };
@@ -831,6 +854,10 @@ const exportToWhatsApp = () => {
  return (
   
   <div style={styles.pageContainer}>
+     {/* Back Button */}
+                    <button style={styles.backButton} onClick={() => navigate(-1)}>
+                    <FaArrowLeft /> Back
+                  </button>
     <h1 style={styles.header}>Shopping List</h1>
   
 
@@ -846,6 +873,7 @@ const exportToWhatsApp = () => {
 
 
    {/* Filter By Section */}
+    {/*We dont need anymore
 <div style={styles.filterContainer}>
  <ToggleButtonGroup
    value={filterType}
@@ -862,6 +890,7 @@ const exportToWhatsApp = () => {
      height: '48px', // Same height as input boxes
    }}
  >
+ 
    <ToggleButton
      value="Alphabetical"
      style={{
@@ -889,10 +918,11 @@ const exportToWhatsApp = () => {
      Label
    </ToggleButton>
  </ToggleButtonGroup>
+ 
 </div>
+*/}
 
 
-{/* Shopping List Name Input */}
 {/* Shopping List Name Input */}
 <div style={{ margin: '20px 0 30px 0', width: '100%', maxWidth: '600px' }}>
  <TextField

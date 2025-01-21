@@ -5,6 +5,7 @@ import IngredientAutocomplete from './IngredientAutocomplete';
 import SubstituteIngredientAutocomplete from './SubstituteIngredientAutocomplete';
 import { useContext } from 'react';
 import { UserContext } from './UserContext';
+import { FaArrowLeft } from 'react-icons/fa';
 
 
 
@@ -54,6 +55,29 @@ const Label = styled.label`
   align-items: center;
   margin-bottom: 5px;
 `;
+const BackButton = styled.button`
+  position: absolute;
+  top: 20px;
+  left: 10px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  padding: 80px 12px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #d2b9af;
+  font-family: 'Oregano, serif';
+  background-color: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
 
 const ErrorText = styled.span`
   color: #e74c3c;
@@ -183,7 +207,7 @@ const Button = styled.button`
   transition: background-color 0.3s, transform 0.2s;
   width: 100%;
   box-sizing: border-box;
-  font-family: 'Merienda', cursive;
+  fontFamily: 'Oregano, serif',
   &:hover {
     transform: translateY(-3px);
   }
@@ -708,6 +732,31 @@ const categories = [
 
   return (
     <PageWrapper>
+     <BackButton 
+  style={{
+    position: 'absolute',
+    top: '20px',
+    left: '10px', 
+    zIndex: 10,
+    display: 'flex',
+    alignItems: 'center',
+    padding: '80px 12px',
+    fontSize: '28px', 
+    fontWeight: 'bold',
+    color: '#d2b9af',
+    fontFamily: 'Oregano, serif',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  }} 
+  onClick={() => window.history.back()}
+>
+  <FaArrowLeft style={{ fontSize: '28px', marginRight: '0px' }} />
+  Back
+</BackButton>
+
       <Form onSubmit={handleFormSubmit}>
         <Title>Add a New Recipe</Title>
 
