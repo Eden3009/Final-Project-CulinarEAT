@@ -79,13 +79,12 @@ const styles = {
   
   listItem: {
     display: 'flex',
-    alignItems: 'center', /* Vertical alignment */
-    justifyContent: 'flex-start', /* Prevents stretching */
+    alignItems: 'flex-start', /* Align items to the top */
+    justifyContent: 'flex-start', /* Prevent stretching */
     gap: '10px', /* Space between items */
     marginBottom: '10px',
-    flexWrap: 'nowrap', /* Ensures content stays in a single line */
+    width: '100%', /* Ensure full width */
   },
-  
   
   listIcon: {
     color: '#8B4513',
@@ -142,11 +141,11 @@ backButtonHover: {
   
   checkboxContainer: {
     display: 'flex',
-    alignItems: 'center', /* Ensure vertical alignment */
-    justifyContent: 'space-between', /* Separate checkbox and button properly */
-    gap: '10px',
+    alignItems: 'flex-start', /* Align items to the top */
+    gap: '10px', /* Space between checkbox and text */
     marginBottom: '10px',
-    
+    flexWrap: 'wrap', /* Allow text to wrap */
+    width: '100%', /* Ensure full width */
   },
 
   checkbox: {
@@ -166,15 +165,16 @@ backButtonHover: {
   
   
   customCheckbox: {
-    display: 'inline-block',
-    width: '20px', // Adjust checkbox size to be slightly smaller
-    height: '20px',
-    border: '2px solid #8B4513', 
-    borderRadius: '50%',
-    backgroundColor: '#f9f7f4',
-    position: 'relative',
+    flexShrink: 0, /* Prevent checkbox from shrinking */
+    width: '24px', /* Fixed width */
+    height: '24px', /* Fixed height */
+    borderRadius: '50%', /* Makes it a perfect circle */
+    border: '2px solid #B55335', /* Consistent border styling */
+    backgroundColor: 'transparent',
     cursor: 'pointer',
-    textAlign: 'center',
+    outline: 'none',
+    boxSizing: 'border-box', /* Prevents padding from affecting size */
+    transition: 'background-color 0.3s ease, transform 0.2s ease',
   },
 
   customCheckboxChecked: {
@@ -1193,6 +1193,7 @@ const instructions = recipe.RecipeInstructions
     }}
   >
    Ingredients</h2>
+
 <ul
   style={{
     listStyleType: 'none',
@@ -1208,17 +1209,22 @@ const instructions = recipe.RecipeInstructions
     <li
       key={index}
       style={{
-        marginBottom: '10px',
         display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
+        alignItems: 'flex-start', // Align checkbox with the start of the text
+        gap: '10px', // Space between checkbox and text
+        marginBottom: '10px',
+        flexWrap: 'wrap', // Allow text to wrap to the next line
+        width: '100%', // Ensure full width for wrapping
       }}
     >
       <label
         style={{
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start', // Align items to the top
           cursor: 'pointer',
+          gap: '10px', // Space between checkbox and text
+          width: '100%', // Make sure the label covers the width
+          flexWrap: 'wrap', // Wrap long text properly
         }}
       >
         {/* Checkbox */}
@@ -1226,17 +1232,15 @@ const instructions = recipe.RecipeInstructions
           type="checkbox"
           style={{
             appearance: 'none',
-            width: '24px', /* Slightly larger to ensure the circle is noticeable */
-            height: '24px', /* Match the width */
-            borderRadius: '50%', /* Ensure it's a perfect circle */
-            border: '2px solid #B55335', /* Thicker border for better visibility */
+            width: '24px', // Fixed width for the checkbox
+            height: '24px', // Fixed height for the checkbox
+            borderRadius: '50%', // Make it a perfect circle
+            border: '2px solid #B55335', // Styling for the border
             backgroundColor: 'transparent',
             cursor: 'pointer',
             outline: 'none',
-            boxSizing: 'border-box', /* Ensures padding or borders don’t break the shape */
+            boxSizing: 'border-box', // Ensure padding doesn’t break the shape
             transition: 'background-color 0.3s ease, transform 0.2s ease',
-            
-            
           }}
           onChange={(e) => handleCheckboxChange(e, ingredient)}
           onMouseEnter={(e) => {
@@ -1254,8 +1258,9 @@ const instructions = recipe.RecipeInstructions
           }}
         />
         {/* Ingredient Display */}
-        <span style={{ marginLeft: '10px' }}>
-        {cleanIngredientName(ingredient.DisplayName)}        </span>
+        <span style={{ flex: 1 }}>
+          {cleanIngredientName(ingredient.DisplayName)}
+        </span>
       </label>
 
       {/* Swap Button for Ingredients with Substitutes */}
@@ -1263,16 +1268,15 @@ const instructions = recipe.RecipeInstructions
         <button
           style={{
             marginLeft: '10px',
-padding: '6px 12px',
-borderRadius: '6px',
-border: 'none',
-backgroundColor: '#B55335', /* Red background */
-cursor: 'pointer',
-fontSize: '14px',
-fontFamily: "'Merienda', cursive", /* Updated font */
-color: '#FFF', /* White text */
-transition: 'background-color 0.3s ease',
-
+            padding: '6px 12px',
+            borderRadius: '6px',
+            border: 'none',
+            backgroundColor: '#B55335', // Red background
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontFamily: "'Merienda', cursive", // Updated font
+            color: '#FFF', // White text
+            transition: 'background-color 0.3s ease',
           }}
           onClick={() => handleSwap(index)}
         >
@@ -1282,6 +1286,8 @@ transition: 'background-color 0.3s ease',
     </li>
   ))}
 </ul>
+
+
 
 
   {/* Buttons Section */}
@@ -1315,7 +1321,7 @@ onClick={() => {
 <button
   onClick={() => setIsConversionModalOpen(true)}
   style={{
-    backgroundColor: "#d2b9af",
+    backgroundColor: "#ccb0a4",
     color: "#fff",
     padding: "12px 20px",
     border: "none",
@@ -1786,10 +1792,6 @@ onClick={() => {
 />
 
 </div>
-
-
-
-
 
 </div>
 
