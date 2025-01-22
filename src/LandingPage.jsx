@@ -254,12 +254,11 @@ const LandingPage = () => {
     marginTop: "10px",
     fontSize: "14px",
     color: "black",
-   // textDecoration: "underline",
     cursor: "pointer",
     fontFamily: "'Poppins', sans-serif",
     textAlign: "left", // Align the text to the left
     alignSelf: "flex-start", // Align the element itself to the left
-    marginLeft: "1260px", // Add space from the left side of the container
+    marginLeft: "1255px", // Add space from the left side of the container
   }}
 >
   Continue as a guest

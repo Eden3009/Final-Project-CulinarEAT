@@ -36,13 +36,12 @@ const SpinTheWheel = () => {
     setMustSpin(false);
     setIsSpun(true);
 
-    // After showing the category, display the redirecting message
     setTimeout(() => {
       setRedirecting(true);
       setTimeout(() => {
         navigate("/login");
       }, 5000); // Wait 5 seconds before redirecting
-    }, 2000); // Show the selected category for 2 seconds before redirecting message
+    }, 2000); // Show the selected category for 2 seconds
   };
 
   return (
@@ -51,7 +50,8 @@ const SpinTheWheel = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        marginTop: "-20px",
+        marginTop: "-35px", // Move the container down
+        marginLeft: "120px", // Move the container to the right
       }}
     >
       {/* Heading Section */}
@@ -59,7 +59,7 @@ const SpinTheWheel = () => {
         style={{
           fontSize: "28px",
           fontWeight: "bold",
-          fontFamily: "'Poppins', sans-serif",
+          fontFamily: "'Merienda', sans-serif",
           color: "#B55335",
           marginBottom: "10px",
           textAlign: "center",
@@ -126,37 +126,42 @@ const SpinTheWheel = () => {
       </button>
 
       {/* Selected Category and Redirecting Message */}
-      {isSpun && !mustSpin && prizeNumber !== null && (
-        <div
-          style={{
-            marginTop: "20px",
-            textAlign: "center",
-          }}
-        >
-          <p
-            style={{
-              fontSize: "18px",
-              fontWeight: "bold",
-              color: "#333",
-            }}
-          >
-            🎉 Selected Category:{" "}
-            <span style={{ color: "#B55335" }}>{data[prizeNumber].option}</span>
-          </p>
-          {redirecting && (
-            <p
+      <div
+        style={{
+          position: "absolute", // Make sure messages do not shift content
+          top: "100%", // Position below the button
+          left: "56%",
+          transform: "translate(-50%, 0)",
+          textAlign: "center",
+        }}
+      >
+        {isSpun && !mustSpin && prizeNumber !== null && (
+          <>
+            <div
               style={{
-                marginTop: "10px",
+                fontSize: "18px",
+                fontWeight: "bold",
+                color: "#333",
+                marginBottom: "10px",
+              }}
+            >
+              🎉 The selected category:{" "}
+              <span style={{ color: "#B55335" }}>
+                {data[prizeNumber].option}
+              </span>
+            </div>
+            <div
+              style={{
                 fontSize: "16px",
                 fontWeight: "bold",
                 color: "#B55335",
               }}
             >
               Redirecting to login page in 5 seconds...
-            </p>
-          )}
-        </div>
-      )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };
