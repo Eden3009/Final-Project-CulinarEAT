@@ -331,6 +331,15 @@ function HomePage() {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [currentTipIndex, setCurrentTipIndex] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [mealTypesHoverIndex, setMealTypesHoverIndex] = useState(null); // Hover state for Meal Types section only
+  const [cuisineTypesHoverIndex, setCuisineTypesHoverIndex] = useState(null); // Hover state for Cuisine Types section only
+  const [dietaryPreferencesHoverIndex, setDietaryPreferencesHoverIndex] = useState(null); // Hover state for Dietary Preferences section only
+  const [occasionsAndThemesHoverIndex, setOccasionsAndThemesHoverIndex] = useState(null); // Hover state for Occasions & Themes section only
+  const [sweetAndDrinksHoverIndex, setSweetAndDrinksHoverIndex] = useState(null); // Hover state for Sweet & Drinks section only
+  const [proteinRichMealsHoverIndex, setProteinRichMealsHoverIndex] = useState(null); // Hover state for Protein-Rich Meals section only
+
+
+
   const [sectionIndexes, setSectionIndexes] = useState({
     mealTypes: 0,
     cuisineTypes: 0,
@@ -896,40 +905,40 @@ const handleSearch = () => {
 
   {/* Grid Section */}
   <div style={styles.gridSection}>
-    {categories.slice(
-      sectionRanges.mealTypes[0] + sectionIndexes.mealTypes,
-      sectionRanges.mealTypes[0] + sectionIndexes.mealTypes + 5
-    ).map((category, index) => (
-      <Link
-        to="/category"
-        state={{
-          img: category.img,
-          label: category.label,
-          apiPath: `/api/recipes?themeName=${category.label}`,
+  {categories.slice(
+    sectionRanges.mealTypes[0] + sectionIndexes.mealTypes,
+    sectionRanges.mealTypes[0] + sectionIndexes.mealTypes + 5
+  ).map((category, index) => (
+    <Link
+      to="/category"
+      state={{
+        img: category.img,
+        label: category.label,
+        apiPath: `/api/recipes?themeName=${category.label}`,
+      }}
+      key={`meal-types-${index}`}
+      style={{ textDecoration: 'none' }}
+    >
+      <div
+        style={{
+          ...styles.gridItem,
+          ...(mealTypesHoverIndex === index ? styles.gridItemHover : {}),
         }}
-        key={`meal-types-${index}`}
-        style={{ textDecoration: 'none' }}
+        onMouseEnter={() => setMealTypesHoverIndex(index)} // Set hover index for Meal Types
+        onMouseLeave={() => setMealTypesHoverIndex(null)} // Clear hover index for Meal Types
       >
         <div
           style={{
-            ...styles.gridItem,
-            ...(hoverIndex === index ? styles.gridItemHover : {}),
+            ...styles.overlay,
+            ...(mealTypesHoverIndex === index ? styles.overlayVisible : {}),
           }}
-          onMouseEnter={() => setHoverIndex(index)}
-          onMouseLeave={() => setHoverIndex(null)}
-        >
-          <div
-            style={{
-              ...styles.overlay,
-              ...(hoverIndex === index ? styles.overlayVisible : {}),
-            }}
-          ></div>
-          <img src={category.img} alt={category.label} style={styles.gridImage} />
-          <span style={styles.gridLabel}>{category.label}</span>
-        </div>
-      </Link>
-    ))}
-  </div>
+        ></div>
+        <img src={category.img} alt={category.label} style={styles.gridImage} />
+        <span style={styles.gridLabel}>{category.label}</span>
+      </div>
+    </Link>
+  ))}
+</div>
 
   {/* Right Arrow */}
   <button
@@ -985,42 +994,40 @@ const handleSearch = () => {
 
   {/* Grid Section */}
   <div style={styles.gridSection}>
-    {categories
-      .slice(
-        sectionRanges.cuisineTypes[0] + sectionIndexes.cuisineTypes,
-        sectionRanges.cuisineTypes[0] + sectionIndexes.cuisineTypes + 5
-      )
-      .map((category, index) => (
-        <Link
-          to="/category"
-          state={{
-            img: category.img,
-            label: category.label,
-            apiPath: `/api/recipes?themeName=${category.label}`,
+  {categories.slice(
+    sectionRanges.cuisineTypes[0] + sectionIndexes.cuisineTypes,
+    sectionRanges.cuisineTypes[0] + sectionIndexes.cuisineTypes + 5
+  ).map((category, index) => (
+    <Link
+      to="/category"
+      state={{
+        img: category.img,
+        label: category.label,
+        apiPath: `/api/recipes?themeName=${category.label}`,
+      }}
+      key={`cuisine-types-${index}`}
+      style={{ textDecoration: 'none' }}
+    >
+      <div
+        style={{
+          ...styles.gridItem,
+          ...(cuisineTypesHoverIndex === index ? styles.gridItemHover : {}),
+        }}
+        onMouseEnter={() => setCuisineTypesHoverIndex(index)} // Set hover index for Cuisine Types
+        onMouseLeave={() => setCuisineTypesHoverIndex(null)} // Clear hover index for Cuisine Types
+      >
+        <div
+          style={{
+            ...styles.overlay,
+            ...(cuisineTypesHoverIndex === index ? styles.overlayVisible : {}),
           }}
-          key={`cuisine-types-${index}`}
-          style={{ textDecoration: 'none' }}
-        >
-          <div
-            style={{
-              ...styles.gridItem,
-              ...(hoverIndex === index ? styles.gridItemHover : {}),
-            }}
-            onMouseEnter={() => setHoverIndex(index)}
-            onMouseLeave={() => setHoverIndex(null)}
-          >
-            <div
-              style={{
-                ...styles.overlay,
-                ...(hoverIndex === index ? styles.overlayVisible : {}),
-              }}
-            ></div>
-            <img src={category.img} alt={category.label} style={styles.gridImage} />
-            <span style={styles.gridLabel}>{category.label}</span>
-          </div>
-        </Link>
-      ))}
-  </div>
+        ></div>
+        <img src={category.img} alt={category.label} style={styles.gridImage} />
+        <span style={styles.gridLabel}>{category.label}</span>
+      </div>
+    </Link>
+  ))}
+</div>
 
   {/* Right Arrow */}
   <button
@@ -1081,42 +1088,40 @@ const handleSearch = () => {
 
   {/* Grid Section */}
   <div style={styles.gridSection}>
-    {categories
-      .slice(
-        sectionRanges.dietaryPreferences[0] + sectionIndexes.dietaryPreferences,
-        sectionRanges.dietaryPreferences[0] + sectionIndexes.dietaryPreferences + 5
-      )
-      .map((category, index) => (
-        <Link
-          to="/category"
-          state={{
-            img: category.img,
-            label: category.label,
-            apiPath: `/api/recipes?themeName=${category.label}`,
+  {categories.slice(
+    sectionRanges.dietaryPreferences[0] + sectionIndexes.dietaryPreferences,
+    sectionRanges.dietaryPreferences[0] + sectionIndexes.dietaryPreferences + 5
+  ).map((category, index) => (
+    <Link
+      to="/category"
+      state={{
+        img: category.img,
+        label: category.label,
+        apiPath: `/api/recipes?themeName=${category.label}`,
+      }}
+      key={`dietary-preferences-${index}`}
+      style={{ textDecoration: 'none' }}
+    >
+      <div
+        style={{
+          ...styles.gridItem,
+          ...(dietaryPreferencesHoverIndex === index ? styles.gridItemHover : {}),
+        }}
+        onMouseEnter={() => setDietaryPreferencesHoverIndex(index)} // Set hover index for Dietary Preferences
+        onMouseLeave={() => setDietaryPreferencesHoverIndex(null)} // Clear hover index for Dietary Preferences
+      >
+        <div
+          style={{
+            ...styles.overlay,
+            ...(dietaryPreferencesHoverIndex === index ? styles.overlayVisible : {}),
           }}
-          key={`dietary-preferences-${index}`}
-          style={{ textDecoration: 'none' }}
-        >
-          <div
-            style={{
-              ...styles.gridItem,
-              ...(hoverIndex === index ? styles.gridItemHover : {}),
-            }}
-            onMouseEnter={() => setHoverIndex(index)}
-            onMouseLeave={() => setHoverIndex(null)}
-          >
-            <div
-              style={{
-                ...styles.overlay,
-                ...(hoverIndex === index ? styles.overlayVisible : {}),
-              }}
-            ></div>
-            <img src={category.img} alt={category.label} style={styles.gridImage} />
-            <span style={styles.gridLabel}>{category.label}</span>
-          </div>
-        </Link>
-      ))}
-  </div>
+        ></div>
+        <img src={category.img} alt={category.label} style={styles.gridImage} />
+        <span style={styles.gridLabel}>{category.label}</span>
+      </div>
+    </Link>
+  ))}
+</div>
 
   {/* Right Arrow */}
   <button
@@ -1179,42 +1184,40 @@ const handleSearch = () => {
 
   {/* Grid Section */}
   <div style={styles.gridSection}>
-    {categories
-      .slice(
-        sectionRanges.occasionsAndThemes[0] + sectionIndexes.occasionsAndThemes,
-        sectionRanges.occasionsAndThemes[0] + sectionIndexes.occasionsAndThemes + 5
-      )
-      .map((category, index) => (
-        <Link
-          to="/category"
-          state={{
-            img: category.img,
-            label: category.label,
-            apiPath: `/api/recipes?themeName=${category.label}`,
+  {categories.slice(
+    sectionRanges.occasionsAndThemes[0] + sectionIndexes.occasionsAndThemes,
+    sectionRanges.occasionsAndThemes[0] + sectionIndexes.occasionsAndThemes + 5
+  ).map((category, index) => (
+    <Link
+      to="/category"
+      state={{
+        img: category.img,
+        label: category.label,
+        apiPath: `/api/recipes?themeName=${category.label}`,
+      }}
+      key={`occasions-${index}`}
+      style={{ textDecoration: 'none' }}
+    >
+      <div
+        style={{
+          ...styles.gridItem,
+          ...(occasionsAndThemesHoverIndex === index ? styles.gridItemHover : {}),
+        }}
+        onMouseEnter={() => setOccasionsAndThemesHoverIndex(index)} // Set hover index for Occasions & Themes
+        onMouseLeave={() => setOccasionsAndThemesHoverIndex(null)} // Clear hover index for Occasions & Themes
+      >
+        <div
+          style={{
+            ...styles.overlay,
+            ...(occasionsAndThemesHoverIndex === index ? styles.overlayVisible : {}),
           }}
-          key={`occasions-${index}`}
-          style={{ textDecoration: 'none' }}
-        >
-          <div
-            style={{
-              ...styles.gridItem,
-              ...(hoverIndex === index + 22 ? styles.gridItemHover : {}),
-            }}
-            onMouseEnter={() => setHoverIndex(index + 22)}
-            onMouseLeave={() => setHoverIndex(null)}
-          >
-            <div
-              style={{
-                ...styles.overlay,
-                ...(hoverIndex === index + 22 ? styles.overlayVisible : {}),
-              }}
-            ></div>
-            <img src={category.img} alt={category.label} style={styles.gridImage} />
-            <span style={styles.gridLabel}>{category.label}</span>
-          </div>
-        </Link>
-      ))}
-  </div>
+        ></div>
+        <img src={category.img} alt={category.label} style={styles.gridImage} />
+        <span style={styles.gridLabel}>{category.label}</span>
+      </div>
+    </Link>
+  ))}
+</div>
 
   {/* Right Arrow */}
   <button
@@ -1276,42 +1279,40 @@ const handleSearch = () => {
 
   {/* Grid Section */}
   <div style={styles.gridSection}>
-    {categories
-      .slice(
-        sectionRanges.sweetAndDrinks[0] + sectionIndexes.sweetAndDrinks,
-        sectionRanges.sweetAndDrinks[0] + sectionIndexes.sweetAndDrinks + 5
-      )
-      .map((category, index) => (
-        <Link
-          to="/category"
-          state={{
-            img: category.img,
-            label: category.label,
-            apiPath: `/api/recipes?themeName=${category.label}`,
+  {categories.slice(
+    sectionRanges.sweetAndDrinks[0] + sectionIndexes.sweetAndDrinks,
+    sectionRanges.sweetAndDrinks[0] + sectionIndexes.sweetAndDrinks + 5
+  ).map((category, index) => (
+    <Link
+      to="/category"
+      state={{
+        img: category.img,
+        label: category.label,
+        apiPath: `/api/recipes?themeName=${category.label}`,
+      }}
+      key={`sweet-drinks-${index}`}
+      style={{ textDecoration: 'none' }}
+    >
+      <div
+        style={{
+          ...styles.gridItem,
+          ...(sweetAndDrinksHoverIndex === index ? styles.gridItemHover : {}),
+        }}
+        onMouseEnter={() => setSweetAndDrinksHoverIndex(index)} // Set hover index for Sweet & Drinks
+        onMouseLeave={() => setSweetAndDrinksHoverIndex(null)} // Clear hover index for Sweet & Drinks
+      >
+        <div
+          style={{
+            ...styles.overlay,
+            ...(sweetAndDrinksHoverIndex === index ? styles.overlayVisible : {}),
           }}
-          key={`sweet-drinks-${index}`}
-          style={{ textDecoration: 'none' }}
-        >
-          <div
-            style={{
-              ...styles.gridItem,
-              ...(hoverIndex === index + 28 ? styles.gridItemHover : {}),
-            }}
-            onMouseEnter={() => setHoverIndex(index + 28)}
-            onMouseLeave={() => setHoverIndex(null)}
-          >
-            <div
-              style={{
-                ...styles.overlay,
-                ...(hoverIndex === index + 28 ? styles.overlayVisible : {}),
-              }}
-            ></div>
-            <img src={category.img} alt={category.label} style={styles.gridImage} />
-            <span style={styles.gridLabel}>{category.label}</span>
-          </div>
-        </Link>
-      ))}
-  </div>
+        ></div>
+        <img src={category.img} alt={category.label} style={styles.gridImage} />
+        <span style={styles.gridLabel}>{category.label}</span>
+      </div>
+    </Link>
+  ))}
+</div>
 
   {/* Right Arrow */}
   <button
@@ -1369,15 +1370,15 @@ const handleSearch = () => {
       <div
         style={{
           ...styles.gridItem,
-          ...(hoverIndex === index + 19 ? styles.gridItemHover : {}),
+          ...(proteinRichMealsHoverIndex === index ? styles.gridItemHover : {}),
         }}
-        onMouseEnter={() => setHoverIndex(index + 19)}
-        onMouseLeave={() => setHoverIndex(null)}
+        onMouseEnter={() => setProteinRichMealsHoverIndex(index)} // Set hover index for Protein-Rich Meals
+        onMouseLeave={() => setProteinRichMealsHoverIndex(null)} // Clear hover index for Protein-Rich Meals
       >
         <div
           style={{
             ...styles.overlay,
-            ...(hoverIndex === index + 19 ? styles.overlayVisible : {}),
+            ...(proteinRichMealsHoverIndex === index ? styles.overlayVisible : {}),
           }}
         ></div>
         <img src={category.img} alt={category.label} style={styles.gridImage} />
@@ -1386,6 +1387,7 @@ const handleSearch = () => {
     </Link>
   ))}
 </div>
+
 
 </div>
   
