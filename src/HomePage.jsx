@@ -124,7 +124,7 @@ const styles = {
   },
   gridSection: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(5, 1fr)',
+    gridTemplateColumns: 'repeat(4, 1fr)',
     gap: '35px',
     padding: '20px',
   },
@@ -423,37 +423,55 @@ const handleSearch = () => {
   }, []);
 
   const categories = [
+    // Meal Types
     { img: breakfastImage, label: 'Breakfast', apiPath: '/api/recipes?category=breakfast' },
     { img: lunchImage, label: 'Lunch', apiPath: '/api/recipes?category=lunch' },
     { img: dinnerImage, label: 'Dinner', apiPath: '/api/recipes?category=dinner' },
-    { img: pastaImage, label: 'Pasta', apiPath: '/api/recipes?category=pasta' },
-    { img: seafoodImage, label: 'Fish & Sea Food', apiPath: '/api/recipes?category=seafood' },
+    { img: quickMealsImage, label: 'Quick Meals', apiPath: '/api/recipes?category=quick-meals' },
+    { img: weeknightDinnerImage, label: 'Weeknight Dinners', apiPath: '/api/recipes?category=weeknight-dinners' },
+    { img: kidsMealImage, label: "Kids' Meals", apiPath: '/api/recipes?category=kids-meals' },
+    { img: snacksImage, label: 'Snacks', apiPath: '/api/recipes?category=snacks' },
     { img: soupsImage, label: 'Soups', apiPath: '/api/recipes?category=soups' },
+  
+    // Cuisine Types
+    { img: asianImage, label: 'Asian', apiPath: '/api/recipes?category=asian' },
+    { img: ethnicCuisineImage, label: 'Ethnic Cuisine', apiPath: '/api/recipes?category=ethnic-cuisine' },
+    { img: pastaImage, label: 'Pasta', apiPath: '/api/recipes?category=pasta' },
+    { img: holidaysImage, label: 'Holidays', apiPath: '/api/recipes?category=holidays' },
+    { img: comfortFoodImage, label: 'Comfort Food', apiPath: '/api/recipes?category=comfort-food' },
     { img: riceImage, label: 'Rice', apiPath: '/api/recipes?category=rice' },
-    { img: dessertsImage, label: 'Desserts', apiPath: '/api/recipes?category=desserts' },
+
+  
+    // Dietary Preferences
     { img: vegetarianImage, label: 'Vegetarian', apiPath: '/api/recipes?category=vegetarian' },
     { img: veganImage, label: 'Vegan', apiPath: '/api/recipes?category=vegan' },
-    { img: drinksImage, label: 'Drinks', apiPath: '/api/recipes?category=drinks' },
-    { img: quickMealsImage, label: 'Quick Meals', apiPath: '/api/recipes?category=quick-meals' },
+    { img: glutenFreeImage, label: 'Gluten-Free', apiPath: '/api/recipes?category=gluten-free' },
+    { img: healthyEatingImage, label: 'Healthy Eating', apiPath: '/api/recipes?category=healthy-eating' },
+    { img: budgetFriendlyImage, label: 'Budget-Friendly', apiPath: '/api/recipes?category=budget-friendly' },
+  
+    // Protein-Rich Meals
+    { img: seafoodImage, label: 'Fish & Sea Food', apiPath: '/api/recipes?category=seafood' },
     { img: chickenImage, label: 'Chicken', apiPath: '/api/recipes?category=chicken' },
     { img: beefImage, label: 'Beef', apiPath: '/api/recipes?category=beef' },
-    { img: asianImage, label: 'Asian', apiPath: '/api/recipes?category=asian' },
-    { img: holidaysImage, label: 'Holidays', apiPath: '/api/recipes?category=holidays' },
-    { img: kidsMealImage, label: "Kids' Meals", apiPath: '/api/recipes?category=kids-meals' },
-    { img: dateMealsImage, label: 'Meals for Date', apiPath: '/api/recipes?category=meals-for-date' },
-    { img: budgetFriendlyImage, label: 'Budget-Friendly', apiPath: '/api/recipes?category=budget-friendly' },
-    { img: weeknightDinnerImage, label: 'Weeknight Dinners', apiPath: '/api/recipes?category=weeknight-dinners' },
-    { img: ethnicCuisineImage, label: 'Ethnic Cuisine', apiPath: '/api/recipes?category=ethnic-cuisine' },
-    { img: comfortFoodImage, label: 'Comfort Food', apiPath: '/api/recipes?category=comfort-food' },
-    { img: snacksImage, label: 'Snacks', apiPath: '/api/recipes?category=snacks' },
-    { img: mealPrepImage, label: 'Meal Prep', apiPath: '/api/recipes?category=meal-prep' },
-    { img: healthyEatingImage, label: 'Healthy Eating', apiPath: '/api/recipes?category=healthy-eating' },
-    { img: seasonalFoodImage, label: 'Seasonal (e.g., Fall)', apiPath: '/api/recipes?category=seasonal' },
-    { img: partyFoodImage, label: 'Party Foods', apiPath: '/api/recipes?category=party-foods' },
-    { img: picnicAndBBQImage, label: 'Picnic & BBQ', apiPath: '/api/recipes?category=picnic-bbq' },
-    { img: glutenFreeImage, label: 'Gluten-Free', apiPath: '/api/recipes?category=gluten-free' },
+   
   
+    // Occasions & Themes
+    { img: mealPrepImage, label: 'Meal Prep', apiPath: '/api/recipes?category=meal-prep' },
+    { img: holidaysImage, label: 'Holidays', apiPath: '/api/recipes?category=holidays' },
+    { img: partyFoodImage, label: 'Party Foods', apiPath: '/api/recipes?category=party-foods' },
+    { img: dateMealsImage, label: 'Meals for Date', apiPath: '/api/recipes?category=meals-for-date' },
+    { img: seasonalFoodImage, label: 'Seasonal (e.g., Fall)', apiPath: '/api/recipes?category=seasonal' },
+    { img: picnicAndBBQImage, label: 'Picnic & BBQ', apiPath: '/api/recipes?category=picnic-bbq' },
+
+
+    // Sweet & Drinks
+    { img: dessertsImage, label: 'Desserts', apiPath: '/api/recipes?category=desserts' },
+    { img: drinksImage, label: 'Drinks', apiPath: '/api/recipes?category=drinks' },
+    { img: snacksImage, label: 'Snacks', apiPath: '/api/recipes?category=snacks' },
+    { img: healthyEatingImage, label: 'Healthy Eating', apiPath: '/api/recipes?category=healthy-eating' },
+    { img: budgetFriendlyImage, label: 'Budget-Friendly', apiPath: '/api/recipes?category=budget-friendly' },
   ];
+  
     
 
   const tips = [
@@ -485,7 +503,28 @@ const handleSearch = () => {
     },
   ];
   
-
+  function CategoryCard({ category, hoverIndex, setHoverIndex }) {
+    return (
+      <div
+        style={{
+          ...styles.gridItem,
+          ...(hoverIndex === category.label ? styles.gridItemHover : {}),
+        }}
+        onMouseEnter={() => setHoverIndex(category.label)}
+        onMouseLeave={() => setHoverIndex(null)}
+      >
+        <div
+          style={{
+            ...styles.overlay,
+            ...(hoverIndex === category.label ? styles.overlayVisible : {}),
+          }}
+        ></div>
+        <img src={category.img} alt={category.label} style={styles.gridImage} />
+        <span style={styles.gridLabel}>{category.label}</span>
+      </div>
+    );
+  }
+  
   
   return (
     <div style={styles.homePage}>
@@ -802,20 +841,21 @@ const handleSearch = () => {
 )}
 
 </div>
-   {/* Grid Section */}
-   <div style={styles.gridSection}>
-  {categories.map((category, index) => (
+{/* Meal Types Section */}
+<h2 style={{ margin: '10px 0 5px 0', color: '#B55335', textAlign: 'center', fontFamily: "'Merienda', cursive", fontSize: '36px' }}>Meal Types</h2>
+<div style={styles.gridSection}>
+  {categories.slice(0, 8).map((category, index) => (
     <Link
-      to="/category" // Redirect to the reusable `CategoryPage`
+      to="/category"
       state={{
-        img: category.img, 
-        label: category.label, 
-        apiPath: `/api/recipes?themeName=${category.label}`
-      }} // Pass the necessary data
-      key={index}
+        img: category.img,
+        label: category.label,
+        apiPath: `/api/recipes?themeName=${category.label}`,
+      }}
+      key={`meal-types-${index}`}
       style={{ textDecoration: 'none' }}
- >
-     <div
+    >
+      <div
         style={{
           ...styles.gridItem,
           ...(hoverIndex === index ? styles.gridItemHover : {}),
@@ -831,11 +871,188 @@ const handleSearch = () => {
         ></div>
         <img src={category.img} alt={category.label} style={styles.gridImage} />
         <span style={styles.gridLabel}>{category.label}</span>
-        </div>
-        </Link>
-        ))}
-        </div>
-        
+      </div>
+    </Link>
+  ))}
+</div>
+
+{/* Cuisine Types Section */}
+<h2 style={{ margin: '10px 0 5px 0', color: '#B55335', textAlign: 'center', fontFamily: "'Merienda', cursive", fontSize: '36px' }}>Cuisine Types</h2>
+<div style={styles.gridSection}>
+  {categories.slice(8, 14).map((category, index) => (
+    <Link
+      to="/category"
+      state={{
+        img: category.img,
+        label: category.label,
+        apiPath: `/api/recipes?themeName=${category.label}`,
+      }}
+      key={`cuisine-${index}`}
+      style={{ textDecoration: 'none' }}
+    >
+      <div
+        style={{
+          ...styles.gridItem,
+          ...(hoverIndex === index + 8 ? styles.gridItemHover : {}),
+        }}
+        onMouseEnter={() => setHoverIndex(index + 8)}
+        onMouseLeave={() => setHoverIndex(null)}
+      >
+        <div
+          style={{
+            ...styles.overlay,
+            ...(hoverIndex === index + 8 ? styles.overlayVisible : {}),
+          }}
+        ></div>
+        <img src={category.img} alt={category.label} style={styles.gridImage} />
+        <span style={styles.gridLabel}>{category.label}</span>
+      </div>
+    </Link>
+  ))}
+</div>
+
+{/* Dietary Preferences Section */}
+<h2 style={{ margin: '10px 0 5px 0', color: '#B55335', textAlign: 'center', fontFamily: "'Merienda', cursive", fontSize: '36px' }}>Dietary Preferences</h2>
+<div style={styles.gridSection}>
+  {categories.slice(14, 19).map((category, index) => (
+    <Link
+      to="/category"
+      state={{
+        img: category.img,
+        label: category.label,
+        apiPath: `/api/recipes?themeName=${category.label}`,
+      }}
+      key={`dietary-${index}`}
+      style={{ textDecoration: 'none' }}
+    >
+      <div
+        style={{
+          ...styles.gridItem,
+          ...(hoverIndex === index + 14 ? styles.gridItemHover : {}),
+        }}
+        onMouseEnter={() => setHoverIndex(index + 14)}
+        onMouseLeave={() => setHoverIndex(null)}
+      >
+        <div
+          style={{
+            ...styles.overlay,
+            ...(hoverIndex === index + 14 ? styles.overlayVisible : {}),
+          }}
+        ></div>
+        <img src={category.img} alt={category.label} style={styles.gridImage} />
+        <span style={styles.gridLabel}>{category.label}</span>
+      </div>
+    </Link>
+  ))}
+</div>
+
+{/* Protein-Rich Meals Section */}
+<h2 style={{ margin: '10px 0 5px 0', color: '#B55335', textAlign: 'center', fontFamily: "'Merienda', cursive", fontSize: '36px' }}>Protein-Rich Meals</h2>
+<div style={styles.gridSection}>
+  {categories.slice(19, 22).map((category, index) => (
+    <Link
+      to="/category"
+      state={{
+        img: category.img,
+        label: category.label,
+        apiPath: `/api/recipes?themeName=${category.label}`,
+      }}
+      key={`protein-${index}`}
+      style={{ textDecoration: 'none' }}
+    >
+      <div
+        style={{
+          ...styles.gridItem,
+          ...(hoverIndex === index + 19 ? styles.gridItemHover : {}),
+        }}
+        onMouseEnter={() => setHoverIndex(index + 19)}
+        onMouseLeave={() => setHoverIndex(null)}
+      >
+        <div
+          style={{
+            ...styles.overlay,
+            ...(hoverIndex === index + 19 ? styles.overlayVisible : {}),
+          }}
+        ></div>
+        <img src={category.img} alt={category.label} style={styles.gridImage} />
+        <span style={styles.gridLabel}>{category.label}</span>
+      </div>
+    </Link>
+  ))}
+</div>
+
+{/* Occasions & Themes Section */}
+<h2 style={{ margin: '10px 0 5px 0', color: '#B55335', textAlign: 'center', fontFamily: "'Merienda', cursive", fontSize: '36px' }}>Occasions & Themes</h2>
+<div style={styles.gridSection}>
+  {categories.slice(22, 28).map((category, index) => (
+    <Link
+      to="/category"
+      state={{
+        img: category.img,
+        label: category.label,
+        apiPath: `/api/recipes?themeName=${category.label}`,
+      }}
+      key={`occasions-${index}`}
+      style={{ textDecoration: 'none' }}
+    >
+      <div
+        style={{
+          ...styles.gridItem,
+          ...(hoverIndex === index + 22 ? styles.gridItemHover : {}),
+        }}
+        onMouseEnter={() => setHoverIndex(index + 22)}
+        onMouseLeave={() => setHoverIndex(null)}
+      >
+        <div
+          style={{
+            ...styles.overlay,
+            ...(hoverIndex === index + 22 ? styles.overlayVisible : {}),
+          }}
+        ></div>
+        <img src={category.img} alt={category.label} style={styles.gridImage} />
+        <span style={styles.gridLabel}>{category.label}</span>
+      </div>
+    </Link>
+  ))}
+</div>
+
+{/* Sweet & Drinks Section */}
+<h2 style={{ margin: '10px 0 5px 0', color: '#B55335', textAlign: 'center', fontFamily: "'Merienda', cursive", fontSize: '36px' }}>Sweet & Drinks</h2>
+<div style={styles.gridSection}>
+  {categories.slice(28).map((category, index) => (
+    <Link
+      to="/category"
+      state={{
+        img: category.img,
+        label: category.label,
+        apiPath: `/api/recipes?themeName=${category.label}`,
+      }}
+      key={`sweet-drinks-${index}`}
+      style={{ textDecoration: 'none' }}
+    >
+      <div
+        style={{
+          ...styles.gridItem,
+          ...(hoverIndex === index + 28 ? styles.gridItemHover : {}),
+        }}
+        onMouseEnter={() => setHoverIndex(index + 28)}
+        onMouseLeave={() => setHoverIndex(null)}
+      >
+        <div
+          style={{
+            ...styles.overlay,
+            ...(hoverIndex === index + 28 ? styles.overlayVisible : {}),
+          }}
+        ></div>
+        <img src={category.img} alt={category.label} style={styles.gridImage} />
+        <span style={styles.gridLabel}>{category.label}</span>
+      </div>
+    </Link>
+  ))}
+</div>
+
+
+
             </div>
           );
         }
