@@ -14,6 +14,17 @@ const units = {
   qt: 1136.52,
   g: 1,
   kg: 1000,
+  "\u00B0C": "temperature", // Celsius
+  "\u00B0F": "temperature", // Fahrenheit
+};
+
+const convertTemperature = (value, fromUnit, toUnit) => {
+  if (fromUnit === "\u00B0C" && toUnit === "\u00B0F") {
+    return (value * 9) / 5 + 32;
+  } else if (fromUnit === "\u00B0F" && toUnit === "\u00B0C") {
+    return ((value - 32) * 5) / 9;
+  }
+  return value;
 };
 
 const ConversionModal = ({ isOpen, onClose }) => {
@@ -23,8 +34,18 @@ const ConversionModal = ({ isOpen, onClose }) => {
 
   const convertUnits = () => {
     if (!quantity || isNaN(quantity)) return "";
-    const convertedValue = (quantity * units[fromUnit]) / units[toUnit];
-    return `${quantity} ${fromUnit} = ${convertedValue.toFixed(2)} ${toUnit}`;
+
+    if (units[fromUnit] === "temperature" && units[toUnit] === "temperature") {
+      const convertedValue = convertTemperature(parseFloat(quantity), fromUnit, toUnit);
+      return `${quantity} ${fromUnit} = ${convertedValue.toFixed(2)} ${toUnit}`;
+    }
+
+    if (units[fromUnit] !== "temperature" && units[toUnit] !== "temperature") {
+      const convertedValue = (quantity * units[fromUnit]) / units[toUnit];
+      return `${quantity} ${fromUnit} = ${convertedValue.toFixed(2)} ${toUnit}`;
+    }
+
+    return "Conversion not possible between these units";
   };
 
   const swapUnits = () => {
@@ -95,8 +116,8 @@ const ConversionModal = ({ isOpen, onClose }) => {
           value={quantity}
           onChange={(e) => {
             const value = e.target.value;
-            // Allow only numbers, dots, and slashes
-            if (/^[0-9./]*$/.test(value)) {
+            // Allow only numbers and dots
+            if (/^[0-9.]*$/.test(value)) {
               setQuantity(value);
             }
           }}
