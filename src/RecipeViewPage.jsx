@@ -302,7 +302,8 @@ const [savedLists, setSavedLists] = useState([]); // To store existing shopping 
             return '';
           }
         });
-    
+        console.log('Extracted Ingredient Names:', extractedIngredientNames);
+
         // Send payload to the backend
         const response = await fetch('http://localhost:5001/api/get-ingredients-by-names', {
           method: 'POST',
@@ -327,36 +328,42 @@ const [savedLists, setSavedLists] = useState([]); // To store existing shopping 
         const payload = {
           userId: user?.UserID,
           listName: name || 'New Shopping List',
-          shoppingList: ingredients.map((ingredient) => {
-            // Backend ingredient match
-            const backendIngredient = data.ingredients.find(
-              (backendItem) =>
-                backendItem.IngredientID === ingredient.IngredientID ||
-                ingredient.Substitutes.some(
-                  (sub) => sub.IngredientID === backendItem.IngredientID
-                )
-            );
-    
-            // Handle substitutes or main ingredient
-            const currentSubstituteIndex = ingredient.currentSubstituteIndex || 0;
-            const isUsingSubstitute = currentSubstituteIndex > 0;
-            const selectedSubstitute =
-              isUsingSubstitute && ingredient.Substitutes[currentSubstituteIndex - 1];
-    
-            // Fallback to backend data if frontend state is incomplete
-            return {
-              IngredientID: isUsingSubstitute
-                ? selectedSubstitute?.IngredientID || backendIngredient?.IngredientID
-                : ingredient.IngredientID || backendIngredient?.IngredientID,
-              Quantity: isUsingSubstitute
-                ? selectedSubstitute?.Quantity || backendIngredient?.Quantity
-                : ingredient.Quantity || backendIngredient?.Quantity,
-              MeasureID: isUsingSubstitute
-                ? selectedSubstitute?.MeasureID || backendIngredient?.MeasureID
-                : ingredient.MeasureID || backendIngredient?.MeasureID,
-            };
-          }),
+          shoppingList: checkedIngredients
+            .map((ingredient) => {
+              // Find backend ingredient by name
+              const backendIngredient = data.ingredients.find(
+                (backendItem) =>
+                  backendItem.IngredientName.trim().toLowerCase() ===
+                  ingredient.IngredientName.trim().toLowerCase()
+              );
+        
+              if (!backendIngredient) {
+                console.warn('Ingredient not found in backend data:', ingredient);
+                return null; // Skip unmatched ingredients
+              }
+        
+              // Handle substitutes or main ingredient
+              const currentSubstituteIndex = ingredient.currentSubstituteIndex || 0;
+              const isUsingSubstitute = currentSubstituteIndex > 0;
+              const selectedSubstitute =
+                isUsingSubstitute && ingredient.Substitutes[currentSubstituteIndex - 1];
+        
+              return {
+                IngredientID: isUsingSubstitute
+                  ? selectedSubstitute?.IngredientID || backendIngredient?.IngredientID
+                  : backendIngredient?.IngredientID,
+                Quantity: isUsingSubstitute
+                  ? selectedSubstitute?.Quantity || backendIngredient?.Quantity
+                  : ingredient.Quantity || backendIngredient?.Quantity,
+                MeasureID: isUsingSubstitute
+                  ? selectedSubstitute?.MeasureID || backendIngredient?.MeasureID
+                  : ingredient.MeasureID || backendIngredient?.MeasureID,
+              };
+            })
+            .filter((item) => item !== null), // Exclude unmatched ingredients
         };
+        
+        
     
         console.log('Final Payload:', payload); // Log the final payload for debuggin
         
