@@ -124,7 +124,7 @@ const styles = {
   },
   gridSection: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
+    gridTemplateColumns: 'repeat(5, 1fr)',
     gap: '35px',
     padding: '20px',
   },
@@ -331,6 +331,32 @@ function HomePage() {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [currentTipIndex, setCurrentTipIndex] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [sectionIndexes, setSectionIndexes] = useState({
+    mealTypes: 0,
+    cuisineTypes: 0,
+    dietaryPreferences: 0,
+    proteinRichMeals: 0,
+    occasionsAndThemes: 0,
+    sweetAndDrinks: 0,
+  });
+  
+  const handleArrowClick = (section, direction, length) => {
+    setSectionIndexes((prev) => {
+      const currentIndex = prev[section];
+      const maxIndex = length > 4 ? length - 5 : 0; // Handle cases with 5 or fewer items
+  
+      const newIndex =
+        direction === "right"
+          ? (currentIndex + 1) % (maxIndex + 1) // Circular navigation
+          : (currentIndex - 1 + (maxIndex + 1)) % (maxIndex + 1); // Wrap around for left
+  
+      return {
+        ...prev,
+        [section]: newIndex,
+      };
+    });
+  };
+  
   
 
   const openModal = (tipIndex) => {
@@ -472,7 +498,15 @@ const handleSearch = () => {
     { img: budgetFriendlyImage, label: 'Budget-Friendly', apiPath: '/api/recipes?category=budget-friendly' },
   ];
   
-    
+  const sectionRanges = {
+    mealTypes: [0, 8], // Meal Types: indices 0-7
+    cuisineTypes: [8, 14], // Cuisine Types: indices 8-13
+    dietaryPreferences: [14, 19], // Dietary Preferences: indices 14-18
+    proteinRichMeals: [19, 22], // Protein-Rich Meals: indices 19-21
+    occasionsAndThemes: [22, 28], // Occasions & Themes: indices 22-27
+    sweetAndDrinks: [28, 33], // Sweet & Drinks: indices 28-32
+  };
+  
 
   const tips = [
     {
@@ -841,114 +875,486 @@ const handleSearch = () => {
 )}
 
 </div>
-{/* Meal Types Section */}
+
+{/*Meal Types*/}
 <h2 style={{ margin: '10px 0 5px 0', color: '#B55335', textAlign: 'center', fontFamily: "'Merienda', cursive", fontSize: '36px' }}>Meal Types</h2>
-<div style={styles.gridSection}>
-  {categories.slice(0, 8).map((category, index) => (
-    <Link
-      to="/category"
-      state={{
-        img: category.img,
-        label: category.label,
-        apiPath: `/api/recipes?themeName=${category.label}`,
-      }}
-      key={`meal-types-${index}`}
-      style={{ textDecoration: 'none' }}
-    >
-      <div
-        style={{
-          ...styles.gridItem,
-          ...(hoverIndex === index ? styles.gridItemHover : {}),
+<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+  {/* Left Arrow */}
+  <button
+    onClick={() => handleArrowClick('mealTypes', 'left', sectionRanges.mealTypes[1] - sectionRanges.mealTypes[0])}
+    style={{
+      position: 'absolute',
+      left: '-40px',
+      backgroundColor: 'transparent',
+      border: 'none',
+      fontSize: '24px',
+      cursor: 'pointer',
+    }}
+  >
+    ‹
+  </button>
+
+  {/* Grid Section */}
+  <div style={styles.gridSection}>
+    {categories.slice(
+      sectionRanges.mealTypes[0] + sectionIndexes.mealTypes,
+      sectionRanges.mealTypes[0] + sectionIndexes.mealTypes + 5
+    ).map((category, index) => (
+      <Link
+        to="/category"
+        state={{
+          img: category.img,
+          label: category.label,
+          apiPath: `/api/recipes?themeName=${category.label}`,
         }}
-        onMouseEnter={() => setHoverIndex(index)}
-        onMouseLeave={() => setHoverIndex(null)}
+        key={`meal-types-${index}`}
+        style={{ textDecoration: 'none' }}
       >
         <div
           style={{
-            ...styles.overlay,
-            ...(hoverIndex === index ? styles.overlayVisible : {}),
+            ...styles.gridItem,
+            ...(hoverIndex === index ? styles.gridItemHover : {}),
           }}
-        ></div>
-        <img src={category.img} alt={category.label} style={styles.gridImage} />
-        <span style={styles.gridLabel}>{category.label}</span>
-      </div>
-    </Link>
-  ))}
+          onMouseEnter={() => setHoverIndex(index)}
+          onMouseLeave={() => setHoverIndex(null)}
+        >
+          <div
+            style={{
+              ...styles.overlay,
+              ...(hoverIndex === index ? styles.overlayVisible : {}),
+            }}
+          ></div>
+          <img src={category.img} alt={category.label} style={styles.gridImage} />
+          <span style={styles.gridLabel}>{category.label}</span>
+        </div>
+      </Link>
+    ))}
+  </div>
+
+  {/* Right Arrow */}
+  <button
+    onClick={() => handleArrowClick('mealTypes', 'right', sectionRanges.mealTypes[1] - sectionRanges.mealTypes[0])}
+    style={{
+      position: 'absolute',
+      right: '-40px',
+      backgroundColor: 'transparent',
+      border: 'none',
+      fontSize: '24px',
+      cursor: 'pointer',
+    }}
+  >
+    ›
+  </button>
 </div>
 
-{/* Cuisine Types Section */}
-<h2 style={{ margin: '10px 0 5px 0', color: '#B55335', textAlign: 'center', fontFamily: "'Merienda', cursive", fontSize: '36px' }}>Cuisine Types</h2>
-<div style={styles.gridSection}>
-  {categories.slice(8, 14).map((category, index) => (
-    <Link
-      to="/category"
-      state={{
-        img: category.img,
-        label: category.label,
-        apiPath: `/api/recipes?themeName=${category.label}`,
-      }}
-      key={`cuisine-${index}`}
-      style={{ textDecoration: 'none' }}
-    >
-      <div
-        style={{
-          ...styles.gridItem,
-          ...(hoverIndex === index + 8 ? styles.gridItemHover : {}),
-        }}
-        onMouseEnter={() => setHoverIndex(index + 8)}
-        onMouseLeave={() => setHoverIndex(null)}
-      >
-        <div
-          style={{
-            ...styles.overlay,
-            ...(hoverIndex === index + 8 ? styles.overlayVisible : {}),
+
+{/*Cuisine Types*/}
+<h2
+  style={{
+    margin: '70px 0 5px 0', // Increased the top margin from 10px to 30px
+    color: '#B55335',
+    textAlign: 'center',
+    fontFamily: "'Merienda', cursive",
+    fontSize: '36px',
+  }}
+>
+  Cuisine Types
+</h2>
+
+<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+  {/* Left Arrow */}
+  <button
+    onClick={() =>
+      handleArrowClick(
+        'cuisineTypes',
+        'left',
+        sectionRanges.cuisineTypes[1] - sectionRanges.cuisineTypes[0]
+      )
+    }
+    style={{
+      position: 'absolute',
+      left: '-40px',
+      backgroundColor: 'transparent',
+      border: 'none',
+      fontSize: '24px',
+      cursor: 'pointer',
+    }}
+  >
+    ‹
+  </button>
+
+  {/* Grid Section */}
+  <div style={styles.gridSection}>
+    {categories
+      .slice(
+        sectionRanges.cuisineTypes[0] + sectionIndexes.cuisineTypes,
+        sectionRanges.cuisineTypes[0] + sectionIndexes.cuisineTypes + 5
+      )
+      .map((category, index) => (
+        <Link
+          to="/category"
+          state={{
+            img: category.img,
+            label: category.label,
+            apiPath: `/api/recipes?themeName=${category.label}`,
           }}
-        ></div>
-        <img src={category.img} alt={category.label} style={styles.gridImage} />
-        <span style={styles.gridLabel}>{category.label}</span>
-      </div>
-    </Link>
-  ))}
+          key={`cuisine-types-${index}`}
+          style={{ textDecoration: 'none' }}
+        >
+          <div
+            style={{
+              ...styles.gridItem,
+              ...(hoverIndex === index ? styles.gridItemHover : {}),
+            }}
+            onMouseEnter={() => setHoverIndex(index)}
+            onMouseLeave={() => setHoverIndex(null)}
+          >
+            <div
+              style={{
+                ...styles.overlay,
+                ...(hoverIndex === index ? styles.overlayVisible : {}),
+              }}
+            ></div>
+            <img src={category.img} alt={category.label} style={styles.gridImage} />
+            <span style={styles.gridLabel}>{category.label}</span>
+          </div>
+        </Link>
+      ))}
+  </div>
+
+  {/* Right Arrow */}
+  <button
+    onClick={() =>
+      handleArrowClick(
+        'cuisineTypes',
+        'right',
+        sectionRanges.cuisineTypes[1] - sectionRanges.cuisineTypes[0]
+      )
+    }
+    style={{
+      position: 'absolute',
+      right: '-40px',
+      backgroundColor: 'transparent',
+      border: 'none',
+      fontSize: '24px',
+      cursor: 'pointer',
+    }}
+  >
+    ›
+  </button>
 </div>
 
-{/* Dietary Preferences Section */}
-<h2 style={{ margin: '10px 0 5px 0', color: '#B55335', textAlign: 'center', fontFamily: "'Merienda', cursive", fontSize: '36px' }}>Dietary Preferences</h2>
-<div style={styles.gridSection}>
-  {categories.slice(14, 19).map((category, index) => (
-    <Link
-      to="/category"
-      state={{
-        img: category.img,
-        label: category.label,
-        apiPath: `/api/recipes?themeName=${category.label}`,
-      }}
-      key={`dietary-${index}`}
-      style={{ textDecoration: 'none' }}
-    >
-      <div
-        style={{
-          ...styles.gridItem,
-          ...(hoverIndex === index + 14 ? styles.gridItemHover : {}),
-        }}
-        onMouseEnter={() => setHoverIndex(index + 14)}
-        onMouseLeave={() => setHoverIndex(null)}
-      >
-        <div
-          style={{
-            ...styles.overlay,
-            ...(hoverIndex === index + 14 ? styles.overlayVisible : {}),
+{/* Dietary Preferences */}
+<h2
+  style={{
+    margin: '70px 0 5px 0', // Increased the top margin to 70px
+    color: '#B55335',
+    textAlign: 'center',
+    fontFamily: "'Merienda', cursive",
+    fontSize: '36px',
+  }}
+>
+  Dietary Preferences
+</h2>
+
+<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+  {/* Left Arrow */}
+  <button
+    onClick={() =>
+      handleArrowClick(
+        'dietaryPreferences',
+        'left',
+        sectionRanges.dietaryPreferences[1] - sectionRanges.dietaryPreferences[0]
+      )
+    }
+    style={{
+      position: 'absolute',
+      left: '-40px',
+      backgroundColor: 'transparent',
+      border: 'none',
+      fontSize: '24px',
+      cursor: 'pointer',
+    }}
+  >
+    ‹
+  </button>
+
+  {/* Grid Section */}
+  <div style={styles.gridSection}>
+    {categories
+      .slice(
+        sectionRanges.dietaryPreferences[0] + sectionIndexes.dietaryPreferences,
+        sectionRanges.dietaryPreferences[0] + sectionIndexes.dietaryPreferences + 5
+      )
+      .map((category, index) => (
+        <Link
+          to="/category"
+          state={{
+            img: category.img,
+            label: category.label,
+            apiPath: `/api/recipes?themeName=${category.label}`,
           }}
-        ></div>
-        <img src={category.img} alt={category.label} style={styles.gridImage} />
-        <span style={styles.gridLabel}>{category.label}</span>
-      </div>
-    </Link>
-  ))}
+          key={`dietary-preferences-${index}`}
+          style={{ textDecoration: 'none' }}
+        >
+          <div
+            style={{
+              ...styles.gridItem,
+              ...(hoverIndex === index ? styles.gridItemHover : {}),
+            }}
+            onMouseEnter={() => setHoverIndex(index)}
+            onMouseLeave={() => setHoverIndex(null)}
+          >
+            <div
+              style={{
+                ...styles.overlay,
+                ...(hoverIndex === index ? styles.overlayVisible : {}),
+              }}
+            ></div>
+            <img src={category.img} alt={category.label} style={styles.gridImage} />
+            <span style={styles.gridLabel}>{category.label}</span>
+          </div>
+        </Link>
+      ))}
+  </div>
+
+  {/* Right Arrow */}
+  <button
+    onClick={() =>
+      handleArrowClick(
+        'dietaryPreferences',
+        'right',
+        sectionRanges.dietaryPreferences[1] - sectionRanges.dietaryPreferences[0]
+      )
+    }
+    style={{
+      position: 'absolute',
+      right: '-40px',
+      backgroundColor: 'transparent',
+      border: 'none',
+      fontSize: '24px',
+      cursor: 'pointer',
+    }}
+  >
+    ›
+  </button>
+</div>
+
+
+
+{/* Occasions & Themes Section */}
+<h2
+  style={{
+    margin: '70px 0 5px 0', // Increased the top margin to 70px
+    color: '#B55335',
+    textAlign: 'center',
+    fontFamily: "'Merienda', cursive",
+    fontSize: '36px',
+  }}
+>
+  Occasions & Themes
+</h2>
+
+<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+  {/* Left Arrow */}
+  <button
+    onClick={() =>
+      handleArrowClick(
+        'occasionsAndThemes',
+        'left',
+        sectionRanges.occasionsAndThemes[1] - sectionRanges.occasionsAndThemes[0]
+      )
+    }
+    style={{
+      position: 'absolute',
+      left: '-40px',
+      backgroundColor: 'transparent',
+      border: 'none',
+      fontSize: '24px',
+      cursor: 'pointer',
+    }}
+  >
+    ‹
+  </button>
+
+  {/* Grid Section */}
+  <div style={styles.gridSection}>
+    {categories
+      .slice(
+        sectionRanges.occasionsAndThemes[0] + sectionIndexes.occasionsAndThemes,
+        sectionRanges.occasionsAndThemes[0] + sectionIndexes.occasionsAndThemes + 5
+      )
+      .map((category, index) => (
+        <Link
+          to="/category"
+          state={{
+            img: category.img,
+            label: category.label,
+            apiPath: `/api/recipes?themeName=${category.label}`,
+          }}
+          key={`occasions-${index}`}
+          style={{ textDecoration: 'none' }}
+        >
+          <div
+            style={{
+              ...styles.gridItem,
+              ...(hoverIndex === index + 22 ? styles.gridItemHover : {}),
+            }}
+            onMouseEnter={() => setHoverIndex(index + 22)}
+            onMouseLeave={() => setHoverIndex(null)}
+          >
+            <div
+              style={{
+                ...styles.overlay,
+                ...(hoverIndex === index + 22 ? styles.overlayVisible : {}),
+              }}
+            ></div>
+            <img src={category.img} alt={category.label} style={styles.gridImage} />
+            <span style={styles.gridLabel}>{category.label}</span>
+          </div>
+        </Link>
+      ))}
+  </div>
+
+  {/* Right Arrow */}
+  <button
+    onClick={() =>
+      handleArrowClick(
+        'occasionsAndThemes',
+        'right',
+        sectionRanges.occasionsAndThemes[1] - sectionRanges.occasionsAndThemes[0]
+      )
+    }
+    style={{
+      position: 'absolute',
+      right: '-40px',
+      backgroundColor: 'transparent',
+      border: 'none',
+      fontSize: '24px',
+      cursor: 'pointer',
+    }}
+  >
+    ›
+  </button>
+</div>
+
+
+{/* Sweet & Drinks Section */}
+<h2
+  style={{
+    margin: '70px 0 5px 0', // Increased the top margin to 70px
+    color: '#B55335',
+    textAlign: 'center',
+    fontFamily: "'Merienda', cursive",
+    fontSize: '36px',
+  }}
+>
+  Sweet & Drinks
+</h2>
+
+<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+  {/* Left Arrow */}
+  <button
+    onClick={() =>
+      handleArrowClick(
+        'sweetAndDrinks',
+        'left',
+        sectionRanges.sweetAndDrinks[1] - sectionRanges.sweetAndDrinks[0]
+      )
+    }
+    style={{
+      position: 'absolute',
+      left: '-40px',
+      backgroundColor: 'transparent',
+      border: 'none',
+      fontSize: '24px',
+      cursor: 'pointer',
+    }}
+  >
+    ‹
+  </button>
+
+  {/* Grid Section */}
+  <div style={styles.gridSection}>
+    {categories
+      .slice(
+        sectionRanges.sweetAndDrinks[0] + sectionIndexes.sweetAndDrinks,
+        sectionRanges.sweetAndDrinks[0] + sectionIndexes.sweetAndDrinks + 5
+      )
+      .map((category, index) => (
+        <Link
+          to="/category"
+          state={{
+            img: category.img,
+            label: category.label,
+            apiPath: `/api/recipes?themeName=${category.label}`,
+          }}
+          key={`sweet-drinks-${index}`}
+          style={{ textDecoration: 'none' }}
+        >
+          <div
+            style={{
+              ...styles.gridItem,
+              ...(hoverIndex === index + 28 ? styles.gridItemHover : {}),
+            }}
+            onMouseEnter={() => setHoverIndex(index + 28)}
+            onMouseLeave={() => setHoverIndex(null)}
+          >
+            <div
+              style={{
+                ...styles.overlay,
+                ...(hoverIndex === index + 28 ? styles.overlayVisible : {}),
+              }}
+            ></div>
+            <img src={category.img} alt={category.label} style={styles.gridImage} />
+            <span style={styles.gridLabel}>{category.label}</span>
+          </div>
+        </Link>
+      ))}
+  </div>
+
+  {/* Right Arrow */}
+  <button
+    onClick={() =>
+      handleArrowClick(
+        'sweetAndDrinks',
+        'right',
+        sectionRanges.sweetAndDrinks[1] - sectionRanges.sweetAndDrinks[0]
+      )
+    }
+    style={{
+      position: 'absolute',
+      right: '-40px',
+      backgroundColor: 'transparent',
+      border: 'none',
+      fontSize: '24px',
+      cursor: 'pointer',
+    }}
+  >
+    ›
+  </button>
 </div>
 
 {/* Protein-Rich Meals Section */}
-<h2 style={{ margin: '10px 0 5px 0', color: '#B55335', textAlign: 'center', fontFamily: "'Merienda', cursive", fontSize: '36px' }}>Protein-Rich Meals</h2>
-<div style={styles.gridSection}>
+<h2
+  style={{
+    margin: '70px 0 5px 0', // Increased the top margin to 70px
+    color: '#B55335',
+    textAlign: 'center',
+    fontFamily: "'Merienda', cursive",
+    fontSize: '36px',
+  }}
+>
+  Protein-Rich Meals
+</h2>
+
+<div
+  style={{
+    ...styles.gridSection,
+    justifyContent: 'center', // Center the items horizontally
+    gridTemplateColumns: 'repeat(3, 1fr)', // Adjust to fit 3 items
+  }}
+>
   {categories.slice(19, 22).map((category, index) => (
     <Link
       to="/category"
@@ -981,79 +1387,9 @@ const handleSearch = () => {
   ))}
 </div>
 
-{/* Occasions & Themes Section */}
-<h2 style={{ margin: '10px 0 5px 0', color: '#B55335', textAlign: 'center', fontFamily: "'Merienda', cursive", fontSize: '36px' }}>Occasions & Themes</h2>
-<div style={styles.gridSection}>
-  {categories.slice(22, 28).map((category, index) => (
-    <Link
-      to="/category"
-      state={{
-        img: category.img,
-        label: category.label,
-        apiPath: `/api/recipes?themeName=${category.label}`,
-      }}
-      key={`occasions-${index}`}
-      style={{ textDecoration: 'none' }}
-    >
-      <div
-        style={{
-          ...styles.gridItem,
-          ...(hoverIndex === index + 22 ? styles.gridItemHover : {}),
-        }}
-        onMouseEnter={() => setHoverIndex(index + 22)}
-        onMouseLeave={() => setHoverIndex(null)}
-      >
-        <div
-          style={{
-            ...styles.overlay,
-            ...(hoverIndex === index + 22 ? styles.overlayVisible : {}),
-          }}
-        ></div>
-        <img src={category.img} alt={category.label} style={styles.gridImage} />
-        <span style={styles.gridLabel}>{category.label}</span>
-      </div>
-    </Link>
-  ))}
 </div>
+  
 
-{/* Sweet & Drinks Section */}
-<h2 style={{ margin: '10px 0 5px 0', color: '#B55335', textAlign: 'center', fontFamily: "'Merienda', cursive", fontSize: '36px' }}>Sweet & Drinks</h2>
-<div style={styles.gridSection}>
-  {categories.slice(28).map((category, index) => (
-    <Link
-      to="/category"
-      state={{
-        img: category.img,
-        label: category.label,
-        apiPath: `/api/recipes?themeName=${category.label}`,
-      }}
-      key={`sweet-drinks-${index}`}
-      style={{ textDecoration: 'none' }}
-    >
-      <div
-        style={{
-          ...styles.gridItem,
-          ...(hoverIndex === index + 28 ? styles.gridItemHover : {}),
-        }}
-        onMouseEnter={() => setHoverIndex(index + 28)}
-        onMouseLeave={() => setHoverIndex(null)}
-      >
-        <div
-          style={{
-            ...styles.overlay,
-            ...(hoverIndex === index + 28 ? styles.overlayVisible : {}),
-          }}
-        ></div>
-        <img src={category.img} alt={category.label} style={styles.gridImage} />
-        <span style={styles.gridLabel}>{category.label}</span>
-      </div>
-    </Link>
-  ))}
-</div>
-
-
-
-            </div>
           );
         }
         
