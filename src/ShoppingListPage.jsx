@@ -781,14 +781,14 @@ const updateUnit = (index, newUnit) => {
   );
   setShoppingList(updatedList);
 };
- const groupedByLabel = shoppingList.reduce((acc, item) => {
+ /*const groupedByLabel = shoppingList.reduce((acc, item) => {
   if (!acc[item.category]) {
     acc[item.category] = [];
   }
   acc[item.category].push(item);
   return acc;
 }, {});
-
+*/
 
 
 
@@ -1131,94 +1131,82 @@ const exportToWhatsApp = () => {
 
 {/* Shopping List Section */}
 <div style={styles.listContainer}>
-  {filterType === 'Label' ? (
-    Object.keys(groupedByLabel).map((label) => (
-      <div key={label}>
-        <Typography style={styles.categoryHeading}>{label}</Typography>
-        {groupedByLabel[label].map((item, index) => (
-          <div key={index} style={styles.listItem}>
-            <Typography style={{ flex: 1, fontSize: '16px', fontFamily: "'Poppins', sans-serif" }}>
-              {`${item.IngredientName} - ${item.quantity} ${measures.find(m => m.MeasureID === item.MeasureID)?.MeasureName || ''}`}
-            </Typography>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Button
-                variant="text"
-                onClick={() => toggleEditing(index)}
-                style={{ color: '#007bff', padding: '0', minWidth: 'auto' }}
-              >
-                <Edit />
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={() => removeItem(index)}
-              >
-                Remove
-              </Button>
-            </div>
-          </div>
-        ))}
+  {shoppingList.map((item, index) => (
+    <div key={index} style={styles.listItem}>
+      <Typography style={{ flex: 1, fontSize: '16px', fontFamily: "'Poppins', sans-serif" }}>
+        {`${item.IngredientName} - ${item.quantity} ${measures.find(m => m.MeasureID === item.MeasureID)?.MeasureName || ''}`}
+      </Typography>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <Button
+          variant="text"
+          onClick={() => toggleEditing(index)}
+          style={{ color: '#007bff', padding: '0', minWidth: 'auto' }}
+        >
+          <Edit />
+        </Button>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => removeItem(index)}
+        >
+          Remove
+        </Button>
       </div>
-    ))
-  ) : (
-    shoppingList
-      .sort((a, b) => a.IngredientName.localeCompare(b.IngredientName))
-      .map((item, index) => (
-        <div key={index} style={styles.listItem}>
-          <Typography style={{ flex: 1, fontSize: '16px', fontFamily: "'Poppins', sans-serif" }}>
-            {`${item.IngredientName} - ${item.quantity} ${item.MeasureName || ''}`}
-          </Typography>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Button
-              variant="text"
-              onClick={() => toggleEditing(index)}
-              style={{ color: '#007bff', padding: '0', minWidth: 'auto' }}
-            >
-              <Edit />
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => removeItem(index)}
-            >
-              Remove
-            </Button>
-          </div>
-        </div>
-      ))
-  )}
+    </div>
+  ))}
 </div>
 
-
-
+{/* Buttons Section */}
 <div style={styles.exportContainer}>
-<div style={styles.buttonRow}>
-<div style={styles.buttonRow}>
-  {isEditing ? (
+  <div style={styles.buttonRow}>
+    {isEditing ? (
+      <Button
+        variant="contained"
+        style={{
+          backgroundColor: '#B55335', // Brown color for "Save Changes"
+          color: '#FFF',
+          fontWeight: 'bold',
+          padding: '4px 10px', // Reduced padding
+          fontSize: '12px', // Smaller font size
+          borderRadius: '6px', // Smaller rounded edges
+          fontFamily: "'Merienda', cursive",
+          width: '120px', // Reduced width
+          height: '50px', // Reduced height
+          textAlign: 'center',
+          marginTop: '10px',
+        }}
+        onClick={saveEditedList}
+      >
+        Save Changes
+      </Button>
+    ) : (
+      <Button
+        variant="contained"
+        style={{
+          backgroundColor: '#B55335',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '4px 10px',
+          fontSize: '12px',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          fontFamily: "'Merienda', cursive",
+          transition: 'background-color 0.3s ease',
+          width: '120px',
+          height: '50px',
+          textAlign: 'center',
+          marginTop: '10px',
+        }}
+        onClick={saveToList}
+      >
+        Save the List
+      </Button>
+    )}
+
     <Button
       variant="contained"
       style={{
-        backgroundColor: '#B55335', // Brown color for "Save Changes"
-        color: '#FFF',
-        fontWeight: 'bold',
-        padding: '4px 10px', // Reduced padding
-        fontSize: '12px', // Smaller font size
-        borderRadius: '6px', // Smaller rounded edges
-        fontFamily: "'Merienda', cursive",
-        width: '120px', // Reduced width
-        height: '50px', // Reduced height
-        textAlign: 'center',
-        marginTop: '10px',
-      }}
-      onClick={saveEditedList}
-    >
-      Save Changes
-    </Button>
-  ) : (
-    <Button
-      variant="contained"
-      style={{
-        backgroundColor: '#B55335',
+        backgroundColor: '#4caf50', // Green color for "Export to WhatsApp"
         color: '#fff',
         fontWeight: 'bold',
         padding: '4px 10px',
@@ -1232,50 +1220,26 @@ const exportToWhatsApp = () => {
         textAlign: 'center',
         marginTop: '10px',
       }}
-      onClick={saveToList}
+      onClick={exportToWhatsApp}
+      endIcon={
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="white"
+          width="16px"
+          height="16px"
+        >
+          <path d="M16.7 13.67c-.29-.15-1.72-.86-1.99-.96-.26-.1-.45-.15-.64.15-.2.29-.74.96-.9 1.16-.16.2-.33.22-.62.07-.29-.15-1.21-.45-2.3-1.43-.85-.76-1.42-1.7-1.59-1.98-.16-.29-.02-.45.12-.6.13-.13.29-.33.43-.49.14-.16.19-.27.29-.48.1-.21.05-.37-.03-.52-.08-.15-.64-1.55-.88-2.12-.23-.56-.47-.49-.64-.5-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.79.37-.26.29-1.03 1.01-1.03 2.48 0 1.47 1.06 2.91 1.2 3.11.15.2 2.09 3.2 5.07 4.48.71.31 1.27.5 1.71.64.72.23 1.37.2 1.89.12.58-.09 1.78-.73 2.03-1.43.26-.7.26-1.29.18-1.42-.08-.13-.26-.2-.54-.35Z" />
+          <path
+            fillRule="evenodd"
+            d="M12.004 2.00002C6.49 2.00002 2 6.36002 2 11.65c0 2.01.64 3.87 1.75 5.42L2 22l5.16-1.54c1.47.78 3.08 1.19 4.84 1.19 5.51 0 10-4.36 10-9.72 0-5.29-4.49-9.72-10-9.72Zm0 17.45c-1.55 0-3.02-.38-4.33-1.1l-.31-.17-3.06.92.86-2.94-.2-.31c-1.07-1.45-1.64-3.17-1.64-4.91 0-4.47 3.83-8.11 8.68-8.11 4.77 0 8.68 3.58 8.68 8.11-.01 4.47-3.84 8.11-8.68 8.11Z"
+            clipRule="evenodd"
+          />
+        </svg>
+      }
     >
-      Save the List
+      Export to WhatsApp
     </Button>
-  )}
-
-  <Button
-    variant="contained"
-    style={{
-      backgroundColor: '#4caf50', // Green color for "Export to WhatsApp"
-      color: '#fff',
-      fontWeight: 'bold',
-      padding: '4px 10px',
-      fontSize: '12px',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      fontFamily: "'Merienda', cursive",
-      transition: 'background-color 0.3s ease',
-      width: '120px',
-      height: '50px',
-      textAlign: 'center',
-      marginTop: '10px',
-    }}
-    onClick={exportToWhatsApp}
-    endIcon={
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="white"
-        width="16px"
-        height="16px"
-      >
-        <path d="M16.7 13.67c-.29-.15-1.72-.86-1.99-.96-.26-.1-.45-.15-.64.15-.2.29-.74.96-.9 1.16-.16.2-.33.22-.62.07-.29-.15-1.21-.45-2.3-1.43-.85-.76-1.42-1.7-1.59-1.98-.16-.29-.02-.45.12-.6.13-.13.29-.33.43-.49.14-.16.19-.27.29-.48.1-.21.05-.37-.03-.52-.08-.15-.64-1.55-.88-2.12-.23-.56-.47-.49-.64-.5-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.79.37-.26.29-1.03 1.01-1.03 2.48 0 1.47 1.06 2.91 1.2 3.11.15.2 2.09 3.2 5.07 4.48.71.31 1.27.5 1.71.64.72.23 1.37.2 1.89.12.58-.09 1.78-.73 2.03-1.43.26-.7.26-1.29.18-1.42-.08-.13-.26-.2-.54-.35Z" />
-        <path
-          fillRule="evenodd"
-          d="M12.004 2.00002C6.49 2.00002 2 6.36002 2 11.65c0 2.01.64 3.87 1.75 5.42L2 22l5.16-1.54c1.47.78 3.08 1.19 4.84 1.19 5.51 0 10-4.36 10-9.72 0-5.29-4.49-9.72-10-9.72Zm0 17.45c-1.55 0-3.02-.38-4.33-1.1l-.31-.17-3.06.92.86-2.94-.2-.31c-1.07-1.45-1.64-3.17-1.64-4.91 0-4.47 3.83-8.11 8.68-8.11 4.77 0 8.68 3.58 8.68 8.11-.01 4.47-3.84 8.11-8.68 8.11Z"
-          clipRule="evenodd"
-        />
-      </svg>
-    }
-  >
-    Export to WhatsApp
-  </Button>
-</div>
 
 
 </div>
