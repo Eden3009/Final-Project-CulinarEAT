@@ -6,6 +6,9 @@ import SubstituteIngredientAutocomplete from './SubstituteIngredientAutocomplete
 import { useContext } from 'react';
 import { UserContext } from './UserContext';
 import { FaArrowLeft } from 'react-icons/fa';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 
 
@@ -720,19 +723,40 @@ const categories = [
   const handleSubmitToBackend = async (payload) => {
     try {
       const response = await axios.post("http://localhost:5001/add-recipe", payload);
-      alert("Recipe submitted successfully!");
+  
+      // Ensure toast is triggered on successful submission
+      toast.success("Recipe submitted successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+  
       console.log("Backend response:", response.data);
     } catch (error) {
       console.error("Error submitting recipe data to backend:", error.response || error.message);
-      alert("Failed to submit recipe data. Please check the console for details.");
+  
+      // Ensure toast is triggered on submission failure
+      toast.error("Failed to submit recipe. Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
   };
-  
   
   
 
   return (
     <PageWrapper>
+       <ToastContainer />
       <BackButton 
   style={{
     position: 'absolute',
